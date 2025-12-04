@@ -10,19 +10,23 @@ namespace AlmacenDesktop
 {
     internal static class Program
     {
+        // --- NUEVO: VARIABLE GLOBAL ACCESIBLE DESDE TODO EL PROYECTO ---
+        public static Usuario UsuarioActualGlobal;
+
         [STAThread]
         static void Main()
         {
             ApplicationConfiguration.Initialize();
 
-            // 1. Inicializar DB (Crear tablas y datos por defecto)
             InicializarBaseDeDatos();
 
-            // 2. Mostrar Login
             LoginForm login = new LoginForm();
 
             if (login.ShowDialog() == DialogResult.OK)
             {
+                // Guardamos el usuario que entró para que cualquiera pueda consultarlo
+                UsuarioActualGlobal = login.UsuarioLogueado;
+
                 MenuPrincipal menu = new MenuPrincipal(login.UsuarioLogueado);
                 Application.Run(menu);
             }
@@ -40,7 +44,6 @@ namespace AlmacenDesktop
                 {
                     context.Database.Migrate();
 
-                    // --- SEMILLA DE USUARIOS ---
                     if (!context.Usuarios.Any())
                     {
                         var admin = new Usuario
@@ -56,8 +59,6 @@ namespace AlmacenDesktop
                         context.SaveChanges();
                     }
 
-                    // --- NUEVO: SEMILLA DE CLIENTE "CONSUMIDOR FINAL" ---
-                    // Verificamos si ya existe por su DNI ficticio (ej. 00000000)
                     if (!context.Clientes.Any(c => c.DniCuit == "00000000"))
                     {
                         var consumidorFinal = new Cliente

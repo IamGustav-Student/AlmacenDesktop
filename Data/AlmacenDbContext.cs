@@ -7,30 +7,31 @@ namespace AlmacenDesktop.Data
 {
     public class AlmacenDbContext : DbContext
     {
-        // Definimos las tablas (DbSet)
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<Producto> Productos { get; set; }
         public DbSet<Venta> Ventas { get; set; }
         public DbSet<DetalleVenta> DetallesVenta { get; set; }
         public DbSet<Pago> Pagos { get; set; }
+        public DbSet<Caja> Cajas { get; set; }
+        public DbSet<MovimientoCaja> MovimientosCaja { get; set; }
+        public DbSet<DatosNegocio> DatosNegocio { get; set; }
 
-        // Configuración de SQLite
+        // --- NUEVO MÓDULO COMPRAS ---
+        public DbSet<Proveedor> Proveedores { get; set; }
+        public DbSet<Compra> Compras { get; set; }
+        public DbSet<DetalleCompra> DetallesCompra { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            // Esto crea el archivo "almacen.db" en la misma carpeta donde corre el .exe
             string dbPath = "almacen.db";
             optionsBuilder.UseSqlite($"Data Source={dbPath}");
         }
 
-        // Configuración adicional de modelos
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Configuramos que Usuario y Cliente se guarden en tablas separadas
-            // aunque hereden de Persona (Estrategia TPT o TPC, EF Core lo maneja inteligente por defecto)
             modelBuilder.Entity<Usuario>().ToTable("Usuarios");
             modelBuilder.Entity<Cliente>().ToTable("Clientes");
-
             base.OnModelCreating(modelBuilder);
         }
     }

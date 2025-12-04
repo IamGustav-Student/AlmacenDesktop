@@ -3,6 +3,7 @@ using System;
 using AlmacenDesktop.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AlmacenDesktop.Migrations
 {
     [DbContext(typeof(AlmacenDbContext))]
-    partial class AlmacenDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251203031339_CuentasCorrientes")]
+    partial class CuentasCorrientes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.11");
@@ -98,33 +101,6 @@ namespace AlmacenDesktop.Migrations
                     b.ToTable("Clientes", (string)null);
                 });
 
-            modelBuilder.Entity("AlmacenDesktop.Modelos.Compra", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("Fecha")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("ProveedorId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<decimal>("Total")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProveedorId");
-
-                    b.HasIndex("UsuarioId");
-
-                    b.ToTable("Compras");
-                });
-
             modelBuilder.Entity("AlmacenDesktop.Modelos.DatosNegocio", b =>
                 {
                     b.Property<int>("Id")
@@ -158,33 +134,6 @@ namespace AlmacenDesktop.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("DatosNegocio");
-                });
-
-            modelBuilder.Entity("AlmacenDesktop.Modelos.DetalleCompra", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Cantidad")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("CompraId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<decimal>("CostoUnitario")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("ProductoId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CompraId");
-
-                    b.HasIndex("ProductoId");
-
-                    b.ToTable("DetallesCompra");
                 });
 
             modelBuilder.Entity("AlmacenDesktop.Modelos.DetalleVenta", b =>
@@ -286,12 +235,6 @@ namespace AlmacenDesktop.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<decimal>("Costo")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("Impuesto")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -299,48 +242,12 @@ namespace AlmacenDesktop.Migrations
                     b.Property<decimal>("Precio")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ProveedorId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("Stock")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProveedorId");
-
                     b.ToTable("Productos");
-                });
-
-            modelBuilder.Entity("AlmacenDesktop.Modelos.Proveedor", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Contacto")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Cuit")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Direccion")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Telefono")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Proveedores");
                 });
 
             modelBuilder.Entity("AlmacenDesktop.Modelos.Usuario", b =>
@@ -427,44 +334,6 @@ namespace AlmacenDesktop.Migrations
                     b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("AlmacenDesktop.Modelos.Compra", b =>
-                {
-                    b.HasOne("AlmacenDesktop.Modelos.Proveedor", "Proveedor")
-                        .WithMany()
-                        .HasForeignKey("ProveedorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AlmacenDesktop.Modelos.Usuario", "Usuario")
-                        .WithMany()
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Proveedor");
-
-                    b.Navigation("Usuario");
-                });
-
-            modelBuilder.Entity("AlmacenDesktop.Modelos.DetalleCompra", b =>
-                {
-                    b.HasOne("AlmacenDesktop.Modelos.Compra", "Compra")
-                        .WithMany("Detalles")
-                        .HasForeignKey("CompraId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AlmacenDesktop.Modelos.Producto", "Producto")
-                        .WithMany()
-                        .HasForeignKey("ProductoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Compra");
-
-                    b.Navigation("Producto");
-                });
-
             modelBuilder.Entity("AlmacenDesktop.Modelos.DetalleVenta", b =>
                 {
                     b.HasOne("AlmacenDesktop.Modelos.Producto", "Producto")
@@ -522,17 +391,6 @@ namespace AlmacenDesktop.Migrations
                     b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("AlmacenDesktop.Modelos.Producto", b =>
-                {
-                    b.HasOne("AlmacenDesktop.Modelos.Proveedor", "Proveedor")
-                        .WithMany()
-                        .HasForeignKey("ProveedorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Proveedor");
-                });
-
             modelBuilder.Entity("AlmacenDesktop.Modelos.Venta", b =>
                 {
                     b.HasOne("AlmacenDesktop.Modelos.Caja", "Caja")
@@ -561,11 +419,6 @@ namespace AlmacenDesktop.Migrations
             modelBuilder.Entity("AlmacenDesktop.Modelos.Caja", b =>
                 {
                     b.Navigation("Ventas");
-                });
-
-            modelBuilder.Entity("AlmacenDesktop.Modelos.Compra", b =>
-                {
-                    b.Navigation("Detalles");
                 });
 
             modelBuilder.Entity("AlmacenDesktop.Modelos.Venta", b =>

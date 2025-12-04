@@ -1,8 +1,11 @@
 ﻿using AlmacenDesktop.Data;
 using AlmacenDesktop.Modelos;
+using AlmacenDesktop.Services;
+using AlmacenDesktop.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -12,31 +15,113 @@ namespace AlmacenDesktop.Forms
     {
         private Usuario _vendedor;
         private List<DetalleVenta> _carrito = new List<DetalleVenta>();
+        private int? _cajaIdActual = null;
 
-        // CLIENTE PREDETERMINADO ---
-        private const string CLIENTE_DEF_NOMBRE = "Consumidor";
-        private const string CLIENTE_DEF_APELLIDO = "Final";
-        private const string CLIENTE_DEF_DNI = "00000000";
+        private decimal _subtotalBase = 0;
+        private decimal _totalFinal = 0;
 
         public VentasForm(Usuario vendedor)
         {
             InitializeComponent();
             _vendedor = vendedor;
+
+            this.KeyPreview = true;
+            this.KeyDown += new KeyEventHandler(VentasForm_KeyDown);
         }
 
         private void VentasForm_Load(object sender, EventArgs e)
         {
+            if (!VerificarCajaAbierta())
+            {
+                this.BeginInvoke(new Action(() => { this.Close(); }));
+                return;
+            }
+
             CargarCombos();
             CargarMetodosPago();
+            ConfigurarGrilla();
             this.ActiveControl = txtEscanear;
+        }
+
+        private void VentasForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.F1:
+                    txtEscanear.Focus();
+                    txtEscanear.SelectAll();
+                    e.Handled = true;
+                    break;
+
+                case Keys.F2:
+                    cboMetodoPago.SelectedItem = "Efectivo";
+                    e.Handled = true;
+                    break;
+
+                case Keys.F3:
+                    int indexBill = cboMetodoPago.FindString("Billetera Virtual");
+                    if (indexBill != -1) cboMetodoPago.SelectedIndex = indexBill;
+                    e.Handled = true;
+                    break;
+
+                case Keys.F4:
+                    cboMetodoPago.SelectedItem = "Fiado";
+                    e.Handled = true;
+                    break;
+
+                case Keys.F5:
+                    btnFinalizar.PerformClick();
+                    e.Handled = true;
+                    break;
+
+                case Keys.F10:
+                    if (MessageBox.Show("¿Cancelar venta?", "Cancelar", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    {
+                        Limpiar();
+                    }
+                    e.Handled = true;
+                    break;
+
+                case Keys.Delete:
+                    EliminarItemSeleccionado();
+                    e.Handled = true;
+                    break;
+            }
+        }
+
+        private void txtPagaCon_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                e.Handled = true;
+                btnFinalizar.PerformClick();
+            }
         }
 
         private void CargarMetodosPago()
         {
+            cboMetodoPago.Items.Clear();
             cboMetodoPago.Items.Add("Efectivo");
             cboMetodoPago.Items.Add("Transferencia");
+            cboMetodoPago.Items.Add("Billetera Virtual");
             cboMetodoPago.Items.Add("Fiado");
             cboMetodoPago.SelectedIndex = 0;
+        }
+
+        private bool VerificarCajaAbierta()
+        {
+            using (var context = new AlmacenDbContext())
+            {
+                var cajaAbierta = context.Cajas.FirstOrDefault(c => c.UsuarioId == _vendedor.Id && c.EstaAbierta);
+                if (cajaAbierta == null)
+                {
+                    MessageBox.Show("Caja Cerrada. Abra caja primero.");
+                    return false;
+                }
+                _cajaIdActual = cajaAbierta.Id;
+                this.Text = $"Nueva Venta - Caja #{_cajaIdActual}";
+                return true;
+            }
         }
 
         private void CargarCombos()
@@ -44,65 +129,22 @@ namespace AlmacenDesktop.Forms
             using (var context = new AlmacenDbContext())
             {
                 var clientes = context.Clientes.ToList();
-
-                // Validación de seguridad por si Program.cs no corrió o falló
-                var consumidorFinal = clientes.FirstOrDefault(c => c.DniCuit == CLIENTE_DEF_DNI);
-
+                var consumidorFinal = clientes.FirstOrDefault(c => c.DniCuit == Constantes.CLIENTE_DEF_DNI);
                 if (consumidorFinal == null)
                 {
-                    // Lo creamos al vuelo si no existe
-                    consumidorFinal = new Cliente
-                    {
-                        Nombre = CLIENTE_DEF_NOMBRE,
-                        Apellido = CLIENTE_DEF_APELLIDO,
-                        DniCuit = CLIENTE_DEF_DNI,
-                        Email = "-",
-                        Telefono = "-",
-                        Direccion = "Mostrador"
-                    };
+                    consumidorFinal = new Cliente { Nombre = Constantes.CLIENTE_DEF_NOMBRE, Apellido = Constantes.CLIENTE_DEF_APELLIDO, DniCuit = Constantes.CLIENTE_DEF_DNI, Email = "-", Telefono = "-", Direccion = "-" };
                     context.Clientes.Add(consumidorFinal);
                     context.SaveChanges();
-                    clientes = context.Clientes.ToList(); // Recargamos la lista
+                    clientes = context.Clientes.ToList();
                 }
-
                 cboClientes.DataSource = clientes;
                 cboClientes.DisplayMember = "NombreCompleto";
                 cboClientes.ValueMember = "Id";
 
-                // Productos
                 var productos = context.Productos.Where(p => p.Stock > 0).ToList();
                 cboProductos.DataSource = productos;
                 cboProductos.DisplayMember = "Nombre";
                 cboProductos.ValueMember = "Id";
-            }
-        }
-
-        // --- LÓGICA INTELIGENTE ---
-        private void cboMetodoPago_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            string metodo = cboMetodoPago.SelectedItem.ToString();
-
-            if (metodo == "Fiado")
-            {
-                cboClientes.Enabled = true;
-            }
-            else
-            {
-                cboClientes.Enabled = false;
-                SeleccionarConsumidorFinal();
-            }
-        }
-
-        private void SeleccionarConsumidorFinal()
-        {
-            foreach (Cliente item in cboClientes.Items)
-            {
-                // Buscamos por DNI que es más seguro que el nombre
-                if (item.DniCuit == CLIENTE_DEF_DNI)
-                {
-                    cboClientes.SelectedItem = item;
-                    break;
-                }
             }
         }
 
@@ -111,166 +153,247 @@ namespace AlmacenDesktop.Forms
             if (e.KeyChar == (char)Keys.Enter)
             {
                 e.Handled = true;
-                string codigo = txtEscanear.Text.Trim();
-
-                if (!string.IsNullOrEmpty(codigo))
-                {
-                    AgregarPorCodigo(codigo);
-                }
+                string entrada = txtEscanear.Text.Trim();
+                if (!string.IsNullOrEmpty(entrada)) ProcesarEntradaInteligente(entrada);
                 txtEscanear.Clear();
                 txtEscanear.Focus();
             }
         }
 
-        private void AgregarPorCodigo(string codigo)
+        private void ProcesarEntradaInteligente(string entrada)
         {
             using (var context = new AlmacenDbContext())
             {
-                var producto = context.Productos.FirstOrDefault(p => p.CodigoBarras == codigo);
-
+                var producto = context.Productos.FirstOrDefault(p => p.CodigoBarras == entrada);
                 if (producto != null)
                 {
-                    int cantidadEnCarrito = _carrito.Where(x => x.ProductoId == producto.Id).Sum(x => x.Cantidad);
-
-                    if (producto.Stock > cantidadEnCarrito)
-                    {
-                        AgregarItemAlCarrito(producto, 1);
-                    }
-                    else
-                    {
-                        MessageBox.Show("No hay suficiente stock.", "Stock", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    }
+                    AgregarProductoLogica(producto);
+                    return;
                 }
-                else
-                {
-                    MessageBox.Show("Producto no encontrado.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                var lista = context.Productos.Where(p => p.Nombre.ToLower().Contains(entrada.ToLower())).ToList();
+                if (lista.Count == 1) AgregarProductoLogica(lista[0]);
+                else if (lista.Count > 1) MessageBox.Show("Múltiples resultados. Sea más específico.");
+                else MessageBox.Show("No encontrado.");
             }
+        }
+
+        private void AgregarProductoLogica(Producto producto)
+        {
+            int enCarrito = _carrito.Where(x => x.ProductoId == producto.Id).Sum(x => x.Cantidad);
+            if (producto.Stock > enCarrito) AgregarItemAlCarrito(producto, 1);
+            else MessageBox.Show("Sin Stock suficiente.");
         }
 
         private void btnAgregar_Click(object sender, EventArgs e)
         {
-            var productoSeleccionado = (Producto)cboProductos.SelectedItem;
-            int cantidad = (int)numCantidad.Value;
+            var prod = (Producto)cboProductos.SelectedItem;
+            if (prod != null) AgregarItemAlCarrito(prod, (int)numCantidad.Value);
+        }
 
-            if (productoSeleccionado == null) return;
+        private void ConfigurarGrilla()
+        {
+            dgvCarrito.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvCarrito.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvCarrito.MultiSelect = false;
+            dgvCarrito.ReadOnly = true;
+            dgvCarrito.RowHeadersVisible = false;
+            dgvCarrito.BackgroundColor = Color.White;
+        }
 
-            int cantidadEnCarrito = _carrito.Where(x => x.ProductoId == productoSeleccionado.Id).Sum(x => x.Cantidad);
-
-            if (productoSeleccionado.Stock >= (cantidad + cantidadEnCarrito))
+        private void EliminarItemSeleccionado()
+        {
+            if (dgvCarrito.SelectedRows.Count > 0)
             {
-                AgregarItemAlCarrito(productoSeleccionado, cantidad);
-            }
-            else
-            {
-                MessageBox.Show("No hay suficiente stock disponible.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                int index = dgvCarrito.SelectedRows[0].Index;
+                if (index >= 0 && index < _carrito.Count)
+                {
+                    _carrito.RemoveAt(index);
+                    CalcularTotales();
+                }
             }
         }
 
         private void AgregarItemAlCarrito(Producto producto, int cantidad)
         {
             var itemExistente = _carrito.FirstOrDefault(x => x.ProductoId == producto.Id);
+            if (itemExistente != null) itemExistente.Cantidad += cantidad;
+            else _carrito.Add(new DetalleVenta { ProductoId = producto.Id, Producto = producto, Cantidad = cantidad, PrecioUnitario = producto.Precio });
 
-            if (itemExistente != null)
-            {
-                itemExistente.Cantidad += cantidad;
-            }
-            else
-            {
-                var item = new DetalleVenta
-                {
-                    ProductoId = producto.Id,
-                    Producto = producto,
-                    Cantidad = cantidad,
-                    PrecioUnitario = producto.Precio
-                };
-                _carrito.Add(item);
-            }
-
-            ActualizarGrilla();
+            CalcularTotales();
         }
 
-        private void ActualizarGrilla()
+        private void CalcularTotales()
         {
             dgvCarrito.DataSource = null;
             dgvCarrito.DataSource = _carrito.Select(x => new
             {
                 Producto = x.Producto.Nombre,
-                Cantidad = x.Cantidad,
+                Cant = x.Cantidad,
                 Precio = x.PrecioUnitario,
                 Subtotal = x.Subtotal
             }).ToList();
 
-            decimal total = _carrito.Sum(x => x.Subtotal);
-            lblTotal.Text = $"Total a Pagar: ${total:N2}";
+            if (dgvCarrito.Columns["Precio"] != null) dgvCarrito.Columns["Precio"].DefaultCellStyle.Format = Constantes.MONEDA_FMT;
+            if (dgvCarrito.Columns["Subtotal"] != null) dgvCarrito.Columns["Subtotal"].DefaultCellStyle.Format = Constantes.MONEDA_FMT;
+
+            _subtotalBase = _carrito.Sum(x => x.Subtotal);
+
+            string metodo = cboMetodoPago.SelectedItem?.ToString();
+            decimal recargo = 0;
+
+            if (metodo == "Billetera Virtual")
+            {
+                recargo = _subtotalBase * 0.06m;
+                lblRecargoInfo.Visible = true;
+            }
+            else
+            {
+                lblRecargoInfo.Visible = false;
+            }
+
+            _totalFinal = _subtotalBase + recargo;
+            lblTotal.Text = $"Total: {_totalFinal.ToString(Constantes.MONEDA_FMT)}";
+
+            CalcularVuelto();
+        }
+
+        private void cboMetodoPago_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string metodo = cboMetodoPago.SelectedItem?.ToString();
+
+            if (metodo == "Fiado")
+            {
+                cboClientes.Enabled = true;
+                cboClientes.Focus();
+                cboClientes.DroppedDown = true;
+            }
+            else
+            {
+                cboClientes.Enabled = false;
+                SeleccionarConsumidorFinal();
+            }
+
+            CalcularTotales();
+        }
+
+        private void SeleccionarConsumidorFinal()
+        {
+            foreach (Cliente item in cboClientes.Items)
+            {
+                if (item.DniCuit == Constantes.CLIENTE_DEF_DNI)
+                {
+                    cboClientes.SelectedItem = item;
+                    break;
+                }
+            }
+        }
+
+        private void txtPagaCon_TextChanged(object sender, EventArgs e)
+        {
+            CalcularVuelto();
+        }
+
+        private void CalcularVuelto()
+        {
+            if (decimal.TryParse(txtPagaCon.Text, out decimal pagaCon))
+            {
+                decimal vuelto = pagaCon - _totalFinal;
+                if (vuelto < 0)
+                {
+                    lblVueltoMonto.ForeColor = Color.Red;
+                    lblVueltoMonto.Text = "Falta dinero";
+                }
+                else
+                {
+                    lblVueltoMonto.ForeColor = Color.Green;
+                    lblVueltoMonto.Text = vuelto.ToString(Constantes.MONEDA_FMT);
+                }
+            }
+            else
+            {
+                lblVueltoMonto.Text = "$ 0.00";
+            }
         }
 
         private void btnFinalizar_Click(object sender, EventArgs e)
         {
-            if (_carrito.Count == 0)
-            {
-                MessageBox.Show("El carrito está vacío.");
-                return;
-            }
+            if (_carrito.Count == 0) return;
+            if (!_cajaIdActual.HasValue) return;
 
-            string metodoPago = cboMetodoPago.SelectedItem.ToString();
-            Cliente clienteSeleccionado = (Cliente)cboClientes.SelectedItem;
-
-            // Validación: No permitir fiar a Consumidor Final
-            if (metodoPago == "Fiado")
+            if (cboMetodoPago.SelectedItem.ToString() == "Fiado")
             {
-                if (clienteSeleccionado.DniCuit == CLIENTE_DEF_DNI)
+                var cliente = (Cliente)cboClientes.SelectedItem;
+                if (cliente.DniCuit == Constantes.CLIENTE_DEF_DNI)
                 {
-                    MessageBox.Show("Para fiar debe seleccionar un cliente registrado con nombre y apellido.", "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Debe seleccionar un cliente para fiar.");
                     return;
                 }
             }
 
+            // Variable para guardar la venta y usarla FUERA del using
+            Venta ventaGuardada = null;
+
             try
             {
+                // 1. GUARDADO DE DATOS (Bloque de Base de Datos)
                 using (var context = new AlmacenDbContext())
                 {
-                    var nuevaVenta = new Venta
+                    ventaGuardada = new Venta
                     {
                         Fecha = DateTime.Now,
                         ClienteId = (int)cboClientes.SelectedValue,
                         UsuarioId = _vendedor.Id,
-                        Total = _carrito.Sum(x => x.Subtotal),
-                        MetodoPago = metodoPago
+                        Total = _totalFinal,
+                        MetodoPago = cboMetodoPago.SelectedItem.ToString(),
+                        CajaId = _cajaIdActual
                     };
 
-                    context.Ventas.Add(nuevaVenta);
+                    context.Ventas.Add(ventaGuardada);
                     context.SaveChanges();
 
                     foreach (var item in _carrito)
                     {
-                        item.VentaId = nuevaVenta.Id;
-                        item.Producto = null;
-                        context.DetallesVenta.Add(item);
+                        var detalle = new DetalleVenta
+                        {
+                            VentaId = ventaGuardada.Id,
+                            ProductoId = item.ProductoId,
+                            Cantidad = item.Cantidad,
+                            PrecioUnitario = item.PrecioUnitario
+                        };
+                        context.DetallesVenta.Add(detalle);
 
-                        var productoEnDb = context.Productos.Find(item.ProductoId);
-                        productoEnDb.ReducirStock(item.Cantidad);
+                        var prodDb = context.Productos.Find(item.ProductoId);
+                        if (prodDb != null) prodDb.ReducirStock(item.Cantidad);
                     }
-
                     context.SaveChanges();
+                } // <--- AQUÍ SE CIERRA LA CONEXIÓN A LA BD
 
-                    MessageBox.Show("¡Venta registrada con éxito!");
-                    Limpiar();
-                    return;
-
+                // 2. IMPRESIÓN (Fuera del bloqueo de BD)
+                if (ventaGuardada != null)
+                {
+                    if (MessageBox.Show("Venta Exitosa. ¿Ticket?", "Imprimir", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    {
+                        // Ahora TicketService puede abrir su propia conexión sin chocar
+                        new TicketService().Imprimir(ventaGuardada, _carrito);
+                    }
                 }
+
+                // 3. LIMPIEZA
+                Limpiar();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al procesar la venta: {ex.Message}");
+                MessageBox.Show("Error: " + ex.Message);
             }
         }
+
         void Limpiar()
         {
             _carrito.Clear();
-            ActualizarGrilla();
+            CalcularTotales();
             SeleccionarConsumidorFinal();
             cboMetodoPago.SelectedIndex = 0;
+            txtPagaCon.Text = "";
             txtEscanear.Clear();
             txtEscanear.Focus();
         }

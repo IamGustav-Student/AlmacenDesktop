@@ -1,5 +1,6 @@
 using AlmacenDesktop.Modelos;
-using System.Drawing; // Necesario para ImageLayout
+using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace AlmacenDesktop.Forms
@@ -13,19 +14,39 @@ namespace AlmacenDesktop.Forms
             InitializeComponent();
             _usuarioActual = usuario;
 
+            // Conectar evento Load
+            this.Load += new EventHandler(MenuPrincipal_Load);
+
             lblUsuarioInfo.Text = $"Conectado como: {_usuarioActual.NombreCompleto} ({_usuarioActual.ObtenerRol()})";
 
-            // Seguridad: Ocultar menú admin si no corresponde
             if (_usuarioActual.NombreUsuario != "admin")
             {
                 tsmiAdmin.Visible = false;
             }
 
-            // --- CORRECCIÓN AQUÍ ---
-            // Hemos eliminado la línea "tsmiHistorial.Click += tsmiHistorial_Click;"
-            // porque el Designer de Visual Studio ya conecta el evento automáticamente.
-
             ConfigurarFondoMDI();
+        }
+
+        private void MenuPrincipal_Load(object sender, EventArgs e)
+        {
+            MostrarDashboard();
+        }
+
+        public void MostrarDashboard() // Hacemos público por si queremos llamarlo desde fuera
+        {
+            foreach (Form f in this.MdiChildren)
+            {
+                if (f is DashboardForm)
+                {
+                    f.BringToFront();
+                    return;
+                }
+            }
+
+            DashboardForm form = new DashboardForm();
+            form.MdiParent = this;
+            form.Dock = DockStyle.Fill;
+            form.Show();
         }
 
         private void ConfigurarFondoMDI()
@@ -34,12 +55,7 @@ namespace AlmacenDesktop.Forms
             {
                 if (ctl is MdiClient mdi)
                 {
-                    if (this.BackgroundImage != null)
-                    {
-                        mdi.BackgroundImage = this.BackgroundImage;
-                        mdi.BackgroundImageLayout = ImageLayout.Stretch;
-                    }
-                    mdi.BackColor = Color.WhiteSmoke;
+                    mdi.BackColor = Color.FromArgb(240, 240, 240);
                     break;
                 }
             }
@@ -50,9 +66,9 @@ namespace AlmacenDesktop.Forms
             Application.Exit();
         }
 
-        private void tsmiProductos_Click(object sender, EventArgs e)
+        // --- CAMBIO CLAVE: DE PRIVATE A PUBLIC ---
+        public void tsmiProductos_Click(object sender, EventArgs e)
         {
-            // Verificamos si ya hay una instancia abierta para no abrir múltiples
             foreach (Form f in this.MdiChildren)
             {
                 if (f is ProductosForm)
@@ -67,7 +83,7 @@ namespace AlmacenDesktop.Forms
             form.Show();
         }
 
-        private void tsmiClientes_Click(object sender, EventArgs e)
+        public void tsmiClientes_Click(object sender, EventArgs e)
         {
             foreach (Form f in this.MdiChildren)
             {
@@ -83,7 +99,8 @@ namespace AlmacenDesktop.Forms
             form.Show();
         }
 
-        private void tsmiNuevaVenta_Click(object sender, EventArgs e)
+        // --- CAMBIO CLAVE: DE PRIVATE A PUBLIC ---
+        public void tsmiNuevaVenta_Click(object sender, EventArgs e)
         {
             VentasForm form = new VentasForm(_usuarioActual);
             form.MdiParent = this;
@@ -92,12 +109,11 @@ namespace AlmacenDesktop.Forms
 
         private void tsmiHistorial_Click(object sender, EventArgs e)
         {
-            // Lógica extra de seguridad: Evitar abrir el historial mil veces
             foreach (Form f in this.MdiChildren)
             {
                 if (f is HistorialVentasForm)
                 {
-                    f.BringToFront(); // Si ya está abierto, lo trae al frente
+                    f.BringToFront();
                     return;
                 }
             }
@@ -107,22 +123,49 @@ namespace AlmacenDesktop.Forms
             form.Show();
         }
 
-        private void fiadoToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            //// Lógica para no abrir duplicados
-            //foreach (Form f in this.MdiChildren)
-            //{
-            //    if (f is ReporteFiadosForm)
-            //    {
-            //        f.BringToFront();
-            //        return;
-            //    }
-            //}
 
-            ReporteFiadosForm form = new ReporteFiadosForm();
+
+        public void inicioToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MostrarDashboard();
+        }
+
+        // Lo dejamos public para poder llamarlo si hiciera falta
+        public void controlDeCajaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ControlCajaForm form = new ControlCajaForm(_usuarioActual);
+            form.ShowDialog();
+            MostrarDashboard();
+        }
+
+        private void configuracionPersonalizadaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ConfiguracionForm form = new ConfiguracionForm();
+            form.MdiParent = this;
+            form.Show();
+        }
+
+        private void cuentasCorrientesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Reemplazamos el reporte simple por el gestor completo
+            CuentaCorrienteForm form = new CuentaCorrienteForm();
+            form.MdiParent = this; // O form.ShowDialog() si prefieres modal
+            form.Show();
+        }
+
+        private void tsmiProveedores_Click(object sender, EventArgs e)
+        {
+            ProveedoresForm form = new ProveedoresForm();
+
+            form.MdiParent = this;
+            form.Show();
+        }
+
+        private void comprasToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ComprasForm form = new ComprasForm();
             form.MdiParent = this;
             form.Show();
         }
     }
-    
 }

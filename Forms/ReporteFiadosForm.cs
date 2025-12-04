@@ -98,7 +98,6 @@ namespace AlmacenDesktop.Forms
                     {
                         Fecha = p.Fecha,
                         Tipo = "PAGO A CUENTA",
-                        Detalle = p.Notas ?? "Pago en efectivo",
                         Debe = 0,
                         Haber = p.Monto
                     })
@@ -173,7 +172,7 @@ namespace AlmacenDesktop.Forms
                         ClienteId = clienteId,
                         Monto = monto,
                         Fecha = DateTime.Now,
-                        Notas = "Pago registrado"
+                        
                     };
 
                     context.Pagos.Add(nuevoPago);

@@ -3,6 +3,7 @@ using System;
 using AlmacenDesktop.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AlmacenDesktop.Migrations
 {
     [DbContext(typeof(AlmacenDbContext))]
-    partial class AlmacenDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251204002751_gestordeproveedores")]
+    partial class gestordeproveedores
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.11");
@@ -289,9 +292,6 @@ namespace AlmacenDesktop.Migrations
                     b.Property<decimal>("Costo")
                         .HasColumnType("TEXT");
 
-                    b.Property<decimal>("Impuesto")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -299,15 +299,10 @@ namespace AlmacenDesktop.Migrations
                     b.Property<decimal>("Precio")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ProveedorId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("Stock")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ProveedorId");
 
                     b.ToTable("Productos");
                 });
@@ -520,17 +515,6 @@ namespace AlmacenDesktop.Migrations
                     b.Navigation("Cliente");
 
                     b.Navigation("Usuario");
-                });
-
-            modelBuilder.Entity("AlmacenDesktop.Modelos.Producto", b =>
-                {
-                    b.HasOne("AlmacenDesktop.Modelos.Proveedor", "Proveedor")
-                        .WithMany()
-                        .HasForeignKey("ProveedorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Proveedor");
                 });
 
             modelBuilder.Entity("AlmacenDesktop.Modelos.Venta", b =>

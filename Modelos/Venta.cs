@@ -1,32 +1,26 @@
-﻿using AlmacenDesktop.Modelos;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace AlmacenDesktop.Modelos
 {
     public class Venta
     {
-        [Key]
         public int Id { get; set; }
-
-        public DateTime Fecha { get; set; } = DateTime.Now;
-
+        public DateTime Fecha { get; set; }
         public decimal Total { get; set; }
+        public string MetodoPago { get; set; } // Efectivo, Tarjeta, etc.
 
-        // --- NUEVO CAMPO ---
-        [Required]
-        [MaxLength(50)]
-        public string MetodoPago { get; set; } // "Efectivo", "Transferencia", "Fiado"
-
-        // Relación con Cliente
+        // Relaciones
         public int ClienteId { get; set; }
-        public virtual Cliente Cliente { get; set; }
+        public Cliente Cliente { get; set; }
 
-        // Relación con Usuario (Vendedor)
         public int UsuarioId { get; set; }
-        public virtual Usuario Usuario { get; set; }
+        public Usuario Usuario { get; set; }
 
-        public virtual List<DetalleVenta> Detalles { get; set; } = new List<DetalleVenta>();
+        // --- NUEVO FASE 3: VINCULO CON CAJA ---
+        public int? CajaId { get; set; } // Puede ser nulo por compatibilidad con ventas viejas
+        public Caja Caja { get; set; }
+
+        public List<DetalleVenta> Detalles { get; set; }
     }
 }

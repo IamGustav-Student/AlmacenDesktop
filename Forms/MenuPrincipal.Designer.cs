@@ -15,7 +15,6 @@
 
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MenuPrincipal));
             menuStrip1 = new MenuStrip();
             tsmiArchivo = new ToolStripMenuItem();
             tsmiSalir = new ToolStripMenuItem();
@@ -28,16 +27,19 @@
             tsmiHistorial = new ToolStripMenuItem();
             tsmiAdmin = new ToolStripMenuItem();
             tsmiUsuarios = new ToolStripMenuItem();
+            controlDeCajaToolStripMenuItem = new ToolStripMenuItem();
+            configuracionPersonalizadaToolStripMenuItem = new ToolStripMenuItem();
+            cuentasCorrientesToolStripMenuItem = new ToolStripMenuItem();
             statusStrip1 = new StatusStrip();
             lblUsuarioInfo = new ToolStripStatusLabel();
-            fiadoToolStripMenuItem = new ToolStripMenuItem();
+            comprasToolStripMenuItem = new ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // menuStrip1
             // 
-            menuStrip1.Items.AddRange(new ToolStripItem[] { tsmiArchivo, tsmiGestion, tsmiVentas, tsmiAdmin });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { tsmiArchivo, tsmiGestion, tsmiVentas, tsmiAdmin, controlDeCajaToolStripMenuItem, configuracionPersonalizadaToolStripMenuItem, cuentasCorrientesToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(800, 24);
@@ -60,7 +62,7 @@
             // 
             // tsmiGestion
             // 
-            tsmiGestion.DropDownItems.AddRange(new ToolStripItem[] { tsmiProductos, tsmiClientes, tsmiProveedores });
+            tsmiGestion.DropDownItems.AddRange(new ToolStripItem[] { tsmiProductos, tsmiClientes, tsmiProveedores, comprasToolStripMenuItem });
             tsmiGestion.Name = "tsmiGestion";
             tsmiGestion.Size = new Size(59, 20);
             tsmiGestion.Text = "Gestión";
@@ -74,7 +76,6 @@
             // 
             // tsmiClientes
             // 
-            tsmiClientes.DropDownItems.AddRange(new ToolStripItem[] { fiadoToolStripMenuItem });
             tsmiClientes.Name = "tsmiClientes";
             tsmiClientes.Size = new Size(180, 22);
             tsmiClientes.Text = "Clientes";
@@ -85,6 +86,7 @@
             tsmiProveedores.Name = "tsmiProveedores";
             tsmiProveedores.Size = new Size(180, 22);
             tsmiProveedores.Text = "Proveedores";
+            tsmiProveedores.Click += tsmiProveedores_Click;
             // 
             // tsmiVentas
             // 
@@ -120,6 +122,27 @@
             tsmiUsuarios.Size = new Size(178, 22);
             tsmiUsuarios.Text = "Gestión de Usuarios";
             // 
+            // controlDeCajaToolStripMenuItem
+            // 
+            controlDeCajaToolStripMenuItem.Name = "controlDeCajaToolStripMenuItem";
+            controlDeCajaToolStripMenuItem.Size = new Size(102, 20);
+            controlDeCajaToolStripMenuItem.Text = "Control De Caja";
+            controlDeCajaToolStripMenuItem.Click += controlDeCajaToolStripMenuItem_Click;
+            // 
+            // configuracionPersonalizadaToolStripMenuItem
+            // 
+            configuracionPersonalizadaToolStripMenuItem.Name = "configuracionPersonalizadaToolStripMenuItem";
+            configuracionPersonalizadaToolStripMenuItem.Size = new Size(170, 20);
+            configuracionPersonalizadaToolStripMenuItem.Text = "Configuracion Personalizada";
+            configuracionPersonalizadaToolStripMenuItem.Click += configuracionPersonalizadaToolStripMenuItem_Click;
+            // 
+            // cuentasCorrientesToolStripMenuItem
+            // 
+            cuentasCorrientesToolStripMenuItem.Name = "cuentasCorrientesToolStripMenuItem";
+            cuentasCorrientesToolStripMenuItem.Size = new Size(119, 20);
+            cuentasCorrientesToolStripMenuItem.Text = "Cuentas Corrientes";
+            cuentasCorrientesToolStripMenuItem.Click += cuentasCorrientesToolStripMenuItem_Click;
+            // 
             // statusStrip1
             // 
             statusStrip1.Items.AddRange(new ToolStripItem[] { lblUsuarioInfo });
@@ -134,18 +157,17 @@
             lblUsuarioInfo.Size = new Size(122, 17);
             lblUsuarioInfo.Text = "Usuario: Desconocido";
             // 
-            // fiadoToolStripMenuItem
+            // comprasToolStripMenuItem
             // 
-            fiadoToolStripMenuItem.Name = "fiadoToolStripMenuItem";
-            fiadoToolStripMenuItem.Size = new Size(180, 22);
-            fiadoToolStripMenuItem.Text = "Fiado";
-            fiadoToolStripMenuItem.Click += fiadoToolStripMenuItem_Click;
+            comprasToolStripMenuItem.Name = "comprasToolStripMenuItem";
+            comprasToolStripMenuItem.Size = new Size(180, 22);
+            comprasToolStripMenuItem.Text = "Compras";
+            comprasToolStripMenuItem.Click += comprasToolStripMenuItem_Click;
             // 
             // MenuPrincipal
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
             BackgroundImageLayout = ImageLayout.Center;
             ClientSize = new Size(800, 450);
             Controls.Add(statusStrip1);
@@ -177,7 +199,10 @@
         private System.Windows.Forms.ToolStripMenuItem tsmiUsuarios;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel lblUsuarioInfo;
-        private ToolStripMenuItem fiadoToolStripMenuItem;
+        private ToolStripMenuItem controlDeCajaToolStripMenuItem;
+        private ToolStripMenuItem configuracionPersonalizadaToolStripMenuItem;
+        private ToolStripMenuItem cuentasCorrientesToolStripMenuItem;
+        private ToolStripMenuItem comprasToolStripMenuItem;
     }
 }
 

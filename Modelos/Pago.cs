@@ -1,24 +1,18 @@
-﻿using AlmacenDesktop.Modelos;
-using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System;
 
 namespace AlmacenDesktop.Modelos
 {
     public class Pago
     {
-        [Key]
         public int Id { get; set; }
-
-        public DateTime Fecha { get; set; } = DateTime.Now;
-
-        [Required]
+        public DateTime Fecha { get; set; }
         public decimal Monto { get; set; }
 
-        // Relación con Cliente (Quién pagó)
+        // Relaciones
         public int ClienteId { get; set; }
-        public virtual Cliente Cliente { get; set; }
+        public Cliente Cliente { get; set; }
 
-        // Opcional: Notas (ej. "Pago parcial de la semana pasada")
-        public string Notas { get; set; }
+        public int UsuarioId { get; set; } // Qué cajero recibió la plata
+        public Usuario Usuario { get; set; }
     }
 }

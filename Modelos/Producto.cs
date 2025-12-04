@@ -1,10 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AlmacenDesktop.Modelos
 {
     public class Producto
     {
-        [Key]
         public int Id { get; set; }
 
         [Required]
@@ -12,24 +14,28 @@ namespace AlmacenDesktop.Modelos
 
         public string CodigoBarras { get; set; }
 
-        [Required]
+        public decimal Costo { get; set; }
+
         public decimal Precio { get; set; }
 
-        [Required]
         public int Stock { get; set; }
 
-        // Método de utilidad para el negocio
+        // NUEVO CAMPO: Aquí guardamos el % de ganancia o impuesto
+        // Ejemplo: 30 para un 30%
+        public decimal Impuesto { get; set; }
+
+        public int ProveedorId { get; set; }
+        public virtual Proveedor Proveedor { get; set; }
+
+        // Métodos auxiliares
+        public void AumentarStock(int cantidad)
+        {
+            Stock += cantidad;
+        }
+
         public void ReducirStock(int cantidad)
         {
-            if (Stock >= cantidad)
-            {
-                Stock -= cantidad;
-            }
-            else
-            {
-                // [Manejo de Excepciones] - Requisito del examen
-                throw new InvalidOperationException("No hay suficiente stock para realizar esta operación.");
-            }
+            Stock -= cantidad;
         }
     }
 }
