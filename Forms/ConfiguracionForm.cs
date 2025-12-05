@@ -12,6 +12,9 @@ namespace AlmacenDesktop.Forms
         public ConfiguracionForm()
         {
             InitializeComponent();
+            // --- TECLAS RÁPIDAS ---
+            this.KeyPreview = true;
+            this.KeyDown += new KeyEventHandler(ConfiguracionForm_KeyDown);
         }
 
         private void ConfiguracionForm_Load(object sender, EventArgs e)
@@ -23,7 +26,6 @@ namespace AlmacenDesktop.Forms
         {
             using (var context = new AlmacenDbContext())
             {
-                // Buscamos el primer registro, si no existe no cargamos nada
                 var datos = context.DatosNegocio.FirstOrDefault();
                 if (datos != null)
                 {
@@ -36,13 +38,17 @@ namespace AlmacenDesktop.Forms
                 }
                 else
                 {
-                    // Valores por defecto sugeridos
                     txtMensaje.Text = "¡Gracias por su compra!";
                 }
             }
         }
 
         private void btnGuardar_Click(object sender, EventArgs e)
+        {
+            GuardarDatos();
+        }
+
+        private void GuardarDatos()
         {
             try
             {
@@ -52,12 +58,10 @@ namespace AlmacenDesktop.Forms
 
                     if (datos == null)
                     {
-                        // CREAR (Primera vez)
                         datos = new DatosNegocio();
                         context.DatosNegocio.Add(datos);
                     }
 
-                    // ACTUALIZAR DATOS
                     datos.NombreFantasia = txtNombre.Text;
                     datos.RazonSocial = txtRazon.Text;
                     datos.CUIT = txtCuit.Text;
@@ -79,6 +83,21 @@ namespace AlmacenDesktop.Forms
         private void btnCancelar_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        // --- MOTOR DE TECLAS ---
+        private void ConfiguracionForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.F5)
+            {
+                GuardarDatos();
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Escape)
+            {
+                this.Close();
+                e.Handled = true;
+            }
         }
     }
 

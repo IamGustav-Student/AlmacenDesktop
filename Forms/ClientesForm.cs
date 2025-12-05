@@ -1,4 +1,5 @@
 ﻿using AlmacenDesktop.Data;
+using AlmacenDesktop.Helpers;
 using AlmacenDesktop.Modelos;
 using System;
 using System.Linq;
@@ -13,6 +14,10 @@ namespace AlmacenDesktop.Forms
         public ClientesForm()
         {
             InitializeComponent();
+
+            // --- HABILITAR ATAJOS DE TECLADO ---
+            this.KeyPreview = true;
+            this.KeyDown += new KeyEventHandler(ClientesForm_KeyDown);
         }
 
         private void ClientesForm_Load(object sender, EventArgs e)
@@ -24,21 +29,27 @@ namespace AlmacenDesktop.Forms
         {
             using (var context = new AlmacenDbContext())
             {
-                var lista = context.Clientes.ToList();
+                // No mostrar al consumidor final por defecto para no editarlo por error
+                var lista = context.Clientes
+                                   .Where(c => c.DniCuit != Constantes.CLIENTE_DEF_DNI)
+                                   .ToList();
                 dgvClientes.DataSource = null;
                 dgvClientes.DataSource = lista;
 
-                // Ocultar columnas internas de EF si aparecen
                 if (dgvClientes.Columns["Id"] != null) dgvClientes.Columns["Id"].Visible = false;
             }
         }
 
         private void btnGuardar_Click(object sender, EventArgs e)
         {
-            // Validaciones
+            GuardarCliente();
+        }
+
+        private void GuardarCliente()
+        {
             if (string.IsNullOrWhiteSpace(txtNombre.Text) || string.IsNullOrWhiteSpace(txtApellido.Text) || string.IsNullOrWhiteSpace(txtDni.Text))
             {
-                MessageBox.Show("Nombre, Apellido y DNI son obligatorios.");
+                MessageBox.Show("Nombre, Apellido y DNI son obligatorios.", "Faltan Datos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -46,9 +57,16 @@ namespace AlmacenDesktop.Forms
             {
                 using (var context = new AlmacenDbContext())
                 {
+                    // VALIDACIÓN: DNI ÚNICO
+                    bool dniExiste = context.Clientes.Any(c => c.DniCuit == txtDni.Text && c.Id != _clienteIdSeleccionado);
+                    if (dniExiste)
+                    {
+                        MessageBox.Show("Ya existe un cliente registrado con ese DNI/CUIT.", "Duplicado", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
                     if (_clienteIdSeleccionado == 0)
                     {
-                        // Nuevo Cliente
                         var nuevo = new Cliente
                         {
                             Nombre = txtNombre.Text,
@@ -62,7 +80,6 @@ namespace AlmacenDesktop.Forms
                     }
                     else
                     {
-                        // Editar Cliente
                         var existente = context.Clientes.Find(_clienteIdSeleccionado);
                         if (existente != null)
                         {
@@ -78,7 +95,6 @@ namespace AlmacenDesktop.Forms
                     context.SaveChanges();
                     MessageBox.Show("Cliente guardado correctamente.");
                     Limpiar();
-                    CargarDatos();
                 }
             }
             catch (Exception ex)
@@ -89,22 +105,27 @@ namespace AlmacenDesktop.Forms
 
         private void btnEliminar_Click(object sender, EventArgs e)
         {
-            if (_clienteIdSeleccionado == 0)
-            {
-                MessageBox.Show("Selecciona un cliente para eliminar.");
-                return;
-            }
+            if (_clienteIdSeleccionado == 0) return;
 
-            if (MessageBox.Show("¿Seguro que deseas eliminar este cliente?", "Confirmar", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            using (var context = new AlmacenDbContext())
             {
-                using (var context = new AlmacenDbContext())
+                // VALIDACIÓN DE INTEGRIDAD
+                bool tieneVentas = context.Ventas.Any(v => v.ClienteId == _clienteIdSeleccionado);
+                bool tienePagos = context.Pagos.Any(p => p.ClienteId == _clienteIdSeleccionado);
+
+                if (tieneVentas || tienePagos)
+                {
+                    MessageBox.Show("No se puede eliminar este cliente porque tiene historial de Ventas o Pagos.\nEsto rompería los reportes de Caja y Cuenta Corriente.", "Acción Bloqueada", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    return;
+                }
+
+                if (MessageBox.Show("¿Seguro que deseas eliminar este cliente?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
                 {
                     var cliente = context.Clientes.Find(_clienteIdSeleccionado);
                     if (cliente != null)
                     {
                         context.Clientes.Remove(cliente);
                         context.SaveChanges();
-                        CargarDatos();
                         Limpiar();
                     }
                 }
@@ -127,6 +148,9 @@ namespace AlmacenDesktop.Forms
             _clienteIdSeleccionado = 0;
             btnGuardar.Text = "GUARDAR CLIENTE";
             dgvClientes.ClearSelection();
+            CargarDatos();
+            // Devolvemos el foco al primer campo para seguir cargando rápido
+            txtNombre.Focus();
         }
 
         private void dgvClientes_SelectionChanged(object sender, EventArgs e)
@@ -145,6 +169,21 @@ namespace AlmacenDesktop.Forms
                 txtDireccion.Text = cliente.Direccion;
 
                 btnGuardar.Text = "ACTUALIZAR CLIENTE";
+            }
+        }
+
+        // --- MANEJO DE TECLAS RÁPIDAS ---
+        private void ClientesForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.F5)
+            {
+                GuardarCliente();
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Escape)
+            {
+                Limpiar();
+                e.Handled = true;
             }
         }
     }

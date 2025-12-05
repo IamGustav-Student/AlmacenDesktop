@@ -167,5 +167,21 @@ namespace AlmacenDesktop.Forms
             form.MdiParent = this;
             form.Show();
         }
+
+        private void etiquetasToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form f in this.MdiChildren)
+            {
+                if (f is EtiquetasForm)
+                {
+                    f.BringToFront();
+                    return;
+                }
+            }
+
+            EtiquetasForm form = new EtiquetasForm();
+            form.MdiParent = this;
+            form.Show();
+        }
     }
 }

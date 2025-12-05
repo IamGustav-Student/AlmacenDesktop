@@ -22,6 +22,7 @@
             tsmiProductos = new ToolStripMenuItem();
             tsmiClientes = new ToolStripMenuItem();
             tsmiProveedores = new ToolStripMenuItem();
+            comprasToolStripMenuItem = new ToolStripMenuItem();
             tsmiVentas = new ToolStripMenuItem();
             tsmiNuevaVenta = new ToolStripMenuItem();
             tsmiHistorial = new ToolStripMenuItem();
@@ -32,7 +33,7 @@
             cuentasCorrientesToolStripMenuItem = new ToolStripMenuItem();
             statusStrip1 = new StatusStrip();
             lblUsuarioInfo = new ToolStripStatusLabel();
-            comprasToolStripMenuItem = new ToolStripMenuItem();
+            etiquetasToolStripMenuItem = new ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
             SuspendLayout();
@@ -62,7 +63,7 @@
             // 
             // tsmiGestion
             // 
-            tsmiGestion.DropDownItems.AddRange(new ToolStripItem[] { tsmiProductos, tsmiClientes, tsmiProveedores, comprasToolStripMenuItem });
+            tsmiGestion.DropDownItems.AddRange(new ToolStripItem[] { tsmiProductos, tsmiClientes, tsmiProveedores, comprasToolStripMenuItem, etiquetasToolStripMenuItem });
             tsmiGestion.Name = "tsmiGestion";
             tsmiGestion.Size = new Size(59, 20);
             tsmiGestion.Text = "Gestión";
@@ -87,6 +88,13 @@
             tsmiProveedores.Size = new Size(180, 22);
             tsmiProveedores.Text = "Proveedores";
             tsmiProveedores.Click += tsmiProveedores_Click;
+            // 
+            // comprasToolStripMenuItem
+            // 
+            comprasToolStripMenuItem.Name = "comprasToolStripMenuItem";
+            comprasToolStripMenuItem.Size = new Size(180, 22);
+            comprasToolStripMenuItem.Text = "Compras";
+            comprasToolStripMenuItem.Click += comprasToolStripMenuItem_Click;
             // 
             // tsmiVentas
             // 
@@ -157,12 +165,12 @@
             lblUsuarioInfo.Size = new Size(122, 17);
             lblUsuarioInfo.Text = "Usuario: Desconocido";
             // 
-            // comprasToolStripMenuItem
+            // etiquetasToolStripMenuItem
             // 
-            comprasToolStripMenuItem.Name = "comprasToolStripMenuItem";
-            comprasToolStripMenuItem.Size = new Size(180, 22);
-            comprasToolStripMenuItem.Text = "Compras";
-            comprasToolStripMenuItem.Click += comprasToolStripMenuItem_Click;
+            etiquetasToolStripMenuItem.Name = "etiquetasToolStripMenuItem";
+            etiquetasToolStripMenuItem.Size = new Size(180, 22);
+            etiquetasToolStripMenuItem.Text = "Etiquetas";
+            etiquetasToolStripMenuItem.Click += etiquetasToolStripMenuItem_Click;
             // 
             // MenuPrincipal
             // 
@@ -203,6 +211,7 @@
         private ToolStripMenuItem configuracionPersonalizadaToolStripMenuItem;
         private ToolStripMenuItem cuentasCorrientesToolStripMenuItem;
         private ToolStripMenuItem comprasToolStripMenuItem;
+        private ToolStripMenuItem etiquetasToolStripMenuItem;
     }
 }
 

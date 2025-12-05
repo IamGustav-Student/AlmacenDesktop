@@ -15,6 +15,10 @@ namespace AlmacenDesktop.Forms
         {
             InitializeComponent();
             CargarDatos();
+
+            // --- GARANTÍA DE TECLAS RÁPIDAS ---
+            this.KeyPreview = true;
+            this.KeyDown += new KeyEventHandler(ProveedoresForm_KeyDown);
         }
 
         private void ProveedoresForm_Load(object sender, EventArgs e)
@@ -34,10 +38,30 @@ namespace AlmacenDesktop.Forms
 
         private void btnGuardar_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtNombre.Text)) { MessageBox.Show("El nombre es obligatorio."); return; }
+            GuardarProveedor();
+        }
+
+        private void GuardarProveedor()
+        {
+            if (string.IsNullOrWhiteSpace(txtNombre.Text))
+            {
+                MessageBox.Show("El nombre es obligatorio.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
             using (var context = new AlmacenDbContext())
             {
+                // VALIDACIÓN: CUIT ÚNICO
+                if (!string.IsNullOrWhiteSpace(txtCuit.Text))
+                {
+                    bool existe = context.Proveedores.Any(p => p.Cuit == txtCuit.Text && p.Id != _idSeleccionado);
+                    if (existe)
+                    {
+                        MessageBox.Show("Ya existe un proveedor con ese CUIT.", "Duplicado", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                }
+
                 if (_idSeleccionado == 0)
                 {
                     context.Proveedores.Add(new Proveedor
@@ -59,24 +83,39 @@ namespace AlmacenDesktop.Forms
                     }
                 }
                 context.SaveChanges();
+                MessageBox.Show("Proveedor guardado correctamente.", "Éxito");
                 Limpiar();
-                CargarDatos();
-                MessageBox.Show("Guardado.");
             }
         }
 
         private void btnEliminar_Click(object sender, EventArgs e)
         {
             if (_idSeleccionado == 0) return;
-            if (MessageBox.Show("¿Eliminar?", "Confirmar", MessageBoxButtons.YesNo) == DialogResult.Yes)
+
+            using (var context = new AlmacenDbContext())
             {
-                using (var context = new AlmacenDbContext())
+                // VALIDACIÓN DE INTEGRIDAD
+                bool tieneProductos = context.Productos.Any(p => p.ProveedorId == _idSeleccionado);
+                bool tieneCompras = context.Compras.Any(c => c.ProveedorId == _idSeleccionado);
+
+                if (tieneProductos)
+                {
+                    MessageBox.Show("No se puede eliminar: Este proveedor tiene Productos asignados.\nElimine o reasigne los productos primero.", "Protección", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    return;
+                }
+
+                if (tieneCompras)
+                {
+                    MessageBox.Show("No se puede eliminar: Existen historiales de Compras a este proveedor.", "Protección", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    return;
+                }
+
+                if (MessageBox.Show("¿Eliminar proveedor?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     var p = context.Proveedores.Find(_idSeleccionado);
                     if (p != null) { context.Proveedores.Remove(p); context.SaveChanges(); }
+                    Limpiar();
                 }
-                Limpiar();
-                CargarDatos();
             }
         }
 
@@ -89,7 +128,9 @@ namespace AlmacenDesktop.Forms
         {
             txtNombre.Clear(); txtTelefono.Clear(); txtDireccion.Clear(); txtCuit.Clear(); txtContacto.Clear();
             _idSeleccionado = 0;
-            btnGuardar.Text = "Guardar";
+            btnGuardar.Text = "Guardar (F5)";
+            CargarDatos();
+            txtNombre.Focus();
         }
 
         private void dgvDatos_SelectionChanged(object sender, EventArgs e)
@@ -100,7 +141,22 @@ namespace AlmacenDesktop.Forms
                 _idSeleccionado = prov.Id;
                 txtNombre.Text = prov.Nombre; txtTelefono.Text = prov.Telefono;
                 txtDireccion.Text = prov.Direccion; txtCuit.Text = prov.Cuit; txtContacto.Text = prov.Contacto;
-                btnGuardar.Text = "Actualizar";
+                btnGuardar.Text = "Actualizar (F5)";
+            }
+        }
+
+        // --- MOTOR DE TECLAS RÁPIDAS ---
+        private void ProveedoresForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.F5)
+            {
+                GuardarProveedor();
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Escape)
+            {
+                Limpiar();
+                e.Handled = true;
             }
         }
     }

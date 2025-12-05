@@ -18,6 +18,11 @@ namespace AlmacenDesktop.Forms
         public ComprasForm()
         {
             InitializeComponent();
+
+            // --- GARANTÍA DE TECLAS RÁPIDAS ---
+            this.KeyPreview = true;
+            this.KeyDown += new KeyEventHandler(ComprasForm_KeyDown);
+
             cboProveedores.SelectedIndexChanged += cboProveedores_SelectedIndexChanged;
             cboProductos.SelectedIndexChanged += cboProductos_SelectedIndexChanged;
         }
@@ -82,11 +87,15 @@ namespace AlmacenDesktop.Forms
 
         private void cboProductos_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // Aquí podrías mostrar el impuesto actual si tuvieras un label
-            // var producto = (Producto)cboProductos.SelectedItem;
+            // Opcional: Mostrar info extra
         }
 
         private void btnAgregar_Click(object sender, EventArgs e)
+        {
+            AgregarProducto();
+        }
+
+        private void AgregarProducto()
         {
             var producto = (Producto)cboProductos.SelectedItem;
             if (producto == null) return;
@@ -105,6 +114,8 @@ namespace AlmacenDesktop.Forms
             });
 
             ActualizarGrilla();
+            // Foco al producto para seguir cargando rápido
+            cboProductos.Focus();
         }
 
         private void ActualizarGrilla()
@@ -128,6 +139,11 @@ namespace AlmacenDesktop.Forms
         }
 
         private void btnFinalizar_Click(object sender, EventArgs e)
+        {
+            FinalizarCompra();
+        }
+
+        private void FinalizarCompra()
         {
             if (_carritoCompra.Count == 0) return;
 
@@ -160,11 +176,8 @@ namespace AlmacenDesktop.Forms
                         if (prodDb != null)
                         {
                             prodDb.AumentarStock(item.Cantidad);
-
-                            // 1. Actualizamos el Costo
                             prodDb.Costo = item.CostoUnitario;
 
-                            // 2. ACTUALIZACIÓN AUTOMÁTICA DE PRECIOS USANDO EL IMPUESTO
                             if (prodDb.Impuesto > 0)
                             {
                                 prodDb.Precio = prodDb.Costo * (1 + (prodDb.Impuesto / 100m));
@@ -172,7 +185,6 @@ namespace AlmacenDesktop.Forms
                         }
                     }
 
-                    // ... Lógica de caja ...
                     var cajaAbierta = context.Cajas.FirstOrDefault(c => c.UsuarioId == Program.UsuarioActualGlobal.Id && c.EstaAbierta);
                     if (cajaAbierta != null)
                     {
@@ -186,10 +198,14 @@ namespace AlmacenDesktop.Forms
                             Descripcion = $"Compra Mercadería - Prov: {cboProveedores.Text}"
                         };
                         context.MovimientosCaja.Add(egreso);
+                        MessageBox.Show("Compra registrada y descontada de caja.", "Éxito");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Compra registrada (Caja cerrada, no se descontó dinero).", "Éxito");
                     }
 
                     context.SaveChanges();
-                    MessageBox.Show("Compra registrada correctamente.", "Éxito");
 
                     _carritoCompra.Clear();
                     ActualizarGrilla();
@@ -198,6 +214,42 @@ namespace AlmacenDesktop.Forms
             catch (Exception ex)
             {
                 MessageBox.Show("Error: " + ex.Message);
+            }
+        }
+
+        // --- MOTOR DE TECLAS RÁPIDAS ---
+        private void ComprasForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            // F5 = Finalizar
+            if (e.KeyCode == Keys.F5)
+            {
+                FinalizarCompra();
+                e.Handled = true;
+            }
+            // Enter en controles de texto para Agregar rápido
+            else if (e.KeyCode == Keys.Enter && !btnFinalizar.Focused)
+            {
+                // Si no estoy en el botón finalizar, Enter intenta agregar producto
+                AgregarProducto();
+                e.Handled = true;
+                e.SuppressKeyPress = true; // Evita el "ding"
+            }
+            // Escape = Salir o Cancelar
+            else if (e.KeyCode == Keys.Escape)
+            {
+                if (_carritoCompra.Count > 0)
+                {
+                    if (MessageBox.Show("¿Cancelar la compra en curso?", "Confirmar", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    {
+                        _carritoCompra.Clear();
+                        ActualizarGrilla();
+                    }
+                }
+                else
+                {
+                    this.Close();
+                }
+                e.Handled = true;
             }
         }
     }

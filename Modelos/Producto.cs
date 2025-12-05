@@ -20,21 +20,30 @@ namespace AlmacenDesktop.Modelos
 
         public int Stock { get; set; }
 
-        // NUEVO CAMPO: Aquí guardamos el % de ganancia o impuesto
-        // Ejemplo: 30 para un 30%
+        // Margen de ganancia
         public decimal Impuesto { get; set; }
 
         public int ProveedorId { get; set; }
         public virtual Proveedor Proveedor { get; set; }
 
-        // Métodos auxiliares
+        // --- MÉTODOS CON LÓGICA DE NEGOCIO ---
+
         public void AumentarStock(int cantidad)
         {
+            if (cantidad < 0) throw new ArgumentException("La cantidad a aumentar no puede ser negativa.");
             Stock += cantidad;
         }
 
         public void ReducirStock(int cantidad)
         {
+            if (cantidad < 0) throw new ArgumentException("La cantidad a reducir no puede ser negativa.");
+
+            // VALIDACIÓN: No permitir stock negativo
+            if (Stock - cantidad < 0)
+            {
+                throw new InvalidOperationException($"No hay stock suficiente de '{Nombre}'. Stock actual: {Stock}, Solicitado: {cantidad}");
+            }
+
             Stock -= cantidad;
         }
     }
