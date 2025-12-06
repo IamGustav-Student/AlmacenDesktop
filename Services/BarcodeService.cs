@@ -9,54 +9,59 @@ namespace AlmacenDesktop.Services
 {
     public class BarcodeService
     {
-        public Bitmap GenerarCodigoBarras(string contenido)
+        // Generamos códigos con suficiente resolución para que no se pixelen al imprimir
+        public Bitmap GenerarCodigoBarras(string contenido, int ancho = 300, int alto = 100)
         {
             if (string.IsNullOrWhiteSpace(contenido)) return null;
 
-            // Configuración del escritor usando PixelData (Independiente de la plataforma)
             var escritor = new BarcodeWriterPixelData
             {
-                Format = BarcodeFormat.EAN_13,
+                // CODE_128 es el más versátil (lee letras y números, longitud variable)
+                Format = BarcodeFormat.CODE_128,
                 Options = new EncodingOptions
                 {
-                    Height = 80,
-                    Width = 200,
-                    PureBarcode = false, // Muestra los números abajo
-                    Margin = 0
+                    Height = alto,
+                    Width = ancho,
+                    PureBarcode = false, // false = Muestra los números humanamente legibles abajo
+                    Margin = 2
                 }
             };
 
-            // Validación simple: Si no tiene 13 dígitos, usamos Code128 que acepta cualquier cosa
-            if (contenido.Length != 13 || !esSoloNumeros(contenido))
+            // Si detectamos que es un código estándar de comercio (13 números), usamos EAN_13
+            if (contenido.Length == 13 && EsSoloNumeros(contenido))
             {
-                escritor.Format = BarcodeFormat.CODE_128;
+                escritor.Format = BarcodeFormat.EAN_13;
             }
 
-            // 1. Generamos los datos crudos (píxeles)
-            var pixelData = escritor.Write(contenido);
-
-            // 2. Convertimos a Bitmap de Windows
-            // Esta conversión manual es la clave para evitar errores de compatibilidad
-            var bitmap = new Bitmap(pixelData.Width, pixelData.Height, PixelFormat.Format32bppRgb);
-            var bitmapData = bitmap.LockBits(new Rectangle(0, 0, pixelData.Width, pixelData.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppRgb);
             try
             {
-                Marshal.Copy(pixelData.Pixels, 0, bitmapData.Scan0, pixelData.Pixels.Length);
-            }
-            finally
-            {
-                bitmap.UnlockBits(bitmapData);
-            }
+                var pixelData = escritor.Write(contenido);
 
-            return bitmap;
+                // Convertimos los datos crudos de ZXing a un Bitmap de Windows GDI+
+                var bitmap = new Bitmap(pixelData.Width, pixelData.Height, PixelFormat.Format32bppRgb);
+                var bitmapData = bitmap.LockBits(new Rectangle(0, 0, pixelData.Width, pixelData.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppRgb);
+
+                try
+                {
+                    Marshal.Copy(pixelData.Pixels, 0, bitmapData.Scan0, pixelData.Pixels.Length);
+                }
+                finally
+                {
+                    bitmap.UnlockBits(bitmapData);
+                }
+
+                return bitmap;
+            }
+            catch
+            {
+                // Si el contenido no es válido para el formato, devolvemos null
+                return null;
+            }
         }
 
-        private bool esSoloNumeros(string str)
+        private bool EsSoloNumeros(string str)
         {
-            foreach (char c in str)
-            {
-                if (!char.IsDigit(c)) return false;
-            }
+            foreach (char c in str) if (!char.IsDigit(c)) return false;
             return true;
         }
     }

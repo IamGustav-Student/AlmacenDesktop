@@ -1,6 +1,7 @@
 using AlmacenDesktop.Data;
 using AlmacenDesktop.Forms;
 using AlmacenDesktop.Modelos;
+using AlmacenDesktop.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -10,23 +11,18 @@ namespace AlmacenDesktop
 {
     internal static class Program
     {
-        // --- NUEVO: VARIABLE GLOBAL ACCESIBLE DESDE TODO EL PROYECTO ---
         public static Usuario UsuarioActualGlobal;
 
         [STAThread]
         static void Main()
         {
             ApplicationConfiguration.Initialize();
-
             InicializarBaseDeDatos();
 
             LoginForm login = new LoginForm();
-
             if (login.ShowDialog() == DialogResult.OK)
             {
-                // Guardamos el usuario que entró para que cualquiera pueda consultarlo
                 UsuarioActualGlobal = login.UsuarioLogueado;
-
                 MenuPrincipal menu = new MenuPrincipal(login.UsuarioLogueado);
                 Application.Run(menu);
             }
@@ -52,25 +48,16 @@ namespace AlmacenDesktop
                             Apellido = "Principal",
                             Email = "admin@almacen.com",
                             NombreUsuario = "admin",
-                            Password = "123",
+                            Password = SecurityHelper.HashPassword("123"),
                             Telefono = "000-0000"
                         };
                         context.Usuarios.Add(admin);
                         context.SaveChanges();
                     }
 
-                    if (!context.Clientes.Any(c => c.DniCuit == "00000000"))
+                    if (!context.Clientes.Any(c => c.DniCuit == Constantes.CLIENTE_DEF_DNI))
                     {
-                        var consumidorFinal = new Cliente
-                        {
-                            Nombre = "Consumidor",
-                            Apellido = "Final",
-                            DniCuit = "00000000",
-                            Email = "-",
-                            Telefono = "-",
-                            Direccion = "Mostrador"
-                        };
-                        context.Clientes.Add(consumidorFinal);
+                        context.Clientes.Add(new Cliente { Nombre = Constantes.CLIENTE_DEF_NOMBRE, Apellido = Constantes.CLIENTE_DEF_APELLIDO, DniCuit = Constantes.CLIENTE_DEF_DNI, Email = "-", Telefono = "-", Direccion = "Mostrador" });
                         context.SaveChanges();
                     }
                 }

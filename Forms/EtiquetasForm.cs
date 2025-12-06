@@ -1,6 +1,6 @@
 ﻿using AlmacenDesktop.Data;
 using AlmacenDesktop.Modelos;
-using AlmacenDesktop.Services; // Usamos nuestro nuevo servicio
+using AlmacenDesktop.Services;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -13,17 +13,34 @@ namespace AlmacenDesktop.Forms
 {
     public partial class EtiquetasForm : Form
     {
-        private List<PictureBox> _colaEtiquetas = new List<PictureBox>();
-        private BarcodeService _barcodeService; // Instancia del servicio
+        // Cola de objetos puros (datos), no controles visuales
+        private List<Producto> _colaImpresion = new List<Producto>();
+
+        // Cache de imágenes de códigos de barra para no regenerarlos en cada repintado (Performance)
+        private Dictionary<int, Bitmap> _cacheBarcodes = new Dictionary<int, Bitmap>();
+
+        private BarcodeService _barcodeService;
+
+        // --- CONFIGURACIÓN DE LA HOJA (Ajustable) ---
+        // Tamaño típico de etiqueta adhesiva o celda en hoja A4 troquelada
+        private int _anchoEtiqueta = 220;
+        private int _altoEtiqueta = 140;
+        private int _margenX = 30; // Margen izquierdo de la hoja
+        private int _margenY = 30; // Margen superior de la hoja
+        private int _espacioEntre = 10; // Separación entre etiquetas
 
         public EtiquetasForm()
         {
             InitializeComponent();
-            _barcodeService = new BarcodeService(); // Inicializamos el servicio
+            _barcodeService = new BarcodeService();
 
-            // Atajos sagrados
+            // Configuración visual del panel de vista previa
+            pnlPreview.AutoScroll = true;
+            pnlPreview.BackColor = Color.LightGray;
+
+            // Habilitar KeyPreview para atajos globales en el form
             this.KeyPreview = true;
-            this.KeyDown += new KeyEventHandler(EtiquetasForm_KeyDown);
+            this.KeyDown += EtiquetasForm_KeyDown;
         }
 
         private void EtiquetasForm_Load(object sender, EventArgs e)
@@ -35,6 +52,7 @@ namespace AlmacenDesktop.Forms
         {
             using (var context = new AlmacenDbContext())
             {
+                // Solo traemos productos que tengan código de barras cargado
                 var lista = context.Productos
                     .Where(p => !string.IsNullOrEmpty(p.CodigoBarras))
                     .OrderBy(p => p.Nombre)
@@ -49,144 +67,154 @@ namespace AlmacenDesktop.Forms
 
         private void btnAgregar_Click(object sender, EventArgs e)
         {
-            AgregarEtiquetas();
-        }
-
-        private void AgregarEtiquetas()
-        {
             var producto = (Producto)cboProductos.SelectedItem;
             if (producto == null) return;
 
             int cantidad = (int)numCopias.Value;
 
-            try
+            // 1. Generar código de barras una sola vez y cachearlo en memoria
+            if (!_cacheBarcodes.ContainsKey(producto.Id))
             {
-                // DELEGAMOS LA RESPONSABILIDAD AL SERVICIO
-                // El formulario no sabe cómo se genera, solo pide la imagen.
-                using (Bitmap imgBarcode = _barcodeService.GenerarCodigoBarras(producto.CodigoBarras))
-                {
-                    if (imgBarcode == null) return;
+                var bmp = _barcodeService.GenerarCodigoBarras(producto.CodigoBarras);
+                if (bmp != null) _cacheBarcodes[producto.Id] = bmp;
+            }
 
-                    for (int i = 0; i < cantidad; i++)
-                    {
-                        // Pasamos un clon de la imagen para que cada PictureBox tenga su copia
-                        PictureBox pb = CrearPanelEtiqueta(producto, (Image)imgBarcode.Clone());
-                        pnlPreview.Controls.Add(pb);
-                        _colaEtiquetas.Add(pb);
-                    }
-                }
-            }
-            catch (Exception ex)
+            // 2. Agregar a la cola lógica (datos)
+            for (int i = 0; i < cantidad; i++)
             {
-                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                _colaImpresion.Add(producto);
             }
+
+            // 3. Reflejar cambios en pantalla
+            ActualizarPrevisualizacion();
         }
 
-        private PictureBox CrearPanelEtiqueta(Producto prod, Image codigoBarras)
+        private void ActualizarPrevisualizacion()
         {
-            PictureBox pb = new PictureBox();
-            pb.Size = new Size(220, 140);
-            pb.BackColor = Color.White;
-            pb.BorderStyle = BorderStyle.FixedSingle;
-            pb.Margin = new Padding(5);
+            // Limpiamos visualmente el panel
+            // NOTA: Borrar controles es lento, en una app muy grande optimizaríamos esto,
+            // pero para < 50 etiquetas está bien.
+            pnlPreview.Controls.Clear();
 
-            Bitmap bitmapFinal = new Bitmap(pb.Width, pb.Height);
-            using (Graphics g = Graphics.FromImage(bitmapFinal))
+            foreach (var prod in _colaImpresion)
             {
-                g.Clear(Color.White);
-                int y = 5;
-                StringFormat centro = new StringFormat() { Alignment = StringAlignment.Center };
+                // Creamos un PictureBox simple solo para mostrar en pantalla
+                PictureBox pb = new PictureBox();
+                pb.Size = new Size(_anchoEtiqueta, _altoEtiqueta);
+                pb.BackColor = Color.White;
+                pb.BorderStyle = BorderStyle.FixedSingle;
+                pb.Margin = new Padding(5);
 
-                if (chkNombre.Checked)
+                // Dibujamos la etiqueta en un Bitmap para asignarlo al PictureBox
+                Bitmap previewBmp = new Bitmap(_anchoEtiqueta, _altoEtiqueta);
+                using (Graphics g = Graphics.FromImage(previewBmp))
                 {
-                    string nombreCorto = prod.Nombre.Length > 25 ? prod.Nombre.Substring(0, 25) + "..." : prod.Nombre;
-                    g.DrawString(nombreCorto, new Font("Arial", 9, FontStyle.Bold), Brushes.Black, new RectangleF(0, y, pb.Width, 20), centro);
-                    y += 20;
+                    g.Clear(Color.White);
+                    // IMPORTANTE: Reutilizamos la misma lógica que usará la impresora
+                    Bitmap barcode = _cacheBarcodes.ContainsKey(prod.Id) ? _cacheBarcodes[prod.Id] : null;
+
+                    // Renderizado antialias para que se vea lindo en pantalla
+                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+
+                    EtiquetaRenderer.Dibujar(g, new RectangleF(0, 0, _anchoEtiqueta, _altoEtiqueta), prod, barcode, chkPrecio.Checked, chkNombre.Checked);
                 }
 
-                // Centrar imagen
-                int xImg = (pb.Width - 180) / 2;
-                if (xImg < 0) xImg = 0;
-                g.DrawImage(codigoBarras, xImg, y, 180, 60);
-                y += 65;
-
-                if (chkPrecio.Checked)
-                {
-                    g.DrawString($"$ {prod.Precio:N2}", new Font("Arial", 14, FontStyle.Bold), Brushes.Black, new RectangleF(0, y, pb.Width, 30), centro);
-                }
+                pb.Image = previewBmp;
+                pnlPreview.Controls.Add(pb);
             }
-
-            pb.Image = bitmapFinal;
-            return pb;
         }
 
         private void btnLimpiar_Click(object sender, EventArgs e)
         {
-            LimpiarCola();
-        }
-
-        private void LimpiarCola()
-        {
-            foreach (Control c in pnlPreview.Controls) c.Dispose();
+            _colaImpresion.Clear();
             pnlPreview.Controls.Clear();
-            _colaEtiquetas.Clear();
             cboProductos.Focus();
         }
 
         private void btnImprimir_Click(object sender, EventArgs e)
         {
-            if (_colaEtiquetas.Count == 0) return;
+            if (_colaImpresion.Count == 0)
+            {
+                MessageBox.Show("No hay etiquetas en la cola para imprimir.", "Cola Vacía", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
 
             PrintDocument pd = new PrintDocument();
             pd.PrintPage += Pd_PrintPage;
 
+            // Diálogo estándar de Windows para elegir impresora
             PrintDialog dialog = new PrintDialog();
             dialog.Document = pd;
+            dialog.UseEXDialog = true; // Recomendado para Windows modernos
 
             if (dialog.ShowDialog() == DialogResult.OK)
             {
-                pd.Print();
+                try
+                {
+                    _indiceImpresion = 0; // Reiniciamos el contador global antes de empezar
+                    pd.Print();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error al intentar imprimir: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
+        // Variable de estado para controlar qué etiqueta toca imprimir
         private int _indiceImpresion = 0;
 
         private void Pd_PrintPage(object sender, PrintPageEventArgs e)
         {
-            int x = 50;
-            int y = 50;
-            int anchoEtiq = 230;
-            int altoEtiq = 150;
+            // Coordenadas iniciales
+            float xActual = _margenX;
+            float yActual = _margenY;
 
-            int columnas = 3;
-            int filas = 6;
+            // Calculamos cuántas etiquetas entran por fila en esta hoja
+            int anchoPaginaUtil = e.PageBounds.Width - (_margenX * 2);
+            int columnasPosibles = (int)(anchoPaginaUtil / (_anchoEtiqueta + _espacioEntre));
 
-            int colActual = 0;
-            int filaActual = 0;
+            if (columnasPosibles < 1) columnasPosibles = 1; // Seguridad por si la etiqueta es gigante
 
-            while (_indiceImpresion < _colaEtiquetas.Count)
+            int colCount = 0;
+
+            // Iteramos mientras queden etiquetas en la cola
+            while (_indiceImpresion < _colaImpresion.Count)
             {
-                var pb = _colaEtiquetas[_indiceImpresion];
-                e.Graphics.DrawImage(pb.Image, x + (colActual * anchoEtiq), y + (filaActual * altoEtiq));
+                var prod = _colaImpresion[_indiceImpresion];
+                Bitmap barcode = _cacheBarcodes.ContainsKey(prod.Id) ? _cacheBarcodes[prod.Id] : null;
 
-                _indiceImpresion++;
-                colActual++;
+                // Definimos el área exacta donde se dibujará ESTA etiqueta
+                RectangleF rectEtiqueta = new RectangleF(xActual, yActual, _anchoEtiqueta, _altoEtiqueta);
 
-                if (colActual >= columnas)
+                // --- MAGIA: DIBUJAR VECTORES DIRECTO A LA IMPRESORA ---
+                EtiquetaRenderer.Dibujar(e.Graphics, rectEtiqueta, prod, barcode, chkPrecio.Checked, chkNombre.Checked);
+
+                // Avanzamos posición X para la siguiente etiqueta
+                xActual += _anchoEtiqueta + _espacioEntre;
+                colCount++;
+
+                // Si llegamos al límite de columnas, saltamos de línea
+                if (colCount >= columnasPosibles)
                 {
-                    colActual = 0;
-                    filaActual++;
+                    colCount = 0;
+                    xActual = _margenX; // Reset X
+                    yActual += _altoEtiqueta + _espacioEntre; // Avanzar Y
                 }
 
-                if (filaActual >= filas)
+                _indiceImpresion++;
+
+                // Chequeamos si la SIGUIENTE etiqueta se saldría de la hoja verticalmente
+                if (yActual + _altoEtiqueta > e.PageBounds.Height - _margenY)
                 {
-                    e.HasMorePages = true;
-                    return;
+                    e.HasMorePages = true; // Pide una hoja nueva al sistema
+                    return; // Salimos de la función; el evento se volverá a disparar para la nueva hoja
                 }
             }
 
+            // Si el while termina, significa que imprimimos todo
             e.HasMorePages = false;
-            _indiceImpresion = 0;
+            _indiceImpresion = 0; // Reset para la próxima vez
         }
 
         private void EtiquetasForm_KeyDown(object sender, KeyEventArgs e)
@@ -198,18 +226,12 @@ namespace AlmacenDesktop.Forms
             }
             else if (e.KeyCode == Keys.Escape)
             {
-                if (_colaEtiquetas.Count > 0)
-                {
-                    if (MessageBox.Show("¿Limpiar cola?", "Confirmar", MessageBoxButtons.YesNo) == DialogResult.Yes) LimpiarCola();
-                }
-                else
-                {
-                    this.Close();
-                }
+                this.Close();
                 e.Handled = true;
             }
-            else if (e.KeyCode == Keys.Enter && !btnImprimir.Focused)
+            else if (e.KeyCode == Keys.Enter && !btnImprimir.Focused && !btnLimpiar.Focused)
             {
+                // Si presionan Enter en los controles de arriba, agregamos
                 btnAgregar.PerformClick();
                 e.Handled = true;
                 e.SuppressKeyPress = true;

@@ -183,5 +183,29 @@ namespace AlmacenDesktop.Forms
             form.MdiParent = this;
             form.Show();
         }
+
+        public void tsmiReporteGanancias_Click(object sender, EventArgs e)
+        {
+            // Solo el admin debería ver esto
+            if (_usuarioActual.NombreUsuario != "admin")
+            {
+                MessageBox.Show("Acceso denegado. Solo administradores.", "Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                return;
+            }
+
+            ReporteGananciasForm form = new ReporteGananciasForm();
+            form.MdiParent = this;
+            form.Show();
+        }
+
+        public void tsmiHistorialCajas_Click(object sender, EventArgs e)
+        {
+            // Solo admin
+            if (_usuarioActual.NombreUsuario != "admin") return;
+
+            HistorialCajasForm form = new HistorialCajasForm();
+            form.MdiParent = this;
+            form.Show();
+        }
     }
 }

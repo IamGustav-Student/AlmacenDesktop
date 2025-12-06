@@ -1,5 +1,6 @@
 ﻿using AlmacenDesktop.Data;
 using AlmacenDesktop.Modelos;
+using AlmacenDesktop.Helpers; // Importante
 using System;
 using System.Linq;
 using System.Windows.Forms;
@@ -15,8 +16,6 @@ namespace AlmacenDesktop.Forms
             InitializeComponent();
         }
 
-        // [POO - Encapsulamiento]
-        // Toda la lógica de validación está encapsulada en este evento.
         private void btnLogin_Click(object sender, EventArgs e)
         {
             string user = txtUsuario.Text;
@@ -24,6 +23,7 @@ namespace AlmacenDesktop.Forms
 
             if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(pass))
             {
+                AudioHelper.PlayError(); // Feedback auditivo
                 MessageBox.Show("Por favor, complete todos los campos.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
@@ -32,22 +32,53 @@ namespace AlmacenDesktop.Forms
             {
                 using (var context = new AlmacenDbContext())
                 {
-                    // Buscamos al usuario en la BD (LINQ)
-                    // NOTA: Para este prototipo comparamos texto plano. En producción usaríamos Hash.
+                    // 1. Buscamos solo por nombre de usuario
                     var usuarioEncontrado = context.Usuarios
-                                            .FirstOrDefault(u => u.NombreUsuario == user && u.Password == pass);
+                                            .FirstOrDefault(u => u.NombreUsuario == user);
 
                     if (usuarioEncontrado != null)
                     {
-                        // ¡Login Exitoso!
-                        UsuarioLogueado = usuarioEncontrado;
-                        this.DialogResult = DialogResult.OK; // Esto le avisa a Program.cs que todo salió bien
-                        this.Close(); // Cerramos la ventana de Login
-                        
+                        // 2. Verificamos el password usando el Helper de Seguridad
+                        // NOTA: Si el sistema es viejo y tiene claves sin encriptar, esto fallará la primera vez.
+                        // Para este upgrade, asumimos que reseteamos o migramos claves.
+
+                        // Truco para compatibilidad: Si la clave en BD es corta (ej "123"), asumimos que es vieja y la comparamos directo.
+                        // Si es larga (Hash SHA256 son 64 chars), usamos el verificador.
+                        bool esValido = false;
+
+                        if (usuarioEncontrado.Password.Length < 50)
+                        {
+                            // Legacy: Comparación directa (y la actualizamos automáticamente para la próxima)
+                            if (usuarioEncontrado.Password == pass)
+                            {
+                                esValido = true;
+                                usuarioEncontrado.Password = SecurityHelper.HashPassword(pass);
+                                context.SaveChanges();
+                            }
+                        }
+                        else
+                        {
+                            // Moderno: Verificación Hash
+                            esValido = SecurityHelper.VerificarPassword(pass, usuarioEncontrado.Password);
+                        }
+
+                        if (esValido)
+                        {
+                            AudioHelper.PlayOk();
+                            UsuarioLogueado = usuarioEncontrado;
+                            this.DialogResult = DialogResult.OK;
+                            this.Close();
+                        }
+                        else
+                        {
+                            AudioHelper.PlayError();
+                            MessageBox.Show("Contraseña incorrecta.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
                     }
                     else
                     {
-                        MessageBox.Show("Usuario o contraseña incorrectos.", "Error de Acceso", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        AudioHelper.PlayError();
+                        MessageBox.Show("Usuario no encontrado.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }

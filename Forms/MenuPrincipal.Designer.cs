@@ -23,24 +23,26 @@
             tsmiClientes = new ToolStripMenuItem();
             tsmiProveedores = new ToolStripMenuItem();
             comprasToolStripMenuItem = new ToolStripMenuItem();
+            etiquetasToolStripMenuItem = new ToolStripMenuItem();
+            tsmiReporteGanancias = new ToolStripMenuItem();
             tsmiVentas = new ToolStripMenuItem();
             tsmiNuevaVenta = new ToolStripMenuItem();
             tsmiHistorial = new ToolStripMenuItem();
-            tsmiAdmin = new ToolStripMenuItem();
-            tsmiUsuarios = new ToolStripMenuItem();
             controlDeCajaToolStripMenuItem = new ToolStripMenuItem();
             configuracionPersonalizadaToolStripMenuItem = new ToolStripMenuItem();
             cuentasCorrientesToolStripMenuItem = new ToolStripMenuItem();
+            tsmiAdmin = new ToolStripMenuItem();
+            tsmiUsuarios = new ToolStripMenuItem();
             statusStrip1 = new StatusStrip();
             lblUsuarioInfo = new ToolStripStatusLabel();
-            etiquetasToolStripMenuItem = new ToolStripMenuItem();
+            tsmiHistorialCajas = new ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // menuStrip1
             // 
-            menuStrip1.Items.AddRange(new ToolStripItem[] { tsmiArchivo, tsmiGestion, tsmiVentas, tsmiAdmin, controlDeCajaToolStripMenuItem, configuracionPersonalizadaToolStripMenuItem, cuentasCorrientesToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { tsmiArchivo, tsmiGestion, tsmiVentas, controlDeCajaToolStripMenuItem, configuracionPersonalizadaToolStripMenuItem, cuentasCorrientesToolStripMenuItem, tsmiAdmin });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(800, 24);
@@ -57,13 +59,13 @@
             // tsmiSalir
             // 
             tsmiSalir.Name = "tsmiSalir";
-            tsmiSalir.Size = new Size(159, 22);
+            tsmiSalir.Size = new Size(180, 22);
             tsmiSalir.Text = "Salir del Sistema";
             tsmiSalir.Click += tsmiSalir_Click;
             // 
             // tsmiGestion
             // 
-            tsmiGestion.DropDownItems.AddRange(new ToolStripItem[] { tsmiProductos, tsmiClientes, tsmiProveedores, comprasToolStripMenuItem, etiquetasToolStripMenuItem });
+            tsmiGestion.DropDownItems.AddRange(new ToolStripItem[] { tsmiProductos, tsmiClientes, tsmiProveedores, comprasToolStripMenuItem, etiquetasToolStripMenuItem, tsmiReporteGanancias, tsmiHistorialCajas });
             tsmiGestion.Name = "tsmiGestion";
             tsmiGestion.Size = new Size(59, 20);
             tsmiGestion.Text = "Gestión";
@@ -71,30 +73,44 @@
             // tsmiProductos
             // 
             tsmiProductos.Name = "tsmiProductos";
-            tsmiProductos.Size = new Size(180, 22);
+            tsmiProductos.Size = new Size(182, 22);
             tsmiProductos.Text = "Productos";
             tsmiProductos.Click += tsmiProductos_Click;
             // 
             // tsmiClientes
             // 
             tsmiClientes.Name = "tsmiClientes";
-            tsmiClientes.Size = new Size(180, 22);
+            tsmiClientes.Size = new Size(182, 22);
             tsmiClientes.Text = "Clientes";
             tsmiClientes.Click += tsmiClientes_Click;
             // 
             // tsmiProveedores
             // 
             tsmiProveedores.Name = "tsmiProveedores";
-            tsmiProveedores.Size = new Size(180, 22);
+            tsmiProveedores.Size = new Size(182, 22);
             tsmiProveedores.Text = "Proveedores";
             tsmiProveedores.Click += tsmiProveedores_Click;
             // 
             // comprasToolStripMenuItem
             // 
             comprasToolStripMenuItem.Name = "comprasToolStripMenuItem";
-            comprasToolStripMenuItem.Size = new Size(180, 22);
+            comprasToolStripMenuItem.Size = new Size(182, 22);
             comprasToolStripMenuItem.Text = "Compras";
             comprasToolStripMenuItem.Click += comprasToolStripMenuItem_Click;
+            // 
+            // etiquetasToolStripMenuItem
+            // 
+            etiquetasToolStripMenuItem.Name = "etiquetasToolStripMenuItem";
+            etiquetasToolStripMenuItem.Size = new Size(182, 22);
+            etiquetasToolStripMenuItem.Text = "Etiquetas";
+            etiquetasToolStripMenuItem.Click += etiquetasToolStripMenuItem_Click;
+            // 
+            // tsmiReporteGanancias
+            // 
+            tsmiReporteGanancias.Name = "tsmiReporteGanancias";
+            tsmiReporteGanancias.Size = new Size(182, 22);
+            tsmiReporteGanancias.Text = "Report de Ganancias";
+            tsmiReporteGanancias.Click += tsmiReporteGanancias_Click;
             // 
             // tsmiVentas
             // 
@@ -117,19 +133,6 @@
             tsmiHistorial.Text = "Historial";
             tsmiHistorial.Click += tsmiHistorial_Click;
             // 
-            // tsmiAdmin
-            // 
-            tsmiAdmin.DropDownItems.AddRange(new ToolStripItem[] { tsmiUsuarios });
-            tsmiAdmin.Name = "tsmiAdmin";
-            tsmiAdmin.Size = new Size(100, 20);
-            tsmiAdmin.Text = "Administración";
-            // 
-            // tsmiUsuarios
-            // 
-            tsmiUsuarios.Name = "tsmiUsuarios";
-            tsmiUsuarios.Size = new Size(178, 22);
-            tsmiUsuarios.Text = "Gestión de Usuarios";
-            // 
             // controlDeCajaToolStripMenuItem
             // 
             controlDeCajaToolStripMenuItem.Name = "controlDeCajaToolStripMenuItem";
@@ -151,6 +154,19 @@
             cuentasCorrientesToolStripMenuItem.Text = "Cuentas Corrientes";
             cuentasCorrientesToolStripMenuItem.Click += cuentasCorrientesToolStripMenuItem_Click;
             // 
+            // tsmiAdmin
+            // 
+            tsmiAdmin.DropDownItems.AddRange(new ToolStripItem[] { tsmiUsuarios });
+            tsmiAdmin.Name = "tsmiAdmin";
+            tsmiAdmin.Size = new Size(100, 20);
+            tsmiAdmin.Text = "Administración";
+            // 
+            // tsmiUsuarios
+            // 
+            tsmiUsuarios.Name = "tsmiUsuarios";
+            tsmiUsuarios.Size = new Size(178, 22);
+            tsmiUsuarios.Text = "Gestión de Usuarios";
+            // 
             // statusStrip1
             // 
             statusStrip1.Items.AddRange(new ToolStripItem[] { lblUsuarioInfo });
@@ -165,12 +181,12 @@
             lblUsuarioInfo.Size = new Size(122, 17);
             lblUsuarioInfo.Text = "Usuario: Desconocido";
             // 
-            // etiquetasToolStripMenuItem
+            // tsmiHistorialCajas
             // 
-            etiquetasToolStripMenuItem.Name = "etiquetasToolStripMenuItem";
-            etiquetasToolStripMenuItem.Size = new Size(180, 22);
-            etiquetasToolStripMenuItem.Text = "Etiquetas";
-            etiquetasToolStripMenuItem.Click += etiquetasToolStripMenuItem_Click;
+            tsmiHistorialCajas.Name = "tsmiHistorialCajas";
+            tsmiHistorialCajas.Size = new Size(182, 22);
+            tsmiHistorialCajas.Text = "Historial de Caja";
+            tsmiHistorialCajas.Click += tsmiHistorialCajas_Click;
             // 
             // MenuPrincipal
             // 
@@ -212,6 +228,8 @@
         private ToolStripMenuItem cuentasCorrientesToolStripMenuItem;
         private ToolStripMenuItem comprasToolStripMenuItem;
         private ToolStripMenuItem etiquetasToolStripMenuItem;
+        private ToolStripMenuItem tsmiReporteGanancias;
+        private ToolStripMenuItem tsmiHistorialCajas;
     }
 }
 
