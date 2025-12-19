@@ -1,5 +1,5 @@
 ﻿using AlmacenDesktop.Data;
-using AlmacenDesktop.Modelos;
+using AlmacenDesktop.Modelos; // Usamos el modelo unificado
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -11,15 +11,7 @@ namespace AlmacenDesktop.Forms
 {
     public partial class ReporteFiadosForm : Form
     {
-        private class MovimientoCtaCte
-        {
-            public DateTime Fecha { get; set; }
-            public string Tipo { get; set; }
-            public string Detalle { get; set; }
-            public decimal Debe { get; set; }
-            public decimal Haber { get; set; }
-            public decimal Saldo { get; set; }
-        }
+        // Se ELIMINÓ la clase interna "MovimientoCtaCte" que causaba duplicación.
 
         public ReporteFiadosForm()
         {
@@ -39,29 +31,17 @@ namespace AlmacenDesktop.Forms
                     .Where(c => c.DniCuit != "00000000")
                     .ToList();
 
-                // --- CORRECCIÓN CLAVE AQUÍ ---
-                // 1. Desvinculamos eventos temporalmente (opcional pero recomendado)
                 cboClientes.SelectedIndexChanged -= cboClientes_SelectedIndexChanged;
-
-                // 2. Configuramos Display y Value ANTES del DataSource
                 cboClientes.DisplayMember = "NombreCompleto";
                 cboClientes.ValueMember = "Id";
-
-                // 3. Asignamos los datos
                 cboClientes.DataSource = clientes;
-
-                // 4. Limpiamos selección inicial
                 cboClientes.SelectedIndex = -1;
-
-                // 5. Volvemos a conectar el evento
                 cboClientes.SelectedIndexChanged += cboClientes_SelectedIndexChanged;
             }
         }
 
         private void cboClientes_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // --- BLINDAJE ANTI-CRASH ---
-            // Verificamos que haya item y que el valor sea realmente un entero
             if (cboClientes.SelectedItem != null && cboClientes.SelectedValue is int id)
             {
                 CalcularEstadoCuenta(id);
@@ -69,7 +49,6 @@ namespace AlmacenDesktop.Forms
             }
             else
             {
-                // Si el valor no es válido, limpiamos la pantalla
                 btnRegistrarPago.Enabled = false;
                 dgvMovimientos.DataSource = null;
                 lblSaldo.Text = "$ 0.00";
@@ -80,13 +59,14 @@ namespace AlmacenDesktop.Forms
         {
             using (var context = new AlmacenDbContext())
             {
+                // Mapeamos a la clase unificada MovimientoCtaCte
                 var ventasFiadas = context.Ventas
                     .Where(v => v.ClienteId == clienteId && v.MetodoPago == "Fiado")
                     .Select(v => new MovimientoCtaCte
                     {
                         Fecha = v.Fecha,
                         Tipo = "COMPRA FIADA",
-                        Detalle = $"Venta #{v.Id}",
+                        Descripcion = $"Venta #{v.Id}", // CAMBIO: Detalle -> Descripcion
                         Debe = v.Total,
                         Haber = 0
                     })
@@ -98,6 +78,7 @@ namespace AlmacenDesktop.Forms
                     {
                         Fecha = p.Fecha,
                         Tipo = "PAGO A CUENTA",
+                        Descripcion = "Entrega de Dinero", // CAMBIO: Detalle -> Descripcion
                         Debe = 0,
                         Haber = p.Monto
                     })
@@ -117,14 +98,27 @@ namespace AlmacenDesktop.Forms
 
                 dgvMovimientos.DataSource = movimientos;
 
-                // Formato si hay filas
+                // Ajustamos nombres de columnas si es necesario (Descripcion en vez de Detalle)
                 if (dgvMovimientos.Columns.Count > 0)
                 {
-                    dgvMovimientos.Columns["Fecha"].DefaultCellStyle.Format = "dd/MM/yyyy";
-                    dgvMovimientos.Columns["Debe"].DefaultCellStyle.Format = "N2";
-                    dgvMovimientos.Columns["Haber"].DefaultCellStyle.Format = "N2";
-                    dgvMovimientos.Columns["Saldo"].DefaultCellStyle.Format = "N2";
-                    dgvMovimientos.Columns["Saldo"].DefaultCellStyle.Font = new Font(dgvMovimientos.Font, FontStyle.Bold);
+                    if (dgvMovimientos.Columns["Fecha"] != null)
+                        dgvMovimientos.Columns["Fecha"].DefaultCellStyle.Format = "dd/MM/yyyy";
+
+                    if (dgvMovimientos.Columns["Debe"] != null)
+                        dgvMovimientos.Columns["Debe"].DefaultCellStyle.Format = "N2";
+
+                    if (dgvMovimientos.Columns["Haber"] != null)
+                        dgvMovimientos.Columns["Haber"].DefaultCellStyle.Format = "N2";
+
+                    if (dgvMovimientos.Columns["Saldo"] != null)
+                    {
+                        dgvMovimientos.Columns["Saldo"].DefaultCellStyle.Format = "N2";
+                        dgvMovimientos.Columns["Saldo"].DefaultCellStyle.Font = new Font(dgvMovimientos.Font, FontStyle.Bold);
+                    }
+
+                    // Ocultamos VentaId si aparece
+                    if (dgvMovimientos.Columns["VentaId"] != null)
+                        dgvMovimientos.Columns["VentaId"].Visible = false;
                 }
 
                 lblSaldo.Text = $"$ {saldoAcumulado:N2}";
@@ -139,7 +133,6 @@ namespace AlmacenDesktop.Forms
         {
             if (cboClientes.SelectedItem == null) return;
 
-            // Usamos el formulario visual de Pago
             PagoForm form = new PagoForm();
 
             if (form.ShowDialog() == DialogResult.OK)
@@ -148,7 +141,6 @@ namespace AlmacenDesktop.Forms
 
                 if (monto > 0)
                 {
-                    // Validamos una vez más el ID
                     if (cboClientes.SelectedValue is int clienteId)
                     {
                         GuardarPago(clienteId, monto);
@@ -172,7 +164,7 @@ namespace AlmacenDesktop.Forms
                         ClienteId = clienteId,
                         Monto = monto,
                         Fecha = DateTime.Now,
-                        
+                        UsuarioId = Program.UsuarioActualGlobal.Id // Asignamos usuario actual
                     };
 
                     context.Pagos.Add(nuevoPago);

@@ -1,6 +1,6 @@
 ﻿using AlmacenDesktop.Data;
 using AlmacenDesktop.Helpers;
-using AlmacenDesktop.Modelos;
+using AlmacenDesktop.Modelos; // Importante: Ahora usa el modelo compartido
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Data;
@@ -66,10 +66,11 @@ namespace AlmacenDesktop.Forms
                     .Select(v => new MovimientoCtaCte
                     {
                         Fecha = v.Fecha,
+                        Tipo = "COMPRA",
                         Descripcion = $"Compra (Venta #{v.Id})",
                         Debe = v.Total,
                         Haber = 0,
-                        VentaId = v.Id // <--- CLAVE PARA EL DETALLE
+                        VentaId = v.Id
                     })
                     .ToList();
 
@@ -80,10 +81,11 @@ namespace AlmacenDesktop.Forms
                     .Select(p => new MovimientoCtaCte
                     {
                         Fecha = p.Fecha,
+                        Tipo = "PAGO",
                         Descripcion = "Pago a Cuenta",
                         Debe = 0,
                         Haber = p.Monto,
-                        VentaId = null // Pagos no tienen detalle de productos
+                        VentaId = null
                     })
                     .ToList();
 
@@ -93,7 +95,8 @@ namespace AlmacenDesktop.Forms
                 foreach (var mov in historia)
                 {
                     saldo += (mov.Debe - mov.Haber);
-                    mov.SaldoParcial = saldo;
+                    // CAMBIO: Antes era SaldoParcial, ahora es Saldo (unificado)
+                    mov.Saldo = saldo;
                 }
 
                 dgvHistoria.DataSource = null;
@@ -127,16 +130,12 @@ namespace AlmacenDesktop.Forms
             }
         }
 
-        // --- NUEVO: EVENTO DOBLE CLIC PARA VER DETALLE ---
         private void dgvHistoria_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            // Validar que el clic sea en una fila válida (no en el encabezado)
             if (e.RowIndex < 0) return;
 
-            // Recuperar el objeto detrás de la fila
             var movimiento = (MovimientoCtaCte)dgvHistoria.Rows[e.RowIndex].DataBoundItem;
 
-            // Si tiene VentaId, es una compra y podemos ver qué llevó
             if (movimiento.VentaId.HasValue)
             {
                 MostrarDetalleVenta(movimiento.VentaId.Value);
@@ -157,7 +156,6 @@ namespace AlmacenDesktop.Forms
 
                     if (detalles.Count > 0)
                     {
-                        // Construimos un mensaje simple tipo "Ticket"
                         string mensaje = $"Detalle de Venta #{ventaId}\n\n";
                         mensaje += "CANT  PRODUCTO           SUBTOTAL\n";
                         mensaje += "-----------------------------------\n";
@@ -180,7 +178,6 @@ namespace AlmacenDesktop.Forms
                 MessageBox.Show("No se pudo cargar el detalle: " + ex.Message);
             }
         }
-        // ------------------------------------------------
 
         private void btnRegistrarPago_Click(object sender, EventArgs e)
         {
@@ -209,7 +206,6 @@ namespace AlmacenDesktop.Forms
                     };
                     context.Pagos.Add(nuevoPago);
 
-                    // Impactar en Caja
                     var cajaAbierta = context.Cajas.FirstOrDefault(c => c.UsuarioId == Program.UsuarioActualGlobal.Id && c.EstaAbierta);
                     if (cajaAbierta != null)
                     {
@@ -249,29 +245,29 @@ namespace AlmacenDesktop.Forms
 
         private void FormatearGrilla()
         {
-            dgvHistoria.Columns["Fecha"].DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
-            dgvHistoria.Columns["Debe"].DefaultCellStyle.Format = "C2";
-            dgvHistoria.Columns["Haber"].DefaultCellStyle.Format = "C2";
-            dgvHistoria.Columns["SaldoParcial"].DefaultCellStyle.Format = "C2";
+            // Validar que las columnas existen antes de formatear para evitar crashes
+            if (dgvHistoria.Columns["Fecha"] != null) dgvHistoria.Columns["Fecha"].DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
 
-            dgvHistoria.Columns["Debe"].DefaultCellStyle.ForeColor = Color.Red;
-            dgvHistoria.Columns["Haber"].DefaultCellStyle.ForeColor = Color.Green;
-            dgvHistoria.Columns["SaldoParcial"].DefaultCellStyle.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            if (dgvHistoria.Columns["Debe"] != null)
+            {
+                dgvHistoria.Columns["Debe"].DefaultCellStyle.Format = "C2";
+                dgvHistoria.Columns["Debe"].DefaultCellStyle.ForeColor = Color.Red;
+            }
 
-            // Ocultamos la columna técnica VentaId
-            if (dgvHistoria.Columns["VentaId"] != null)
-                dgvHistoria.Columns["VentaId"].Visible = false;
+            if (dgvHistoria.Columns["Haber"] != null)
+            {
+                dgvHistoria.Columns["Haber"].DefaultCellStyle.Format = "C2";
+                dgvHistoria.Columns["Haber"].DefaultCellStyle.ForeColor = Color.Green;
+            }
+
+            // CAMBIO: Ahora usamos "Saldo", no "SaldoParcial"
+            if (dgvHistoria.Columns["Saldo"] != null)
+            {
+                dgvHistoria.Columns["Saldo"].DefaultCellStyle.Format = "C2";
+                dgvHistoria.Columns["Saldo"].DefaultCellStyle.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            }
+
+            if (dgvHistoria.Columns["VentaId"] != null) dgvHistoria.Columns["VentaId"].Visible = false;
         }
-    }
-
-    // Clase actualizada con VentaId
-    public class MovimientoCtaCte
-    {
-        public DateTime Fecha { get; set; }
-        public string Descripcion { get; set; }
-        public decimal Debe { get; set; }
-        public decimal Haber { get; set; }
-        public decimal SaldoParcial { get; set; }
-        public int? VentaId { get; set; } // Propiedad oculta para enlace
     }
 }

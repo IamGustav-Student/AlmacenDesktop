@@ -1,10 +1,8 @@
-﻿// ... (mismos imports) ...
-using AlmacenDesktop.Data;
+﻿using AlmacenDesktop.Data;
 using AlmacenDesktop.Modelos;
-using AlmacenDesktop.Services; // Importante
+using AlmacenDesktop.Services; // Importante para usar el BackupService
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -13,7 +11,6 @@ namespace AlmacenDesktop.Forms
 {
     public partial class ControlCajaForm : Form
     {
-        // ... (constructor y variables iguales) ...
         private Usuario _usuario;
         private Caja _cajaActual;
 
@@ -29,7 +26,6 @@ namespace AlmacenDesktop.Forms
             VerificarEstadoCaja();
         }
 
-        // ... (BtnRegistrarMovimiento_Click y VerificarEstadoCaja iguales) ...
         private void BtnRegistrarMovimiento_Click(object sender, EventArgs e)
         {
             if (_cajaActual == null || !_cajaActual.EstaAbierta) return;
@@ -72,8 +68,6 @@ namespace AlmacenDesktop.Forms
 
         private void CalcularTotalesCierre(AlmacenDbContext context)
         {
-            // (Lógica de cálculo igual a la versión anterior, asegurando llenar _cajaActual.SaldoFinalSistema)
-            // ... (Copiado de la versión anterior) ...
             var ventasCaja = context.Ventas.AsNoTracking().Where(v => v.CajaId == _cajaActual.Id).ToList();
             var movimientos = context.MovimientosCaja.AsNoTracking().Where(m => m.CajaId == _cajaActual.Id).ToList();
 
@@ -81,10 +75,9 @@ namespace AlmacenDesktop.Forms
             decimal totalIngresosManuales = movimientos.Where(m => m.Tipo == "INGRESO").Sum(m => m.Monto);
             decimal totalEgresosManuales = movimientos.Where(m => m.Tipo == "EGRESO").Sum(m => m.Monto);
 
-            _cajaActual.TotalVentasEfectivo = totalEfectivoVentas; // Guardamos este dato
+            _cajaActual.TotalVentasEfectivo = totalEfectivoVentas;
             _cajaActual.SaldoFinalSistema = _cajaActual.SaldoInicial + totalEfectivoVentas + totalIngresosManuales - totalEgresosManuales;
 
-            // ... (Actualización de grilla y labels igual) ...
             lblResumenDetalle.Text = $"Sistema dice: $ {_cajaActual.SaldoFinalSistema:N2}";
         }
 
@@ -110,23 +103,36 @@ namespace AlmacenDesktop.Forms
                     }
                     else // CERRAR
                     {
-                        // Recalcular para asegurar integridad
+                        // 1. Lógica de Cierre
                         CalcularTotalesCierre(context);
 
                         var cajaDb = context.Cajas.Find(_cajaActual.Id);
                         cajaDb.FechaCierre = DateTime.Now;
                         cajaDb.EstaAbierta = false;
                         cajaDb.SaldoFinalSistema = _cajaActual.SaldoFinalSistema;
-                        cajaDb.TotalVentasEfectivo = _cajaActual.TotalVentasEfectivo; // Importante guardar esto
+                        cajaDb.TotalVentasEfectivo = _cajaActual.TotalVentasEfectivo;
                         cajaDb.SaldoFinalReal = numMonto.Value;
                         cajaDb.Diferencia = numMonto.Value - _cajaActual.SaldoFinalSistema;
 
-                        context.SaveChanges();
+                        context.SaveChanges(); // Guardamos el cierre en BD
 
-                        // --- NUEVO: IMPRESIÓN DE TICKET Z ---
-                        if (MessageBox.Show("Caja Cerrada. ¿Imprimir Ticket Z?", "Imprimir", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                        // 2. BACKUP AUTOMÁTICO (Aquí está la magia)
+                        // Lo hacemos dentro de un try-catch pequeño para que si falla el backup,
+                        // NO impida que la caja se cierre (la caja ya se cerró en la línea anterior).
+                        try
                         {
-                            // Usamos el objeto actualizado
+                            BackupService.RealizarBackupAutomatico();
+                            // Opcional: MessageBox.Show("Backup realizado correctamente."); 
+                            // (Generalmente no se avisa si sale bien para no molestar, solo si sale mal)
+                        }
+                        catch (Exception exBackup)
+                        {
+                            MessageBox.Show("⚠️ La caja se cerró, pero HUBO UN ERROR EN EL BACKUP:\n" + exBackup.Message, "Alerta de Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+
+                        // 3. Impresión de Ticket Z
+                        if (MessageBox.Show("Caja Cerrada Exitosamente. ¿Imprimir Ticket Z?", "Imprimir", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                        {
                             new TicketService().ImprimirCierreCaja(cajaDb);
                         }
 
@@ -136,7 +142,7 @@ namespace AlmacenDesktop.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error: " + ex.Message);
+                MessageBox.Show("Error crítico: " + ex.Message);
             }
         }
     }

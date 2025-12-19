@@ -39,7 +39,7 @@ namespace AlmacenDesktop.Forms
 
             // --- CONFIGURACIÓN FOCUS AGRESIVO ---
             _timerFocus = new System.Windows.Forms.Timer(); // Especificamos el tipo completo
-            _timerFocus.Interval = 1000; // Chequear cada 1 segundo
+            _timerFocus.Interval = 10000; // Chequear cada 10 segundo
             _timerFocus.Tick += TimerFocus_Tick; // Ahora el método existe abajo
             _timerFocus.Start();
         }

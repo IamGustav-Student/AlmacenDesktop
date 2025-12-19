@@ -207,5 +207,10 @@ namespace AlmacenDesktop.Forms
             form.MdiParent = this;
             form.Show();
         }
+
+        private void lblUsuarioInfo_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
