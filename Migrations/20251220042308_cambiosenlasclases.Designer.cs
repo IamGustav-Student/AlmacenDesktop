@@ -3,6 +3,7 @@ using System;
 using AlmacenDesktop.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AlmacenDesktop.Migrations
 {
     [DbContext(typeof(AlmacenDbContext))]
-    partial class AlmacenDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251220042308_cambiosenlasclases")]
+    partial class cambiosenlasclases
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.11");
@@ -284,7 +287,6 @@ namespace AlmacenDesktop.Migrations
 
                     b.Property<string>("CodigoBarras")
                         .IsRequired()
-                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.Property<decimal>("Costo")
@@ -292,7 +294,6 @@ namespace AlmacenDesktop.Migrations
 
                     b.Property<string>("Descripcion")
                         .IsRequired()
-                        .HasMaxLength(255)
                         .HasColumnType("TEXT");
 
                     b.Property<decimal>("Impuesto")
@@ -300,7 +301,6 @@ namespace AlmacenDesktop.Migrations
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<decimal>("Precio")
@@ -330,27 +330,22 @@ namespace AlmacenDesktop.Migrations
 
                     b.Property<string>("Contacto")
                         .IsRequired()
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Cuit")
                         .IsRequired()
-                        .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Direccion")
                         .IsRequired()
-                        .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Telefono")
                         .IsRequired()
-                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -540,7 +535,7 @@ namespace AlmacenDesktop.Migrations
             modelBuilder.Entity("AlmacenDesktop.Modelos.Producto", b =>
                 {
                     b.HasOne("AlmacenDesktop.Modelos.Proveedor", "Proveedor")
-                        .WithMany("Productos")
+                        .WithMany()
                         .HasForeignKey("ProveedorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -581,11 +576,6 @@ namespace AlmacenDesktop.Migrations
             modelBuilder.Entity("AlmacenDesktop.Modelos.Compra", b =>
                 {
                     b.Navigation("Detalles");
-                });
-
-            modelBuilder.Entity("AlmacenDesktop.Modelos.Proveedor", b =>
-                {
-                    b.Navigation("Productos");
                 });
 
             modelBuilder.Entity("AlmacenDesktop.Modelos.Venta", b =>

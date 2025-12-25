@@ -7,32 +7,59 @@ namespace AlmacenDesktop.Data
 {
     public class AlmacenDbContext : DbContext
     {
-        public DbSet<Usuario> Usuarios { get; set; }
-        public DbSet<Cliente> Clientes { get; set; }
+        // --- MÓDULO VENTAS Y PRODUCTOS ---
         public DbSet<Producto> Productos { get; set; }
+        public DbSet<Cliente> Clientes { get; set; }
         public DbSet<Venta> Ventas { get; set; }
         public DbSet<DetalleVenta> DetallesVenta { get; set; }
-        public DbSet<Pago> Pagos { get; set; }
-        public DbSet<Caja> Cajas { get; set; }
-        public DbSet<MovimientoCaja> MovimientosCaja { get; set; }
-        public DbSet<DatosNegocio> DatosNegocio { get; set; }
+        public DbSet<Usuario> Usuarios { get; set; }
 
-        // --- NUEVO MÓDULO COMPRAS ---
+        // --- MÓDULO COMPRAS Y PROVEEDORES ---
         public DbSet<Proveedor> Proveedores { get; set; }
         public DbSet<Compra> Compras { get; set; }
         public DbSet<DetalleCompra> DetallesCompra { get; set; }
 
+        // --- MÓDULO CAJA Y FINANZAS ---
+        public DbSet<Caja> Cajas { get; set; }
+        public DbSet<MovimientoCaja> MovimientosCaja { get; set; }
+        public DbSet<Pago> Pagos { get; set; }
+
+        // ELIMINADO: MovimientoCtaCte no es una tabla, es un reporte en memoria.
+        // public DbSet<MovimientoCtaCte> MovimientosCtaCte { get; set; } 
+
+        // --- CONFIGURACIÓN GENERAL ---
+        public DbSet<DatosNegocio> DatosNegocio { get; set; }
+        public DbSet<ConfiguracionAfip> ConfiguracionesAfip { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            string dbPath = "almacen.db";
+            string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "almacen.db");
             optionsBuilder.UseSqlite($"Data Source={dbPath}");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Usuario>().ToTable("Usuarios");
-            modelBuilder.Entity<Cliente>().ToTable("Clientes");
-            base.OnModelCreating(modelBuilder);
+            // CONFIGURACIÓN DE PRECISIÓN DECIMAL
+            modelBuilder.Entity<Producto>().Property(p => p.Costo).HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<Producto>().Property(p => p.Precio).HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<Venta>().Property(v => v.Total).HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<Compra>().Property(c => c.Total).HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<DetalleCompra>().Property(d => d.CostoUnitario).HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<DetalleCompra>().Property(d => d.Subtotal).HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<Caja>().Property(c => c.SaldoInicial).HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<Caja>().Property(c => c.SaldoFinalReal).HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<Caja>().Property(c => c.Diferencia).HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<MovimientoCaja>().Property(m => m.Monto).HasColumnType("decimal(18,2)");
+
+            // ELIMINADO: Configuración de MovimientoCtaCte porque no es una tabla
+
+            // ÍNDICES PARA PERFORMANCE
+            modelBuilder.Entity<Producto>().HasIndex(p => p.CodigoBarras).IsUnique();
+            modelBuilder.Entity<Cliente>().HasIndex(c => c.DniCuit);
         }
     }
 }

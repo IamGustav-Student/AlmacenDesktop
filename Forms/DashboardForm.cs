@@ -219,5 +219,19 @@ namespace AlmacenDesktop.Forms
                 x += anchoBarra + 10;
             }
         }
+
+        private void btnImportarExcel_Click(object sender, EventArgs e)
+        {
+            ImportarProductosForm form = new ImportarProductosForm();
+            form.MdiParent = this.MdiParent;
+            form.Show();
+        }
+
+        private void btnHistorialVentas_Click(object sender, EventArgs e)
+        {
+            HistorialVentasForm form = new HistorialVentasForm();
+            form.MdiParent = this.MdiParent;
+            form.Show();
+        }
     }
 }

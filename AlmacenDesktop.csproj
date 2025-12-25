@@ -21,9 +21,13 @@
 
 		<!-- EXCEL -->
 		<PackageReference Include="ClosedXML" Version="0.104.2" />
+		<PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.1" />
 
 		<!-- CÓDIGOS DE BARRA - NÚCLEO PURO -->
 		<PackageReference Include="ZXing.Net" Version="0.16.9" />
+
+		<!-- IMPRESIÓN ESC/POS (NUEVO) -->
+		<PackageReference Include="ESCPOS_NET" Version="3.0.0" />
 
 		<!-- GRÁFICOS (Necesario para .NET 8) -->
 		<PackageReference Include="System.Drawing.Common" Version="8.0.0" />

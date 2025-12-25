@@ -31,6 +31,8 @@
             pnlGrafico = new Panel();
             lblTituloGrafico = new Label();
             grpAccesos = new GroupBox();
+            btnImportarExcel = new Button();
+            btnHistorialVentas = new Button();
             btnRapidoCaja = new Button();
             btnRapidoProductos = new Button();
             btnRapidoVenta = new Button();
@@ -204,16 +206,47 @@
             // grpAccesos
             // 
             grpAccesos.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            grpAccesos.AutoSize = true;
+            grpAccesos.Controls.Add(btnImportarExcel);
+            grpAccesos.Controls.Add(btnHistorialVentas);
             grpAccesos.Controls.Add(btnRapidoCaja);
             grpAccesos.Controls.Add(btnRapidoProductos);
             grpAccesos.Controls.Add(btnRapidoVenta);
             grpAccesos.Font = new Font("Segoe UI", 10F);
             grpAccesos.Location = new Point(720, 70);
             grpAccesos.Name = "grpAccesos";
-            grpAccesos.Size = new Size(250, 200);
+            grpAccesos.Size = new Size(250, 312);
             grpAccesos.TabIndex = 4;
             grpAccesos.TabStop = false;
             grpAccesos.Text = "Accesos Rápidos";
+            // 
+            // btnImportarExcel
+            // 
+            btnImportarExcel.BackColor = Color.Gold;
+            btnImportarExcel.FlatStyle = FlatStyle.Flat;
+            btnImportarExcel.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
+            btnImportarExcel.ForeColor = Color.White;
+            btnImportarExcel.Location = new Point(15, 193);
+            btnImportarExcel.Name = "btnImportarExcel";
+            btnImportarExcel.Size = new Size(220, 40);
+            btnImportarExcel.TabIndex = 4;
+            btnImportarExcel.Text = "📑 Exportar Excel";
+            btnImportarExcel.UseVisualStyleBackColor = false;
+            btnImportarExcel.Click += btnImportarExcel_Click;
+            // 
+            // btnHistorialVentas
+            // 
+            btnHistorialVentas.BackColor = Color.LimeGreen;
+            btnHistorialVentas.FlatStyle = FlatStyle.Flat;
+            btnHistorialVentas.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
+            btnHistorialVentas.ForeColor = Color.White;
+            btnHistorialVentas.Location = new Point(15, 248);
+            btnHistorialVentas.Name = "btnHistorialVentas";
+            btnHistorialVentas.Size = new Size(220, 40);
+            btnHistorialVentas.TabIndex = 3;
+            btnHistorialVentas.Text = "📊 Historial de Ventas";
+            btnHistorialVentas.UseVisualStyleBackColor = false;
+            btnHistorialVentas.Click += btnHistorialVentas_Click;
             // 
             // btnRapidoCaja
             // 
@@ -260,6 +293,7 @@
             // grpAtajos
             // 
             grpAtajos.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            grpAtajos.AutoSize = true;
             grpAtajos.Controls.Add(lblKeyF5);
             grpAtajos.Controls.Add(lblHelpF5);
             grpAtajos.Controls.Add(lblKeyF3);
@@ -270,7 +304,7 @@
             grpAtajos.Controls.Add(lblHelpF1);
             grpAtajos.Font = new Font("Segoe UI", 10F);
             grpAtajos.ForeColor = Color.DimGray;
-            grpAtajos.Location = new Point(720, 280);
+            grpAtajos.Location = new Point(720, 414);
             grpAtajos.Name = "grpAtajos";
             grpAtajos.Size = new Size(250, 150);
             grpAtajos.TabIndex = 8;
@@ -365,7 +399,7 @@
             grpAlertas.ForeColor = Color.Firebrick;
             grpAlertas.Location = new Point(25, 380);
             grpAlertas.Name = "grpAlertas";
-            grpAlertas.Size = new Size(680, 300);
+            grpAlertas.Size = new Size(680, 417);
             grpAlertas.TabIndex = 6;
             grpAlertas.TabStop = false;
             grpAlertas.Text = "⚠️ Alertas de Stock Bajo (Menos de 10 unidades)";
@@ -384,17 +418,18 @@
             dgvAlertasStock.ReadOnly = true;
             dgvAlertasStock.RowHeadersVisible = false;
             dgvAlertasStock.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvAlertasStock.Size = new Size(674, 276);
+            dgvAlertasStock.Size = new Size(674, 393);
             dgvAlertasStock.TabIndex = 0;
             // 
             // grpTopProductos
             // 
             grpTopProductos.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
+            grpTopProductos.AutoSize = true;
             grpTopProductos.Controls.Add(lstTopProductos);
             grpTopProductos.Font = new Font("Segoe UI", 9F);
-            grpTopProductos.Location = new Point(720, 440);
+            grpTopProductos.Location = new Point(720, 579);
             grpTopProductos.Name = "grpTopProductos";
-            grpTopProductos.Size = new Size(250, 240);
+            grpTopProductos.Size = new Size(250, 218);
             grpTopProductos.TabIndex = 7;
             grpTopProductos.TabStop = false;
             grpTopProductos.Text = "⭐ Top 5 Más Vendidos";
@@ -408,7 +443,7 @@
             lstTopProductos.ItemHeight = 15;
             lstTopProductos.Location = new Point(3, 19);
             lstTopProductos.Name = "lstTopProductos";
-            lstTopProductos.Size = new Size(244, 218);
+            lstTopProductos.Size = new Size(244, 196);
             lstTopProductos.TabIndex = 0;
             // 
             // DashboardForm
@@ -416,7 +451,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.WhiteSmoke;
-            ClientSize = new Size(1000, 700);
+            ClientSize = new Size(1000, 817);
             Controls.Add(grpAtajos);
             Controls.Add(grpTopProductos);
             Controls.Add(grpAlertas);
@@ -491,5 +526,7 @@
 
         private System.Windows.Forms.GroupBox grpTopProductos;
         private System.Windows.Forms.ListBox lstTopProductos;
+        private Button btnHistorialVentas;
+        private Button btnImportarExcel;
     }
 }

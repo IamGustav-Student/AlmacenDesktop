@@ -1,9 +1,12 @@
 ﻿using AlmacenDesktop.Data;
 using AlmacenDesktop.Modelos;
-using AlmacenDesktop.Services; // Importamos el Servicio
+using AlmacenDesktop.Services;
+using AlmacenDesktop.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -11,393 +14,370 @@ namespace AlmacenDesktop.Forms
 {
     public partial class ProductosForm : Form
     {
-        private int? _productoIdSeleccionado = null;
+        private Producto _productoSeleccionado;
+        private readonly ExcelService _excelService;
+        private ErrorProvider _errorProvider;
 
         public ProductosForm()
         {
             InitializeComponent();
+            _excelService = new ExcelService();
 
-            // GARANTÍA DE TECLAS RÁPIDAS
-            this.KeyPreview = true;
-            this.KeyDown += new KeyEventHandler(ProductosForm_KeyDown);
-            txtCodigo.KeyDown += new KeyEventHandler(txtCodigo_KeyDown);
+            _errorProvider = new ErrorProvider();
+            _errorProvider.BlinkStyle = ErrorBlinkStyle.NeverBlink;
 
-            CargarProveedores();
-            CargarProductos();
+            // EVENTO DE VALIDACIÓN EN TIEMPO REAL (KEYPRESS)
+            txtCodigo.KeyPress += new KeyPressEventHandler(txtCodigo_KeyPress);
+
+            ConfigurarGrilla();
         }
 
-        protected override void OnLoad(EventArgs e)
+        private void ProductosForm_Load(object sender, EventArgs e)
         {
-            base.OnLoad(e);
-            txtCodigo.Focus();
-        }
-
-        // ... (Lógica de Escaneo y Carga de Combos se mantiene igual) ...
-
-        private void txtCodigo_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Enter)
+            try
             {
-                e.Handled = true;
-                e.SuppressKeyPress = true;
-                BuscarProductoPorCodigo(txtCodigo.Text.Trim());
+                AsegurarProveedorGeneral();
+                CargarProveedores();
+                CargarProductos();
+                LimpiarFormulario();
+            }
+            catch (Exception ex)
+            {
+                AudioHelper.PlayError();
+                MessageBox.Show($"Error crítico iniciando Productos: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
             }
         }
 
-        private void BuscarProductoPorCodigo(string codigo)
+        private void ConfigurarGrilla()
         {
-            if (string.IsNullOrEmpty(codigo)) return;
+            dgvProductos.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvProductos.MultiSelect = false;
+            dgvProductos.ReadOnly = true;
+            dgvProductos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvProductos.RowHeadersVisible = false;
+            dgvProductos.BackgroundColor = Color.White;
+            dgvProductos.BorderStyle = BorderStyle.None;
+        }
 
+        private void AsegurarProveedorGeneral()
+        {
             using (var context = new AlmacenDbContext())
             {
-                var producto = context.Productos.FirstOrDefault(p => p.CodigoBarras == codigo);
-
-                if (producto != null)
+                if (!context.Proveedores.Any())
                 {
-                    _productoIdSeleccionado = producto.Id;
-                    txtNombre.Text = producto.Nombre;
-                    numCosto.Value = producto.Costo;
-                    numImpuesto.Value = producto.Impuesto;
-                    numPrecio.Value = producto.Precio;
-                    numStock.Value = producto.Stock;
-                    cboProveedor.SelectedValue = producto.ProveedorId;
-
-                    btnGuardar.Text = "Modificar (F5)";
-                    txtNombre.Focus();
-                    txtNombre.SelectAll();
-                }
-                else
-                {
-                    LimpiarCamposMenosCodigo();
-                    btnGuardar.Text = "Guardar (F5)";
-                    txtNombre.Focus();
+                    var general = new Proveedor
+                    {
+                        Nombre = "PROVEEDOR GENERAL",
+                        Contacto = "SISTEMA",
+                        Direccion = "-",
+                        Telefono = "-",
+                        Cuit = "-"
+                    };
+                    context.Proveedores.Add(general);
+                    context.SaveChanges();
                 }
             }
-        }
-
-        private void LimpiarCamposMenosCodigo()
-        {
-            _productoIdSeleccionado = null;
-            txtNombre.Clear();
-            numCosto.Value = 0;
-            numPrecio.Value = 0;
-            numStock.Value = 0;
-            numImpuesto.Value = 0;
-            cboProveedor.SelectedIndex = -1;
         }
 
         private void CargarProveedores()
         {
             using (var context = new AlmacenDbContext())
             {
-                cboProveedor.DataSource = context.Proveedores.ToList();
+                var proveedores = context.Proveedores.OrderBy(p => p.Nombre).ToList();
+                cboProveedor.DataSource = proveedores;
                 cboProveedor.DisplayMember = "Nombre";
                 cboProveedor.ValueMember = "Id";
                 cboProveedor.SelectedIndex = -1;
             }
         }
 
-        private void CargarProductos()
+        private void CargarProductos(string filtro = "")
         {
             using (var context = new AlmacenDbContext())
             {
-                var lista = context.Productos
-                    .Include(p => p.Proveedor)
-                    .Select(p => new
-                    {
-                        Id = p.Id,
-                        Codigo = p.CodigoBarras,
-                        Nombre = p.Nombre,
-                        Costo = p.Costo,
-                        Margen = p.Impuesto,
-                        Precio = p.Precio,
-                        Stock = p.Stock,
-                        Proveedor = p.Proveedor != null ? p.Proveedor.Nombre : "Sin Proveedor"
-                    })
-                    .ToList();
+                var query = context.Productos.Include(p => p.Proveedor).AsQueryable();
+
+                if (!string.IsNullOrEmpty(filtro))
+                {
+                    query = query.Where(p => p.Nombre.Contains(filtro) || p.CodigoBarras.Contains(filtro));
+                }
+
+                var lista = query.Select(p => new
+                {
+                    p.Id,
+                    Codigo = p.CodigoBarras,
+                    p.Nombre,
+                    p.Precio,
+                    Stock = p.Stock,
+                    Proveedor = p.Proveedor != null ? p.Proveedor.Nombre : "SIN ASIGNAR"
+                }).ToList();
 
                 dgvProductos.DataSource = lista;
                 if (dgvProductos.Columns["Id"] != null) dgvProductos.Columns["Id"].Visible = false;
             }
         }
 
-        private void btnGuardar_Click(object sender, EventArgs e)
+        // --- VALIDACIÓN DE TECLADO: SOLO NÚMEROS ---
+        private void txtCodigo_KeyPress(object sender, KeyPressEventArgs e)
         {
-            GuardarProducto();
+            // Permitir solo dígitos y teclas de control (BackSpace)
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+            {
+                e.Handled = true; // Bloquea la tecla
+
+                // Feedback visual opcional (parpadeo o sonido sutil)
+                System.Media.SystemSounds.Beep.Play();
+            }
         }
 
-        private void GuardarProducto()
+        private void btnGuardar_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtNombre.Text))
+            if (!ValidarFormularioConUX())
             {
-                MessageBox.Show("El Nombre es obligatorio.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-            if (string.IsNullOrWhiteSpace(txtCodigo.Text))
-            {
-                MessageBox.Show("El Código es obligatorio.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                AudioHelper.PlayError();
                 return;
             }
 
             if (numPrecio.Value < numCosto.Value)
             {
-                if (MessageBox.Show("⚠️ El Precio es MENOR al Costo.\n¿Guardar igual?", "Alerta", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No)
-                    return;
+                var result = MessageBox.Show(
+                    $"¡CUIDADO! El precio de venta (${numPrecio.Value}) es MENOR al costo (${numCosto.Value}).\n¿Desea guardar de todas formas y perder dinero?",
+                    "Alerta de Rentabilidad",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning);
+
+                if (result == DialogResult.No) return;
             }
 
-            using (var context = new AlmacenDbContext())
+            try
             {
-                bool codigoExiste = context.Productos.Any(p => p.CodigoBarras == txtCodigo.Text && p.Id != (_productoIdSeleccionado ?? 0));
-
-                if (codigoExiste)
+                using (var context = new AlmacenDbContext())
                 {
-                    MessageBox.Show($"El código '{txtCodigo.Text}' ya existe.", "Duplicado", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    txtCodigo.SelectAll();
-                    txtCodigo.Focus();
-                    return;
-                }
+                    int proveedorIdSeleccionado = Convert.ToInt32(cboProveedor.SelectedValue);
 
-                Producto producto;
-
-                if (_productoIdSeleccionado == null)
-                {
-                    producto = new Producto();
-                    context.Productos.Add(producto);
-                }
-                else
-                {
-                    producto = context.Productos.Find(_productoIdSeleccionado);
-                }
-
-                producto.Nombre = txtNombre.Text;
-                producto.CodigoBarras = txtCodigo.Text;
-                producto.Costo = numCosto.Value;
-                producto.Precio = numPrecio.Value;
-                producto.Stock = (int)numStock.Value;
-                producto.Impuesto = numImpuesto.Value;
-
-                if (cboProveedor.SelectedValue != null)
-                    producto.ProveedorId = (int)cboProveedor.SelectedValue;
-
-                context.SaveChanges();
-            }
-
-            MessageBox.Show("Guardado.");
-            Limpiar();
-        }
-
-        // --- EXPORTAR EXCEL ---
-        private void btnExportar_Click(object sender, EventArgs e)
-        {
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "Excel (*.xlsx)|*.xlsx";
-            sfd.FileName = "Productos_" + DateTime.Now.ToString("yyyyMMdd");
-
-            if (sfd.ShowDialog() == DialogResult.OK)
-            {
-                try
-                {
-                    using (var context = new AlmacenDbContext())
+                    if (_productoSeleccionado == null)
                     {
-                        var lista = context.Productos.ToList();
-                        var servicio = new ExcelService();
-                        servicio.ExportarProductos(sfd.FileName, lista);
-                        MessageBox.Show("Exportación exitosa.", "Excel", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error al exportar: " + ex.Message);
-                }
-            }
-        }
-
-        // --- IMPORTAR EXCEL O CSV ---
-        private void btnImportar_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "Archivos de Datos (*.xlsx;*.csv)|*.xlsx;*.csv";
-
-            if (ofd.ShowDialog() == DialogResult.OK)
-            {
-                try
-                {
-                    var servicio = new ExcelService();
-                    var productosImportados = servicio.LeerProductos(ofd.FileName);
-
-                    if (productosImportados.Count == 0)
-                    {
-                        MessageBox.Show("El archivo está vacío o no tiene el formato correcto.");
-                        return;
-                    }
-
-                    int nuevos = 0;
-                    int actualizados = 0;
-
-                    using (var context = new AlmacenDbContext())
-                    {
-                        foreach (var dto in productosImportados)
+                        if (context.Productos.Any(p => p.CodigoBarras == txtCodigo.Text.Trim()))
                         {
-                            // VALIDACIÓN DE SEGURIDAD:
-                            // Buscamos si ya existe por código de barras
-                            var productoExistente = context.Productos.FirstOrDefault(p => p.CodigoBarras == dto.CodigoBarras);
-
-                            if (productoExistente != null)
-                            {
-                                // ACTUALIZAMOS (Respetando ID existente)
-                                productoExistente.Nombre = dto.Nombre;
-                                productoExistente.Costo = dto.Costo;
-                                productoExistente.Impuesto = dto.Impuesto;
-                                productoExistente.Stock = dto.Stock; // Opcional: Podríamos sumar stock en vez de reemplazar
-                                productoExistente.ProveedorId = dto.ProveedorId;
-
-                                // Recalculamos precio automáticamente
-                                productoExistente.Precio = dto.Costo * (1 + (dto.Impuesto / 100m));
-
-                                actualizados++;
-                            }
-                            else
-                            {
-                                // CREAMOS NUEVO
-                                var nuevoProd = new Producto
-                                {
-                                    CodigoBarras = dto.CodigoBarras,
-                                    Nombre = dto.Nombre,
-                                    Costo = dto.Costo,
-                                    Impuesto = dto.Impuesto,
-                                    Stock = dto.Stock,
-                                    ProveedorId = dto.ProveedorId,
-                                    // Calculamos precio
-                                    Precio = dto.Costo * (1 + (dto.Impuesto / 100m))
-                                };
-                                context.Productos.Add(nuevoProd);
-                                nuevos++;
-                            }
+                            _errorProvider.SetError(txtCodigo, "Este código ya existe.");
+                            AudioHelper.PlayError();
+                            MessageBox.Show("El Código de Barras ya existe.", "Duplicado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            return;
                         }
-                        context.SaveChanges();
-                    }
 
-                    MessageBox.Show($"Proceso terminado.\nNuevos: {nuevos}\nActualizados: {actualizados}", "Importación", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    Limpiar(); // Recarga la grilla
+                        var nuevo = new Producto
+                        {
+                            CodigoBarras = txtCodigo.Text.Trim(),
+                            Nombre = txtNombre.Text.Trim(),
+                            Descripcion = txtDescripcion.Text.Trim(),
+                            Costo = numCosto.Value,
+                            Precio = numPrecio.Value,
+                            Stock = Convert.ToInt32(numStock.Value),
+                            StockMinimo = Convert.ToInt32(numStockMinimo.Value),
+                            ProveedorId = proveedorIdSeleccionado
+                        };
+                        context.Productos.Add(nuevo);
+                        MessageBox.Show("Producto creado exitosamente.");
+                    }
+                    else
+                    {
+                        var productoDb = context.Productos.Find(_productoSeleccionado.Id);
+                        if (productoDb != null)
+                        {
+                            if (context.Productos.Any(p => p.CodigoBarras == txtCodigo.Text.Trim() && p.Id != _productoSeleccionado.Id))
+                            {
+                                MessageBox.Show("El código de barras ya pertenece a otro producto.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                return;
+                            }
+
+                            productoDb.CodigoBarras = txtCodigo.Text.Trim();
+                            productoDb.Nombre = txtNombre.Text.Trim();
+                            productoDb.Descripcion = txtDescripcion.Text.Trim();
+                            productoDb.Costo = numCosto.Value;
+                            productoDb.Precio = numPrecio.Value;
+                            productoDb.Stock = Convert.ToInt32(numStock.Value);
+                            productoDb.StockMinimo = Convert.ToInt32(numStockMinimo.Value);
+                            productoDb.ProveedorId = proveedorIdSeleccionado;
+                        }
+                        MessageBox.Show("Producto actualizado.");
+                    }
+                    context.SaveChanges();
+                    AudioHelper.PlayOk();
+                }
+
+                LimpiarFormulario();
+                CargarProductos();
+            }
+            catch (Exception ex)
+            {
+                AudioHelper.PlayError();
+                MessageBox.Show($"Error al guardar:\n{ex.Message}", "Error Crítico", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private bool ValidarFormularioConUX()
+        {
+            bool esValido = true;
+            _errorProvider.Clear();
+
+            // 1. CÓDIGO: No vacío Y Numérico
+            if (!ValidationHelper.ValidarCampo(txtCodigo, _errorProvider, "El código es obligatorio y debe ser numérico.",
+                () => {
+                    string texto = txtCodigo.Text.Trim();
+                    // Valida que no esté vacío Y que sea un número válido (long para soportar EAN-13)
+                    return !string.IsNullOrWhiteSpace(texto) && long.TryParse(texto, out _);
+                })) esValido = false;
+
+            if (!ValidationHelper.ValidarCampo(txtNombre, _errorProvider, "El nombre es obligatorio.",
+                () => !string.IsNullOrWhiteSpace(txtNombre.Text))) esValido = false;
+
+            if (!ValidationHelper.ValidarCampo(cboProveedor, _errorProvider, "Seleccione un proveedor.",
+                () => cboProveedor.SelectedValue != null)) esValido = false;
+
+            return esValido;
+        }
+
+        private void btnEliminar_Click(object sender, EventArgs e)
+        {
+            if (_productoSeleccionado == null) return;
+
+            if (MessageBox.Show($"¿Eliminar '{_productoSeleccionado.Nombre}'?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                try
+                {
+                    using (var context = new AlmacenDbContext())
+                    {
+                        var prod = context.Productos.Find(_productoSeleccionado.Id);
+                        if (prod != null)
+                        {
+                            context.Productos.Remove(prod);
+                            context.SaveChanges();
+                            AudioHelper.PlayOk();
+                        }
+                    }
+                    LimpiarFormulario();
+                    CargarProductos();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error crítico al importar: " + ex.Message);
+                    MessageBox.Show("No se puede eliminar el producto. Puede que tenga ventas asociadas o historial.\n\nSugerencia: Cambie el nombre a 'INACTIVO' o el stock a 0.", "Restricción de Datos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
         }
+
+        private void btnLimpiar_Click(object sender, EventArgs e) => LimpiarFormulario();
 
         private void dgvProductos_SelectionChanged(object sender, EventArgs e)
         {
             if (dgvProductos.SelectedRows.Count > 0)
             {
-                var row = dgvProductos.SelectedRows[0];
-                if (row.Cells["Id"].Value == null) return;
-
-                int id = (int)row.Cells["Id"].Value;
+                var celdaId = dgvProductos.SelectedRows[0].Cells["Id"].Value;
+                if (celdaId == null) return;
+                int id = Convert.ToInt32(celdaId);
 
                 using (var context = new AlmacenDbContext())
                 {
-                    var producto = context.Productos.Find(id);
-                    if (producto != null)
-                    {
-                        _productoIdSeleccionado = producto.Id;
-                        txtNombre.Text = producto.Nombre;
-                        txtCodigo.Text = producto.CodigoBarras;
-                        numCosto.Value = producto.Costo;
-                        numPrecio.Value = producto.Precio;
-                        numStock.Value = producto.Stock;
-                        numImpuesto.Value = producto.Impuesto;
-                        cboProveedor.SelectedValue = producto.ProveedorId;
-
-                        btnGuardar.Text = "Modificar (F5)";
-                    }
+                    _productoSeleccionado = context.Productos.Find(id);
                 }
+                if (_productoSeleccionado != null) LlenarFormulario(_productoSeleccionado);
             }
         }
 
-        private void btnLimpiar_Click(object sender, EventArgs e)
+        private void LlenarFormulario(Producto p)
         {
-            Limpiar();
+            txtCodigo.Text = p.CodigoBarras;
+            txtNombre.Text = p.Nombre;
+            txtDescripcion.Text = p.Descripcion;
+            numCosto.Value = p.Costo;
+            numPrecio.Value = p.Precio;
+            numStock.Value = p.Stock;
+            numStockMinimo.Value = p.StockMinimo;
+            cboProveedor.SelectedValue = p.ProveedorId;
+
+            _errorProvider.Clear();
+            txtCodigo.BackColor = Color.White;
+            txtNombre.BackColor = Color.White;
+
+            btnEliminar.Enabled = true;
+            btnGuardar.Text = "MODIFICAR PRODUCTO";
         }
 
-        private void Limpiar()
+        private void LimpiarFormulario()
         {
-            _productoIdSeleccionado = null;
-            txtNombre.Clear();
+            _productoSeleccionado = null;
             txtCodigo.Clear();
+            txtNombre.Clear();
+            txtDescripcion.Clear();
             numCosto.Value = 0;
             numPrecio.Value = 0;
             numStock.Value = 0;
-            numImpuesto.Value = 0;
+            numStockMinimo.Value = 5;
             cboProveedor.SelectedIndex = -1;
 
-            btnGuardar.Text = "Guardar (F5)";
-            CargarProductos();
+            _errorProvider.Clear();
+            txtCodigo.BackColor = Color.White;
+            txtNombre.BackColor = Color.White;
+
+            dgvProductos.ClearSelection();
             txtCodigo.Focus();
+
+            btnGuardar.Text = "GUARDAR PRODUCTO";
+            btnEliminar.Enabled = false;
         }
 
-        private void btnEliminar_Click(object sender, EventArgs e)
+        private void txtBuscar_TextChanged(object sender, EventArgs e) => CargarProductos(txtBuscar.Text);
+
+        private void btnImportar_Click(object sender, EventArgs e)
         {
-            if (_productoIdSeleccionado == null) return;
-
-            using (var context = new AlmacenDbContext())
+            using (var ofd = new OpenFileDialog() { Filter = "Excel Files|*.xlsx" })
             {
-                bool tieneVentas = context.DetallesVenta.Any(d => d.ProductoId == _productoIdSeleccionado);
-                if (tieneVentas)
+                if (ofd.ShowDialog() == DialogResult.OK)
                 {
-                    MessageBox.Show("No se puede eliminar: Tiene historial de ventas.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                if (MessageBox.Show("¿Eliminar producto?", "Confirmar", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                {
-                    var prod = context.Productos.Find(_productoIdSeleccionado);
-                    if (prod != null)
+                    this.Cursor = Cursors.WaitCursor;
+                    try
                     {
-                        context.Productos.Remove(prod);
-                        context.SaveChanges();
-                        Limpiar();
+                        var resultado = _excelService.ImportarProductosInteligente(ofd.FileName);
+                        AudioHelper.PlayOk();
+                        MessageBox.Show($"Importación Finalizada:\n\nNuevos: {resultado.Nuevos}\nActualizados: {resultado.Actualizados}\nErrores: {resultado.Errores}", "Reporte", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        CargarProductos();
                     }
+                    catch (Exception ex)
+                    {
+                        AudioHelper.PlayError();
+                        MessageBox.Show("Error importando: " + ex.Message);
+                    }
+                    finally { this.Cursor = Cursors.Default; }
                 }
             }
         }
 
-        private void numCosto_ValueChanged(object sender, EventArgs e)
+        private void btnExportar_Click(object sender, EventArgs e)
         {
-            CalcularPrecioVenta();
-        }
-
-        private void numImpuesto_ValueChanged(object sender, EventArgs e)
-        {
-            CalcularPrecioVenta();
-        }
-
-        private void CalcularPrecioVenta()
-        {
-            if (numCosto.Value > 0)
+            using (var sfd = new SaveFileDialog() { Filter = "Excel Files|*.xlsx", FileName = $"Inventario_{DateTime.Now:yyyyMMdd}.xlsx" })
             {
-                decimal costo = numCosto.Value;
-                decimal porcentaje = numImpuesto.Value;
-                decimal precioSugerido = costo * (1 + (porcentaje / 100m));
-                numPrecio.Value = precioSugerido;
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+                    this.Cursor = Cursors.WaitCursor;
+                    try
+                    {
+                        List<Producto> listaParaExportar;
+                        using (var context = new AlmacenDbContext())
+                        {
+                            listaParaExportar = context.Productos.Include(p => p.Proveedor).ToList();
+                        }
+                        _excelService.ExportarProductos(sfd.FileName, listaParaExportar);
+                        AudioHelper.PlayOk();
+                        MessageBox.Show("Exportación exitosa.");
+                    }
+                    catch (Exception ex)
+                    {
+                        AudioHelper.PlayError();
+                        MessageBox.Show("Error exportando: " + ex.Message);
+                    }
+                    finally { this.Cursor = Cursors.Default; }
+                }
             }
-        }
-
-        // --- MOTOR DE TECLAS RÁPIDAS (SAGRADO) ---
-        private void ProductosForm_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.F5)
-            {
-                GuardarProducto();
-                e.Handled = true;
-            }
-            else if (e.KeyCode == Keys.Escape)
-            {
-                Limpiar();
-                e.Handled = true;
-            }
-            // Podríamos agregar F9 para Importar y F10 para Exportar si quieres
         }
     }
 }

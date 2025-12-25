@@ -36,6 +36,7 @@
             tsmiUsuarios = new ToolStripMenuItem();
             statusStrip1 = new StatusStrip();
             lblUsuarioInfo = new ToolStripStatusLabel();
+            importarExcelToolStripMenuItem = new ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
             SuspendLayout();
@@ -74,6 +75,7 @@
             // 
             // tsmiProductos
             // 
+            tsmiProductos.DropDownItems.AddRange(new ToolStripItem[] { importarExcelToolStripMenuItem });
             tsmiProductos.Name = "tsmiProductos";
             tsmiProductos.Size = new Size(182, 22);
             tsmiProductos.Text = "Productos";
@@ -199,6 +201,13 @@
             lblUsuarioInfo.Text = "Usuario: Desconocido";
             lblUsuarioInfo.Click += lblUsuarioInfo_Click;
             // 
+            // importarExcelToolStripMenuItem
+            // 
+            importarExcelToolStripMenuItem.Name = "importarExcelToolStripMenuItem";
+            importarExcelToolStripMenuItem.Size = new Size(180, 22);
+            importarExcelToolStripMenuItem.Text = "Importar Excel";
+            importarExcelToolStripMenuItem.Click += importarExcelToolStripMenuItem_Click;
+            // 
             // MenuPrincipal
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -240,6 +249,7 @@
         private ToolStripMenuItem etiquetasToolStripMenuItem;
         private ToolStripMenuItem tsmiReporteGanancias;
         private ToolStripMenuItem tsmiHistorialCajas;
+        private ToolStripMenuItem importarExcelToolStripMenuItem;
     }
 }
 

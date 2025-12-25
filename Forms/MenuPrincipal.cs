@@ -212,5 +212,12 @@ namespace AlmacenDesktop.Forms
         {
 
         }
+
+        private void importarExcelToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ImportarProductosForm form = new ImportarProductosForm();
+            form.MdiParent = this;
+            form.Show();
+        }
     }
 }
