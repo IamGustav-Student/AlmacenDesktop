@@ -3,6 +3,7 @@ using System;
 using AlmacenDesktop.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AlmacenDesktop.Migrations
 {
     [DbContext(typeof(AlmacenDbContext))]
-    partial class AlmacenDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251225220829_CorreccionModelosIntegridad")]
+    partial class CorreccionModelosIntegridad
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.11");
@@ -277,7 +280,6 @@ namespace AlmacenDesktop.Migrations
 
                     b.Property<string>("Descripcion")
                         .IsRequired()
-                        .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Fecha")
@@ -316,11 +318,6 @@ namespace AlmacenDesktop.Migrations
 
                     b.Property<decimal>("Monto")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Observaciones")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("TEXT");
 
                     b.Property<int>("UsuarioId")
                         .HasColumnType("INTEGER");
@@ -396,7 +393,7 @@ namespace AlmacenDesktop.Migrations
 
                     b.Property<string>("Cuit")
                         .IsRequired()
-                        .HasMaxLength(13)
+                        .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Direccion")
@@ -425,9 +422,6 @@ namespace AlmacenDesktop.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("Activo")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Apellido")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -444,20 +438,15 @@ namespace AlmacenDesktop.Migrations
 
                     b.Property<string>("NombreUsuario")
                         .IsRequired()
-                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Telefono")
                         .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 

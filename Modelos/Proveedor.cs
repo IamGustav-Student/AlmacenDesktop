@@ -7,12 +7,12 @@ namespace AlmacenDesktop.Modelos
     {
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "El nombre del proveedor es obligatorio.")]
-        [StringLength(100, ErrorMessage = "El nombre es muy largo.")]
-        public string Nombre { get; set; }
+        [Required(ErrorMessage = "El nombre es obligatorio.")]
+        [StringLength(100)]
+        public string Nombre { get; set; } 
 
         [StringLength(100)]
-        public string Contacto { get; set; }
+        public string Contacto { get; set; } 
 
         [Phone(ErrorMessage = "El formato del teléfono no es válido.")]
         [StringLength(50)]
@@ -21,11 +21,10 @@ namespace AlmacenDesktop.Modelos
         [StringLength(200)]
         public string Direccion { get; set; }
 
-        [StringLength(20)]
-        // Aquí podríamos agregar una validación personalizada de CUIT más adelante
+        [StringLength(13, MinimumLength = 11, ErrorMessage = "El CUIT debe tener 11 dígitos (con o sin guiones).")]
         public string Cuit { get; set; }
 
-        // Relación inversa (opcional pero recomendada para navegación)
+        // Colección para navegación (opcional pero recomendada)
         public virtual ICollection<Producto> Productos { get; set; }
     }
 }

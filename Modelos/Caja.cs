@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AlmacenDesktop.Modelos
 {
@@ -7,23 +9,49 @@ namespace AlmacenDesktop.Modelos
     {
         public int Id { get; set; }
 
-        // Quién abrió la caja
+        [Required]
         public int UsuarioId { get; set; }
         public Usuario Usuario { get; set; }
 
-        public DateTime FechaApertura { get; set; }
+        [Required]
+        public DateTime FechaApertura { get; set; } = DateTime.Now;
+
         public DateTime? FechaCierre { get; set; }
 
-        public decimal SaldoInicial { get; set; } // Cambio con el que se arrancó
-        public decimal TotalVentasEfectivo { get; set; } // Se calcula al cerrar
-        public decimal TotalVentasOtros { get; set; } // Tarjetas, transferencias
-        public decimal SaldoFinalSistema { get; set; } // Inicial + Ventas Efete
-        public decimal SaldoFinalReal { get; set; } // Lo que contó el cajero
-        public decimal Diferencia { get; set; } // Real - Sistema
+        [Range(0, 99999999, ErrorMessage = "El saldo inicial no puede ser negativo.")]
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal SaldoInicial { get; set; }
+
+        [Range(0, 99999999)]
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal TotalVentasEfectivo { get; set; }
+
+        [Range(0, 99999999)]
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal TotalVentasOtros { get; set; }
+
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal SaldoFinalSistema { get; set; }
+
+        [Range(0, 99999999, ErrorMessage = "El saldo real no puede ser negativo.")]
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal SaldoFinalReal { get; set; }
+
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal Diferencia { get; set; }
 
         public bool EstaAbierta { get; set; } = true;
 
-        // Relación: Una sesión de caja tiene muchas ventas
         public List<Venta> Ventas { get; set; }
+
+        // --- VALIDACIÓN LÓGICA ---
+        public bool EsFechaValida()
+        {
+            if (FechaCierre.HasValue)
+            {
+                return FechaCierre.Value > FechaApertura;
+            }
+            return true;
+        }
     }
 }

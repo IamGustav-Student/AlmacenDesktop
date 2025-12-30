@@ -17,516 +17,345 @@
 
         private void InitializeComponent()
         {
-            lblBienvenida = new Label();
-            btnRefrescar = new Button();
-            pnlVentasHoy = new Panel();
-            lblVentasHoyMonto = new Label();
-            lblTituloVentas = new Label();
-            pnlCantVentas = new Panel();
-            lblCantVentasNumero = new Label();
-            lblTituloCant = new Label();
-            pnlTicketPromedio = new Panel();
-            lblTicketPromedioMonto = new Label();
-            lblTituloTicket = new Label();
-            pnlGrafico = new Panel();
-            lblTituloGrafico = new Label();
-            grpAccesos = new GroupBox();
-            btnImportarExcel = new Button();
-            btnHistorialVentas = new Button();
-            btnRapidoCaja = new Button();
-            btnRapidoProductos = new Button();
-            btnRapidoVenta = new Button();
-            grpAtajos = new GroupBox();
-            lblKeyF5 = new Label();
-            lblHelpF5 = new Label();
-            lblKeyF3 = new Label();
-            lblHelpF3 = new Label();
-            lblKeyF2 = new Label();
-            lblHelpF2 = new Label();
-            lblKeyF1 = new Label();
-            lblHelpF1 = new Label();
-            grpAlertas = new GroupBox();
-            dgvAlertasStock = new DataGridView();
-            grpTopProductos = new GroupBox();
-            lstTopProductos = new ListBox();
-            pnlVentasHoy.SuspendLayout();
-            pnlCantVentas.SuspendLayout();
-            pnlTicketPromedio.SuspendLayout();
-            pnlGrafico.SuspendLayout();
-            grpAccesos.SuspendLayout();
-            grpAtajos.SuspendLayout();
-            grpAlertas.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvAlertasStock).BeginInit();
-            grpTopProductos.SuspendLayout();
-            SuspendLayout();
-            // 
-            // lblBienvenida
-            // 
-            lblBienvenida.AutoSize = true;
-            lblBienvenida.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
-            lblBienvenida.ForeColor = Color.DimGray;
-            lblBienvenida.Location = new Point(20, 15);
-            lblBienvenida.Name = "lblBienvenida";
-            lblBienvenida.Size = new Size(268, 32);
-            lblBienvenida.TabIndex = 0;
-            lblBienvenida.Text = "Tablero de Control 📊";
-            // 
-            // btnRefrescar
-            // 
-            btnRefrescar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnRefrescar.FlatStyle = FlatStyle.Flat;
-            btnRefrescar.ForeColor = Color.DimGray;
-            btnRefrescar.Location = new Point(850, 15);
-            btnRefrescar.Name = "btnRefrescar";
-            btnRefrescar.Size = new Size(120, 35);
-            btnRefrescar.TabIndex = 99;
-            btnRefrescar.Text = "🔄 Actualizar (F5)";
-            btnRefrescar.UseVisualStyleBackColor = true;
-            btnRefrescar.Click += btnRefrescar_Click;
-            // 
-            // pnlVentasHoy
-            // 
-            pnlVentasHoy.BackColor = Color.FromArgb(46, 204, 113);
-            pnlVentasHoy.Controls.Add(lblVentasHoyMonto);
-            pnlVentasHoy.Controls.Add(lblTituloVentas);
-            pnlVentasHoy.Location = new Point(25, 70);
-            pnlVentasHoy.Name = "pnlVentasHoy";
-            pnlVentasHoy.Size = new Size(250, 100);
-            pnlVentasHoy.TabIndex = 1;
-            // 
-            // lblVentasHoyMonto
-            // 
-            lblVentasHoyMonto.AutoSize = true;
-            lblVentasHoyMonto.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
-            lblVentasHoyMonto.ForeColor = Color.White;
-            lblVentasHoyMonto.Location = new Point(10, 40);
-            lblVentasHoyMonto.Name = "lblVentasHoyMonto";
-            lblVentasHoyMonto.Size = new Size(95, 37);
-            lblVentasHoyMonto.TabIndex = 0;
-            lblVentasHoyMonto.Text = "$ 0.00";
-            // 
-            // lblTituloVentas
-            // 
-            lblTituloVentas.AutoSize = true;
-            lblTituloVentas.Font = new Font("Segoe UI", 10F);
-            lblTituloVentas.ForeColor = Color.White;
-            lblTituloVentas.Location = new Point(10, 10);
-            lblTituloVentas.Name = "lblTituloVentas";
-            lblTituloVentas.Size = new Size(98, 19);
-            lblTituloVentas.TabIndex = 1;
-            lblTituloVentas.Text = "Ventas de Hoy";
-            // 
-            // pnlCantVentas
-            // 
-            pnlCantVentas.BackColor = Color.FromArgb(52, 152, 219);
-            pnlCantVentas.Controls.Add(lblCantVentasNumero);
-            pnlCantVentas.Controls.Add(lblTituloCant);
-            pnlCantVentas.Location = new Point(290, 70);
-            pnlCantVentas.Name = "pnlCantVentas";
-            pnlCantVentas.Size = new Size(200, 100);
-            pnlCantVentas.TabIndex = 2;
-            // 
-            // lblCantVentasNumero
-            // 
-            lblCantVentasNumero.AutoSize = true;
-            lblCantVentasNumero.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
-            lblCantVentasNumero.ForeColor = Color.White;
-            lblCantVentasNumero.Location = new Point(10, 40);
-            lblCantVentasNumero.Name = "lblCantVentasNumero";
-            lblCantVentasNumero.Size = new Size(33, 37);
-            lblCantVentasNumero.TabIndex = 0;
-            lblCantVentasNumero.Text = "0";
-            // 
-            // lblTituloCant
-            // 
-            lblTituloCant.AutoSize = true;
-            lblTituloCant.Font = new Font("Segoe UI", 10F);
-            lblTituloCant.ForeColor = Color.White;
-            lblTituloCant.Location = new Point(10, 10);
-            lblTituloCant.Name = "lblTituloCant";
-            lblTituloCant.Size = new Size(86, 19);
-            lblTituloCant.TabIndex = 1;
-            lblTituloCant.Text = "Cant. Ventas";
-            // 
-            // pnlTicketPromedio
-            // 
-            pnlTicketPromedio.BackColor = Color.FromArgb(155, 89, 182);
-            pnlTicketPromedio.Controls.Add(lblTicketPromedioMonto);
-            pnlTicketPromedio.Controls.Add(lblTituloTicket);
-            pnlTicketPromedio.Location = new Point(505, 70);
-            pnlTicketPromedio.Name = "pnlTicketPromedio";
-            pnlTicketPromedio.Size = new Size(200, 100);
-            pnlTicketPromedio.TabIndex = 3;
-            // 
-            // lblTicketPromedioMonto
-            // 
-            lblTicketPromedioMonto.AutoSize = true;
-            lblTicketPromedioMonto.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
-            lblTicketPromedioMonto.ForeColor = Color.White;
-            lblTicketPromedioMonto.Location = new Point(10, 40);
-            lblTicketPromedioMonto.Name = "lblTicketPromedioMonto";
-            lblTicketPromedioMonto.Size = new Size(95, 37);
-            lblTicketPromedioMonto.TabIndex = 0;
-            lblTicketPromedioMonto.Text = "$ 0.00";
-            // 
-            // lblTituloTicket
-            // 
-            lblTituloTicket.AutoSize = true;
-            lblTituloTicket.Font = new Font("Segoe UI", 10F);
-            lblTituloTicket.ForeColor = Color.White;
-            lblTituloTicket.Location = new Point(10, 10);
-            lblTituloTicket.Name = "lblTituloTicket";
-            lblTituloTicket.Size = new Size(107, 19);
-            lblTituloTicket.TabIndex = 1;
-            lblTituloTicket.Text = "Ticket Promedio";
-            // 
-            // pnlGrafico
-            // 
-            pnlGrafico.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            pnlGrafico.BackColor = Color.White;
-            pnlGrafico.BorderStyle = BorderStyle.FixedSingle;
-            pnlGrafico.Controls.Add(lblTituloGrafico);
-            pnlGrafico.Location = new Point(25, 190);
-            pnlGrafico.Name = "pnlGrafico";
-            pnlGrafico.Size = new Size(680, 180);
-            pnlGrafico.TabIndex = 5;
-            pnlGrafico.Paint += pnlGrafico_Paint;
-            // 
-            // lblTituloGrafico
-            // 
-            lblTituloGrafico.AutoSize = true;
-            lblTituloGrafico.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblTituloGrafico.ForeColor = Color.Gray;
-            lblTituloGrafico.Location = new Point(5, 5);
-            lblTituloGrafico.Name = "lblTituloGrafico";
-            lblTituloGrafico.Size = new Size(126, 15);
-            lblTituloGrafico.TabIndex = 0;
-            lblTituloGrafico.Text = "Ventas Últimos 7 Días";
-            // 
-            // grpAccesos
-            // 
-            grpAccesos.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            grpAccesos.AutoSize = true;
-            grpAccesos.Controls.Add(btnImportarExcel);
-            grpAccesos.Controls.Add(btnHistorialVentas);
-            grpAccesos.Controls.Add(btnRapidoCaja);
-            grpAccesos.Controls.Add(btnRapidoProductos);
-            grpAccesos.Controls.Add(btnRapidoVenta);
-            grpAccesos.Font = new Font("Segoe UI", 10F);
-            grpAccesos.Location = new Point(720, 70);
-            grpAccesos.Name = "grpAccesos";
-            grpAccesos.Size = new Size(250, 312);
-            grpAccesos.TabIndex = 4;
-            grpAccesos.TabStop = false;
-            grpAccesos.Text = "Accesos Rápidos";
-            // 
-            // btnImportarExcel
-            // 
-            btnImportarExcel.BackColor = Color.Gold;
-            btnImportarExcel.FlatStyle = FlatStyle.Flat;
-            btnImportarExcel.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-            btnImportarExcel.ForeColor = Color.White;
-            btnImportarExcel.Location = new Point(15, 193);
-            btnImportarExcel.Name = "btnImportarExcel";
-            btnImportarExcel.Size = new Size(220, 40);
-            btnImportarExcel.TabIndex = 4;
-            btnImportarExcel.Text = "📑 Exportar Excel";
-            btnImportarExcel.UseVisualStyleBackColor = false;
-            btnImportarExcel.Click += btnImportarExcel_Click;
-            // 
-            // btnHistorialVentas
-            // 
-            btnHistorialVentas.BackColor = Color.LimeGreen;
-            btnHistorialVentas.FlatStyle = FlatStyle.Flat;
-            btnHistorialVentas.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-            btnHistorialVentas.ForeColor = Color.White;
-            btnHistorialVentas.Location = new Point(15, 248);
-            btnHistorialVentas.Name = "btnHistorialVentas";
-            btnHistorialVentas.Size = new Size(220, 40);
-            btnHistorialVentas.TabIndex = 3;
-            btnHistorialVentas.Text = "📊 Historial de Ventas";
-            btnHistorialVentas.UseVisualStyleBackColor = false;
-            btnHistorialVentas.Click += btnHistorialVentas_Click;
-            // 
-            // btnRapidoCaja
-            // 
-            btnRapidoCaja.BackColor = Color.DarkOrange;
-            btnRapidoCaja.FlatStyle = FlatStyle.Flat;
-            btnRapidoCaja.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-            btnRapidoCaja.ForeColor = Color.White;
-            btnRapidoCaja.Location = new Point(15, 135);
-            btnRapidoCaja.Name = "btnRapidoCaja";
-            btnRapidoCaja.Size = new Size(220, 40);
-            btnRapidoCaja.TabIndex = 2;
-            btnRapidoCaja.Text = "💰 Control Caja";
-            btnRapidoCaja.UseVisualStyleBackColor = false;
-            btnRapidoCaja.Click += btnRapidoCaja_Click;
-            // 
-            // btnRapidoProductos
-            // 
-            btnRapidoProductos.BackColor = Color.SteelBlue;
-            btnRapidoProductos.FlatStyle = FlatStyle.Flat;
-            btnRapidoProductos.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-            btnRapidoProductos.ForeColor = Color.White;
-            btnRapidoProductos.Location = new Point(15, 85);
-            btnRapidoProductos.Name = "btnRapidoProductos";
-            btnRapidoProductos.Size = new Size(220, 40);
-            btnRapidoProductos.TabIndex = 1;
-            btnRapidoProductos.Text = "📦 Productos";
-            btnRapidoProductos.UseVisualStyleBackColor = false;
-            btnRapidoProductos.Click += btnRapidoProductos_Click;
-            // 
-            // btnRapidoVenta
-            // 
-            btnRapidoVenta.BackColor = Color.Teal;
-            btnRapidoVenta.FlatStyle = FlatStyle.Flat;
-            btnRapidoVenta.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            btnRapidoVenta.ForeColor = Color.White;
-            btnRapidoVenta.Location = new Point(15, 30);
-            btnRapidoVenta.Name = "btnRapidoVenta";
-            btnRapidoVenta.Size = new Size(220, 45);
-            btnRapidoVenta.TabIndex = 0;
-            btnRapidoVenta.Text = "\U0001f6d2 NUEVA VENTA";
-            btnRapidoVenta.UseVisualStyleBackColor = false;
-            btnRapidoVenta.Click += btnRapidoVenta_Click;
-            // 
-            // grpAtajos
-            // 
-            grpAtajos.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            grpAtajos.AutoSize = true;
-            grpAtajos.Controls.Add(lblKeyF5);
-            grpAtajos.Controls.Add(lblHelpF5);
-            grpAtajos.Controls.Add(lblKeyF3);
-            grpAtajos.Controls.Add(lblHelpF3);
-            grpAtajos.Controls.Add(lblKeyF2);
-            grpAtajos.Controls.Add(lblHelpF2);
-            grpAtajos.Controls.Add(lblKeyF1);
-            grpAtajos.Controls.Add(lblHelpF1);
-            grpAtajos.Font = new Font("Segoe UI", 10F);
-            grpAtajos.ForeColor = Color.DimGray;
-            grpAtajos.Location = new Point(720, 414);
-            grpAtajos.Name = "grpAtajos";
-            grpAtajos.Size = new Size(250, 150);
-            grpAtajos.TabIndex = 8;
-            grpAtajos.TabStop = false;
-            grpAtajos.Text = "⌨️ Teclas Rápidas";
-            // 
-            // lblKeyF5
-            // 
-            lblKeyF5.AutoSize = true;
-            lblKeyF5.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            lblKeyF5.ForeColor = Color.Gray;
-            lblKeyF5.Location = new Point(20, 105);
-            lblKeyF5.Name = "lblKeyF5";
-            lblKeyF5.Size = new Size(24, 19);
-            lblKeyF5.TabIndex = 0;
-            lblKeyF5.Text = "F5";
-            // 
-            // lblHelpF5
-            // 
-            lblHelpF5.AutoSize = true;
-            lblHelpF5.Location = new Point(55, 105);
-            lblHelpF5.Name = "lblHelpF5";
-            lblHelpF5.Size = new Size(108, 19);
-            lblHelpF5.TabIndex = 1;
-            lblHelpF5.Text = "Actualizar Datos";
-            // 
-            // lblKeyF3
-            // 
-            lblKeyF3.AutoSize = true;
-            lblKeyF3.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            lblKeyF3.ForeColor = Color.DarkOrange;
-            lblKeyF3.Location = new Point(20, 80);
-            lblKeyF3.Name = "lblKeyF3";
-            lblKeyF3.Size = new Size(24, 19);
-            lblKeyF3.TabIndex = 2;
-            lblKeyF3.Text = "F3";
-            // 
-            // lblHelpF3
-            // 
-            lblHelpF3.AutoSize = true;
-            lblHelpF3.Location = new Point(55, 80);
-            lblHelpF3.Name = "lblHelpF3";
-            lblHelpF3.Size = new Size(104, 19);
-            lblHelpF3.TabIndex = 3;
-            lblHelpF3.Text = "Control de Caja";
-            // 
-            // lblKeyF2
-            // 
-            lblKeyF2.AutoSize = true;
-            lblKeyF2.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            lblKeyF2.ForeColor = Color.SteelBlue;
-            lblKeyF2.Location = new Point(20, 55);
-            lblKeyF2.Name = "lblKeyF2";
-            lblKeyF2.Size = new Size(24, 19);
-            lblKeyF2.TabIndex = 4;
-            lblKeyF2.Text = "F2";
-            // 
-            // lblHelpF2
-            // 
-            lblHelpF2.AutoSize = true;
-            lblHelpF2.Location = new Point(55, 55);
-            lblHelpF2.Name = "lblHelpF2";
-            lblHelpF2.Size = new Size(95, 19);
-            lblHelpF2.TabIndex = 5;
-            lblHelpF2.Text = "Ver Productos";
-            // 
-            // lblKeyF1
-            // 
-            lblKeyF1.AutoSize = true;
-            lblKeyF1.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            lblKeyF1.ForeColor = Color.Teal;
-            lblKeyF1.Location = new Point(20, 30);
-            lblKeyF1.Name = "lblKeyF1";
-            lblKeyF1.Size = new Size(24, 19);
-            lblKeyF1.TabIndex = 6;
-            lblKeyF1.Text = "F1";
-            // 
-            // lblHelpF1
-            // 
-            lblHelpF1.AutoSize = true;
-            lblHelpF1.Location = new Point(55, 30);
-            lblHelpF1.Name = "lblHelpF1";
-            lblHelpF1.Size = new Size(87, 19);
-            lblHelpF1.TabIndex = 7;
-            lblHelpF1.Text = "Nueva Venta";
-            // 
-            // grpAlertas
-            // 
-            grpAlertas.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            grpAlertas.Controls.Add(dgvAlertasStock);
-            grpAlertas.Font = new Font("Segoe UI", 10F);
-            grpAlertas.ForeColor = Color.Firebrick;
-            grpAlertas.Location = new Point(25, 380);
-            grpAlertas.Name = "grpAlertas";
-            grpAlertas.Size = new Size(680, 417);
-            grpAlertas.TabIndex = 6;
-            grpAlertas.TabStop = false;
-            grpAlertas.Text = "⚠️ Alertas de Stock Bajo (Menos de 10 unidades)";
-            // 
-            // dgvAlertasStock
-            // 
-            dgvAlertasStock.AllowUserToAddRows = false;
-            dgvAlertasStock.AllowUserToDeleteRows = false;
-            dgvAlertasStock.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvAlertasStock.BackgroundColor = Color.White;
-            dgvAlertasStock.BorderStyle = BorderStyle.None;
-            dgvAlertasStock.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvAlertasStock.Dock = DockStyle.Fill;
-            dgvAlertasStock.Location = new Point(3, 21);
-            dgvAlertasStock.Name = "dgvAlertasStock";
-            dgvAlertasStock.ReadOnly = true;
-            dgvAlertasStock.RowHeadersVisible = false;
-            dgvAlertasStock.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvAlertasStock.Size = new Size(674, 393);
-            dgvAlertasStock.TabIndex = 0;
-            // 
-            // grpTopProductos
-            // 
-            grpTopProductos.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
-            grpTopProductos.AutoSize = true;
-            grpTopProductos.Controls.Add(lstTopProductos);
-            grpTopProductos.Font = new Font("Segoe UI", 9F);
-            grpTopProductos.Location = new Point(720, 579);
-            grpTopProductos.Name = "grpTopProductos";
-            grpTopProductos.Size = new Size(250, 218);
-            grpTopProductos.TabIndex = 7;
-            grpTopProductos.TabStop = false;
-            grpTopProductos.Text = "⭐ Top 5 Más Vendidos";
-            // 
-            // lstTopProductos
-            // 
-            lstTopProductos.BackColor = Color.WhiteSmoke;
-            lstTopProductos.BorderStyle = BorderStyle.None;
-            lstTopProductos.Dock = DockStyle.Fill;
-            lstTopProductos.FormattingEnabled = true;
-            lstTopProductos.ItemHeight = 15;
-            lstTopProductos.Location = new Point(3, 19);
-            lstTopProductos.Name = "lstTopProductos";
-            lstTopProductos.Size = new Size(244, 196);
-            lstTopProductos.TabIndex = 0;
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title1 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title2 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            this.lblTitulo = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.lblVentasHoy = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.lblVentasMes = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.panel3 = new System.Windows.Forms.Panel();
+            this.lblBajoStock = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.panel4 = new System.Windows.Forms.Panel();
+            this.lblClientes = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.dgvUltimasVentas = new System.Windows.Forms.DataGridView();
+            this.label9 = new System.Windows.Forms.Label();
+            this.btnActualizar = new System.Windows.Forms.Button();
+            this.chartVentas = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.chartPagos = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.panel1.SuspendLayout();
+            this.panel2.SuspendLayout();
+            this.panel3.SuspendLayout();
+            this.panel4.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvUltimasVentas)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartVentas)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartPagos)).BeginInit();
+            this.SuspendLayout();
+            // 
+            // lblTitulo
+            // 
+            this.lblTitulo.AutoSize = true;
+            this.lblTitulo.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblTitulo.ForeColor = System.Drawing.Color.DimGray;
+            this.lblTitulo.Location = new System.Drawing.Point(20, 15);
+            this.lblTitulo.Name = "lblTitulo";
+            this.lblTitulo.Size = new System.Drawing.Size(203, 30);
+            this.lblTitulo.TabIndex = 0;
+            this.lblTitulo.Text = "Panel de Resumen";
+            // 
+            // panel1
+            // 
+            this.panel1.BackColor = System.Drawing.Color.SeaGreen;
+            this.panel1.Controls.Add(this.lblVentasHoy);
+            this.panel1.Controls.Add(this.label1);
+            this.panel1.Location = new System.Drawing.Point(25, 60);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(220, 90);
+            this.panel1.TabIndex = 1;
+            // 
+            // lblVentasHoy
+            // 
+            this.lblVentasHoy.AutoSize = true;
+            this.lblVentasHoy.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblVentasHoy.ForeColor = System.Drawing.Color.White;
+            this.lblVentasHoy.Location = new System.Drawing.Point(15, 40);
+            this.lblVentasHoy.Name = "lblVentasHoy";
+            this.lblVentasHoy.Size = new System.Drawing.Size(84, 32);
+            this.lblVentasHoy.TabIndex = 1;
+            this.lblVentasHoy.Text = "$ 0.00";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label1.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.label1.Location = new System.Drawing.Point(15, 10);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(95, 19);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "Ventas de Hoy";
+            // 
+            // panel2
+            // 
+            this.panel2.BackColor = System.Drawing.Color.SteelBlue;
+            this.panel2.Controls.Add(this.lblVentasMes);
+            this.panel2.Controls.Add(this.label3);
+            this.panel2.Location = new System.Drawing.Point(265, 60);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(220, 90);
+            this.panel2.TabIndex = 2;
+            // 
+            // lblVentasMes
+            // 
+            this.lblVentasMes.AutoSize = true;
+            this.lblVentasMes.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblVentasMes.ForeColor = System.Drawing.Color.White;
+            this.lblVentasMes.Location = new System.Drawing.Point(15, 40);
+            this.lblVentasMes.Name = "lblVentasMes";
+            this.lblVentasMes.Size = new System.Drawing.Size(84, 32);
+            this.lblVentasMes.TabIndex = 1;
+            this.lblVentasMes.Text = "$ 0.00";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label3.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.label3.Location = new System.Drawing.Point(15, 10);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(95, 19);
+            this.label3.TabIndex = 0;
+            this.label3.Text = "Ventas del Mes";
+            // 
+            // panel3
+            // 
+            this.panel3.BackColor = System.Drawing.Color.IndianRed;
+            this.panel3.Controls.Add(this.lblBajoStock);
+            this.panel3.Controls.Add(this.label5);
+            this.panel3.Location = new System.Drawing.Point(505, 60);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(220, 90);
+            this.panel3.TabIndex = 3;
+            // 
+            // lblBajoStock
+            // 
+            this.lblBajoStock.AutoSize = true;
+            this.lblBajoStock.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblBajoStock.ForeColor = System.Drawing.Color.White;
+            this.lblBajoStock.Location = new System.Drawing.Point(15, 40);
+            this.lblBajoStock.Name = "lblBajoStock";
+            this.lblBajoStock.Size = new System.Drawing.Size(28, 32);
+            this.lblBajoStock.TabIndex = 1;
+            this.lblBajoStock.Text = "0";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label5.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.label5.Location = new System.Drawing.Point(15, 10);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(127, 19);
+            this.label5.TabIndex = 0;
+            this.label5.Text = "Alerta: Stock Crítico";
+            // 
+            // panel4
+            // 
+            this.panel4.BackColor = System.Drawing.Color.DarkOrange;
+            this.panel4.Controls.Add(this.lblClientes);
+            this.panel4.Controls.Add(this.label7);
+            this.panel4.Location = new System.Drawing.Point(745, 60);
+            this.panel4.Name = "panel4";
+            this.panel4.Size = new System.Drawing.Size(220, 90);
+            this.panel4.TabIndex = 4;
+            // 
+            // lblClientes
+            // 
+            this.lblClientes.AutoSize = true;
+            this.lblClientes.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblClientes.ForeColor = System.Drawing.Color.White;
+            this.lblClientes.Location = new System.Drawing.Point(15, 40);
+            this.lblClientes.Name = "lblClientes";
+            this.lblClientes.Size = new System.Drawing.Size(28, 32);
+            this.lblClientes.TabIndex = 1;
+            this.lblClientes.Text = "0";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label7.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.label7.Location = new System.Drawing.Point(15, 10);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(115, 19);
+            this.label7.TabIndex = 0;
+            this.label7.Text = "Clientes Activos";
+            // 
+            // chartVentas
+            // 
+            chartArea1.Name = "ChartArea1";
+            this.chartVentas.ChartAreas.Add(chartArea1);
+            legend1.Name = "Legend1";
+            this.chartVentas.Legends.Add(legend1);
+            this.chartVentas.Location = new System.Drawing.Point(25, 170);
+            this.chartVentas.Name = "chartVentas";
+            series1.ChartArea = "ChartArea1";
+            series1.Legend = "Legend1";
+            series1.Name = "Ventas";
+            this.chartVentas.Series.Add(series1);
+            this.chartVentas.Size = new System.Drawing.Size(580, 200);
+            this.chartVentas.TabIndex = 8;
+            this.chartVentas.Text = "Ventas Semanales";
+            title1.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            title1.Name = "Title1";
+            title1.Text = "Ventas Últimos 7 Días";
+            this.chartVentas.Titles.Add(title1);
+            // 
+            // chartPagos
+            // 
+            chartArea2.Name = "ChartArea1";
+            this.chartPagos.ChartAreas.Add(chartArea2);
+            legend2.Name = "Legend1";
+            this.chartPagos.Legends.Add(legend2);
+            this.chartPagos.Location = new System.Drawing.Point(620, 170);
+            this.chartPagos.Name = "chartPagos";
+            series2.ChartArea = "ChartArea1";
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Doughnut;
+            series2.Legend = "Legend1";
+            series2.Name = "Series1";
+            this.chartPagos.Series.Add(series2);
+            this.chartPagos.Size = new System.Drawing.Size(345, 200);
+            this.chartPagos.TabIndex = 9;
+            this.chartPagos.Text = "Métodos Pago";
+            title2.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            title2.Name = "Title1";
+            title2.Text = "Métodos de Pago";
+            this.chartPagos.Titles.Add(title2);
+            // 
+            // dgvUltimasVentas
+            // 
+            this.dgvUltimasVentas.AllowUserToAddRows = false;
+            this.dgvUltimasVentas.AllowUserToDeleteRows = false;
+            this.dgvUltimasVentas.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dgvUltimasVentas.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgvUltimasVentas.BackgroundColor = System.Drawing.Color.White;
+            this.dgvUltimasVentas.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.dgvUltimasVentas.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.SingleHorizontal;
+            this.dgvUltimasVentas.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.DimGray;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgvUltimasVentas.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            this.dgvUltimasVentas.ColumnHeadersHeight = 30;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.AliceBlue;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.Black;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgvUltimasVentas.DefaultCellStyle = dataGridViewCellStyle2;
+            this.dgvUltimasVentas.EnableHeadersVisualStyles = false;
+            this.dgvUltimasVentas.GridColor = System.Drawing.Color.WhiteSmoke;
+            this.dgvUltimasVentas.Location = new System.Drawing.Point(25, 410);
+            this.dgvUltimasVentas.Name = "dgvUltimasVentas";
+            this.dgvUltimasVentas.ReadOnly = true;
+            this.dgvUltimasVentas.RowHeadersVisible = false;
+            this.dgvUltimasVentas.RowTemplate.Height = 35;
+            this.dgvUltimasVentas.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvUltimasVentas.Size = new System.Drawing.Size(940, 180);
+            this.dgvUltimasVentas.TabIndex = 5;
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label9.ForeColor = System.Drawing.Color.DimGray;
+            this.label9.Location = new System.Drawing.Point(25, 385);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(243, 21);
+            this.label9.TabIndex = 6;
+            this.label9.Text = "Últimas Operaciones (En vivo)";
+            // 
+            // btnActualizar
+            // 
+            this.btnActualizar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnActualizar.BackColor = System.Drawing.Color.White;
+            this.btnActualizar.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnActualizar.FlatAppearance.BorderColor = System.Drawing.Color.Silver;
+            this.btnActualizar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnActualizar.ForeColor = System.Drawing.Color.DimGray;
+            this.btnActualizar.Location = new System.Drawing.Point(865, 15);
+            this.btnActualizar.Name = "btnActualizar";
+            this.btnActualizar.Size = new System.Drawing.Size(100, 30);
+            this.btnActualizar.TabIndex = 7;
+            this.btnActualizar.Text = "↻ Actualizar";
+            this.btnActualizar.UseVisualStyleBackColor = false;
+            this.btnActualizar.Click += new System.EventHandler(this.btnActualizar_Click);
             // 
             // DashboardForm
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.WhiteSmoke;
-            ClientSize = new Size(1000, 817);
-            Controls.Add(grpAtajos);
-            Controls.Add(grpTopProductos);
-            Controls.Add(grpAlertas);
-            Controls.Add(pnlGrafico);
-            Controls.Add(grpAccesos);
-            Controls.Add(pnlTicketPromedio);
-            Controls.Add(pnlCantVentas);
-            Controls.Add(pnlVentasHoy);
-            Controls.Add(btnRefrescar);
-            Controls.Add(lblBienvenida);
-            FormBorderStyle = FormBorderStyle.None;
-            MinimizeBox = false;
-            MinimumSize = new Size(1000, 700);
-            Name = "DashboardForm";
-            StartPosition = FormStartPosition.CenterScreen;
-            Text = "Dashboard";
-            pnlVentasHoy.ResumeLayout(false);
-            pnlVentasHoy.PerformLayout();
-            pnlCantVentas.ResumeLayout(false);
-            pnlCantVentas.PerformLayout();
-            pnlTicketPromedio.ResumeLayout(false);
-            pnlTicketPromedio.PerformLayout();
-            pnlGrafico.ResumeLayout(false);
-            pnlGrafico.PerformLayout();
-            grpAccesos.ResumeLayout(false);
-            grpAtajos.ResumeLayout(false);
-            grpAtajos.PerformLayout();
-            grpAlertas.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)dgvAlertasStock).EndInit();
-            grpTopProductos.ResumeLayout(false);
-            ResumeLayout(false);
-            PerformLayout();
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.White;
+            this.ClientSize = new System.Drawing.Size(1000, 600);
+            this.Controls.Add(this.chartPagos);
+            this.Controls.Add(this.chartVentas);
+            this.Controls.Add(this.btnActualizar);
+            this.Controls.Add(this.label9);
+            this.Controls.Add(this.dgvUltimasVentas);
+            this.Controls.Add(this.panel4);
+            this.Controls.Add(this.panel3);
+            this.Controls.Add(this.panel2);
+            this.Controls.Add(this.panel1);
+            this.Controls.Add(this.lblTitulo);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.Name = "DashboardForm";
+            this.Text = "Dashboard";
+            this.Load += new System.EventHandler(this.DashboardForm_Load);
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
+            this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
+            this.panel3.ResumeLayout(false);
+            this.panel3.PerformLayout();
+            this.panel4.ResumeLayout(false);
+            this.panel4.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvUltimasVentas)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartVentas)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartPagos)).EndInit();
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
         }
 
         #endregion
 
-        private System.Windows.Forms.Label lblBienvenida;
-        private System.Windows.Forms.Button btnRefrescar;
-
-        private System.Windows.Forms.Panel pnlVentasHoy;
-        private System.Windows.Forms.Label lblVentasHoyMonto;
-        private System.Windows.Forms.Label lblTituloVentas;
-
-        private System.Windows.Forms.Panel pnlCantVentas;
-        private System.Windows.Forms.Label lblCantVentasNumero;
-        private System.Windows.Forms.Label lblTituloCant;
-
-        private System.Windows.Forms.Panel pnlTicketPromedio;
-        private System.Windows.Forms.Label lblTicketPromedioMonto;
-        private System.Windows.Forms.Label lblTituloTicket;
-
-        private System.Windows.Forms.Panel pnlGrafico;
-        private System.Windows.Forms.Label lblTituloGrafico;
-
-        private System.Windows.Forms.GroupBox grpAccesos;
-        private System.Windows.Forms.Button btnRapidoVenta;
-        private System.Windows.Forms.Button btnRapidoProductos;
-        private System.Windows.Forms.Button btnRapidoCaja;
-
-        private System.Windows.Forms.GroupBox grpAtajos;
-        private System.Windows.Forms.Label lblKeyF1;
-        private System.Windows.Forms.Label lblHelpF1;
-        private System.Windows.Forms.Label lblKeyF2;
-        private System.Windows.Forms.Label lblHelpF2;
-        private System.Windows.Forms.Label lblKeyF3;
-        private System.Windows.Forms.Label lblHelpF3;
-        private System.Windows.Forms.Label lblKeyF5;
-        private System.Windows.Forms.Label lblHelpF5;
-
-        private System.Windows.Forms.GroupBox grpAlertas;
-        private System.Windows.Forms.DataGridView dgvAlertasStock;
-
-        private System.Windows.Forms.GroupBox grpTopProductos;
-        private System.Windows.Forms.ListBox lstTopProductos;
-        private Button btnHistorialVentas;
-        private Button btnImportarExcel;
+        private System.Windows.Forms.Label lblTitulo;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Label lblVentasHoy;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.Label lblVentasMes;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.Label lblBajoStock;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Panel panel4;
+        private System.Windows.Forms.Label lblClientes;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.DataGridView dgvUltimasVentas;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Button btnActualizar;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chartVentas;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chartPagos;
     }
 }

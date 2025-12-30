@@ -2,91 +2,21 @@
 using AlmacenDesktop.Modelos;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting; // Necesario para gráficos
 
 namespace AlmacenDesktop.Forms
 {
     public partial class DashboardForm : Form
     {
-        private Dictionary<string, decimal> _ventasSemana = new Dictionary<string, decimal>();
-
         public DashboardForm()
         {
             InitializeComponent();
-
-            // 🔥 PARTE 1: ACTIVAR LA ESCUCHA DE TECLAS 🔥
-            // ------------------------------------------------------------------
-            this.KeyPreview = true; // <--- OBLIGATORIO: Permite que el Form capture la tecla antes que el botón
-            this.KeyDown += new KeyEventHandler(DashboardForm_KeyDown); // <--- Conectamos el evento
-            // ------------------------------------------------------------------
         }
 
         private void DashboardForm_Load(object sender, EventArgs e)
         {
-            CargarDatos();
-            this.Focus(); // Aseguramos que el dashboard tenga el foco al abrir
-        }
-
-        protected override void OnActivated(EventArgs e)
-        {
-            base.OnActivated(e);
-            CargarDatos();
-        }
-
-        // 🔥 PARTE 2: EL CEREBRO QUE DECIDE QUÉ HACER 🔥
-        // ------------------------------------------------------------------
-        private void DashboardForm_KeyDown(object sender, KeyEventArgs e)
-        {
-            switch (e.KeyCode)
-            {
-                case Keys.F1: // <--- Si presionan F1...
-                    btnRapidoVenta.PerformClick(); // ...simulamos clic en "Nueva Venta"
-                    e.Handled = true; // Evita el sonido "ding" de Windows
-                    break;
-
-                case Keys.F2: // <--- Si presionan F2...
-                    btnRapidoProductos.PerformClick(); // ...simulamos clic en "Productos"
-                    e.Handled = true;
-                    break;
-
-                case Keys.F3: // <--- Si presionan F3...
-                    btnRapidoCaja.PerformClick(); // ...simulamos clic en "Control Caja"
-                    e.Handled = true;
-                    break;
-
-                case Keys.F5: // <--- Si presionan F5...
-                    btnRefrescar.PerformClick(); // ...actualizamos datos
-                    e.Handled = true;
-                    break;
-            }
-        }
-        // ------------------------------------------------------------------
-
-        private void btnRefrescar_Click(object sender, EventArgs e)
-        {
-            CargarDatos();
-        }
-
-        private void btnRapidoVenta_Click(object sender, EventArgs e)
-        {
-            // Llama a la función pública del Menú Principal
-            if (this.MdiParent is MenuPrincipal menu) menu.tsmiNuevaVenta_Click(sender, e);
-        }
-
-        private void btnRapidoProductos_Click(object sender, EventArgs e)
-        {
-            if (this.MdiParent is MenuPrincipal menu) menu.tsmiProductos_Click(sender, e);
-        }
-
-        private void btnRapidoCaja_Click(object sender, EventArgs e)
-        {
-            ControlCajaForm form = new ControlCajaForm(Program.UsuarioActualGlobal);
-            form.ShowDialog();
             CargarDatos();
         }
 
@@ -96,142 +26,92 @@ namespace AlmacenDesktop.Forms
             {
                 using (var context = new AlmacenDbContext())
                 {
-                    DateTime inicioDia = DateTime.Today;
-                    DateTime finDia = DateTime.Today.AddDays(1).AddTicks(-1);
+                    var hoy = DateTime.Today;
 
-                    // 1. VENTAS DEL DÍA
-                    var ventasHoy = context.Ventas
-                        .AsNoTracking()
-                        .Where(v => v.Fecha >= inicioDia && v.Fecha <= finDia)
-                        .ToList();
+                    // --- TARJETAS KPI ---
+                    decimal ventasHoy = context.Ventas
+                        .Where(v => v.Fecha >= hoy)
+                        .Sum(v => v.Total);
+                    lblVentasHoy.Text = $"$ {ventasHoy:N0}"; // N0 para quitar centavos en dashboard
 
-                    decimal totalVentas = ventasHoy.Sum(v => v.Total);
-                    int cantidadVentas = ventasHoy.Count;
-                    decimal ticketPromedio = cantidadVentas > 0 ? totalVentas / cantidadVentas : 0;
+                    var inicioMes = new DateTime(hoy.Year, hoy.Month, 1);
+                    decimal ventasMes = context.Ventas
+                        .Where(v => v.Fecha >= inicioMes)
+                        .Sum(v => v.Total);
+                    lblVentasMes.Text = $"$ {ventasMes:N0}";
 
-                    lblVentasHoyMonto.Text = $"$ {totalVentas:N2}";
-                    lblCantVentasNumero.Text = cantidadVentas.ToString();
-                    lblTicketPromedioMonto.Text = $"$ {ticketPromedio:N2}";
+                    int bajoStock = context.Productos.Count(p => p.Stock <= p.StockMinimo);
+                    lblBajoStock.Text = bajoStock.ToString();
 
-                    // 2. ALERTAS DE STOCK
-                    var productosBajos = context.Productos
-                        .AsNoTracking()
-                        .Where(p => p.Stock <= 10)
-                        .OrderBy(p => p.Stock)
-                        .Select(p => new { Id = p.Id, Producto = p.Nombre, Stock = p.Stock })
-                        .ToList();
+                    int clientes = context.Clientes.Count();
+                    lblClientes.Text = clientes.ToString();
 
-                    dgvAlertasStock.DataSource = productosBajos;
-                    if (dgvAlertasStock.Columns["Id"] != null) dgvAlertasStock.Columns["Id"].Visible = false;
-
-                    // 3. TOP 5 PRODUCTOS
-                    var fechaSemanaAtras = DateTime.Today.AddDays(-7);
-
-                    var ranking = context.DetallesVenta
-                        .AsNoTracking()
-                        .Include(d => d.Producto)
-                        .Where(d => d.Venta.Fecha >= fechaSemanaAtras)
-                        .AsEnumerable()
-                        .GroupBy(d => d.Producto.Nombre)
-                        .Select(g => new { Nombre = g.Key, TotalVendido = g.Sum(x => x.Cantidad) })
-                        .OrderByDescending(x => x.TotalVendido)
+                    // --- GRILLA (Últimas 5) ---
+                    var ultimasVentas = context.Ventas
+                        .Include(v => v.Cliente)
+                        .OrderByDescending(v => v.Fecha)
                         .Take(5)
+                        .Select(v => new
+                        {
+                            v.Id,
+                            Hora = v.Fecha.ToString("HH:mm"),
+                            Cliente = v.Cliente.Nombre + " " + v.Cliente.Apellido,
+                            Total = v.Total,
+                            Pago = v.MetodoPago
+                        })
+                        .ToList();
+                    dgvUltimasVentas.DataSource = ultimasVentas;
+
+                    // --- GRÁFICO 1: BARRAS (Ventas últimos 7 días) ---
+                    var fechaLimite = hoy.AddDays(-6);
+                    var datosSemana = context.Ventas
+                        .Where(v => v.Fecha >= fechaLimite)
+                        .ToList() // Traemos a memoria para agrupar por fecha corta
+                        .GroupBy(v => v.Fecha.Date)
+                        .Select(g => new { Fecha = g.Key, Total = g.Sum(x => x.Total) })
+                        .OrderBy(x => x.Fecha)
                         .ToList();
 
-                    lstTopProductos.Items.Clear();
-                    foreach (var item in ranking)
+                    chartVentas.Series["Ventas"].Points.Clear();
+
+                    // Rellenar días vacíos si no hubo ventas
+                    for (int i = 0; i < 7; i++)
                     {
-                        lstTopProductos.Items.Add($"{item.TotalVendido} x {item.Nombre}");
+                        var dia = fechaLimite.AddDays(i);
+                        var ventaDia = datosSemana.FirstOrDefault(d => d.Fecha == dia);
+                        decimal totalDia = ventaDia != null ? ventaDia.Total : 0;
+
+                        chartVentas.Series["Ventas"].Points.AddXY(dia.ToString("dd/MM"), totalDia);
                     }
 
-                    // 4. DATOS PARA GRÁFICO
-                    _ventasSemana.Clear();
-                    for (int i = 6; i >= 0; i--)
+                    // --- GRÁFICO 2: TORTA (Métodos de Pago - Mes Actual) ---
+                    var datosPagos = context.Ventas
+                        .Where(v => v.Fecha >= inicioMes)
+                        .GroupBy(v => v.MetodoPago)
+                        .Select(g => new { Metodo = g.Key, Cantidad = g.Count() })
+                        .ToList();
+
+                    chartPagos.Series[0].Points.Clear();
+                    foreach (var pago in datosPagos)
                     {
-                        DateTime fecha = DateTime.Today.AddDays(-i);
-                        DateTime desde = fecha.Date;
-                        DateTime hasta = fecha.Date.AddDays(1).AddTicks(-1);
-
-                        decimal totalDia = context.Ventas
-                             .Where(v => v.Fecha >= desde && v.Fecha <= hasta)
-                             .Sum(v => (decimal?)v.Total) ?? 0;
-
-                        _ventasSemana.Add(fecha.ToString("dd/MM"), totalDia);
+                        chartPagos.Series[0].Points.AddXY(pago.Metodo, pago.Cantidad);
                     }
-
-                    pnlGrafico.Invalidate();
+                    chartPagos.Series[0].IsValueShownAsLabel = true;
                 }
             }
             catch (Exception ex)
             {
-                // Ignorar errores en dashboard
+                // Log silencioso o visual sutil
             }
         }
 
-        private void pnlGrafico_Paint(object sender, PaintEventArgs e)
+        private void btnActualizar_Click(object sender, EventArgs e)
         {
-            if (_ventasSemana.Count == 0) return;
-
-            Graphics g = e.Graphics;
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-
-            int margen = 30;
-            int anchoUtil = pnlGrafico.Width - (margen * 2);
-            int altoUtil = pnlGrafico.Height - (margen * 2);
-
-            decimal maxVenta = _ventasSemana.Values.Count > 0 ? _ventasSemana.Values.Max() : 1;
-            if (maxVenta == 0) maxVenta = 1;
-
-            int anchoBarra = (anchoUtil / _ventasSemana.Count) - 10;
-            int x = margen;
-
-            using (Pen penEjes = new Pen(Color.LightGray, 1))
-            {
-                g.DrawLine(penEjes, margen, pnlGrafico.Height - margen, pnlGrafico.Width - margen, pnlGrafico.Height - margen);
-            }
-
-            foreach (var dia in _ventasSemana)
-            {
-                int alturaBarra = (int)((dia.Value / maxVenta) * (altoUtil - 20));
-
-                Rectangle rectBarra = new Rectangle(
-                    x,
-                    (pnlGrafico.Height - margen) - alturaBarra,
-                    anchoBarra,
-                    alturaBarra
-                );
-
-                if (alturaBarra > 0)
-                {
-                    using (LinearGradientBrush brush = new LinearGradientBrush(rectBarra, Color.CornflowerBlue, Color.RoyalBlue, 90F))
-                    {
-                        g.FillRectangle(brush, rectBarra);
-                    }
-                }
-
-                g.DrawString(dia.Key, new Font("Segoe UI", 8), Brushes.DimGray, x + (anchoBarra / 2) - 10, pnlGrafico.Height - margen + 5);
-
-                if (alturaBarra > 0)
-                {
-                    g.DrawString($"${dia.Value:N0}", new Font("Segoe UI", 7), Brushes.Black, x, rectBarra.Y - 15);
-                }
-
-                x += anchoBarra + 10;
-            }
+            CargarDatos();
         }
 
-        private void btnImportarExcel_Click(object sender, EventArgs e)
-        {
-            ImportarProductosForm form = new ImportarProductosForm();
-            form.MdiParent = this.MdiParent;
-            form.Show();
-        }
-
-        private void btnHistorialVentas_Click(object sender, EventArgs e)
-        {
-            HistorialVentasForm form = new HistorialVentasForm();
-            form.MdiParent = this.MdiParent;
-            form.Show();
-        }
+        // Métodos de compatibilidad por si quedaron referencias viejas
+        private void tsmiProductos_Click(object sender, EventArgs e) { }
+        private void tsmiNuevaVenta_Click(object sender, EventArgs e) { }
     }
 }

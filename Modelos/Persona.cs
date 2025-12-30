@@ -13,16 +13,21 @@ namespace AlmacenDesktop.Modelos
 
         [Required]
         [MaxLength(100)]
+        [RegularExpression(@"^[A-Za-z]+$", ErrorMessage = "El nombre solo puede contener letras.")]
         public string Nombre { get; set; }
 
         [Required]
         [MaxLength(100)]
+        [RegularExpression(@"^[A-Za-z]+$", ErrorMessage = "El apellido solo puede contener letras.")]
         public string Apellido { get; set; }
 
         [Required]
         [EmailAddress]
         public string Email { get; set; }
 
+        [Phone]
+        [Required]
+        [RegularExpression(@"^\+?[1-9]\d{1,14}$", ErrorMessage = "El número de teléfono no es válido.")]
         public string Telefono { get; set; }
 
         // [POO - Polimorfismo]

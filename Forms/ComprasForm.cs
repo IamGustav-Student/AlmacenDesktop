@@ -14,10 +14,12 @@ namespace AlmacenDesktop.Forms
     {
         private List<DetalleCompra> _carritoCompra = new List<DetalleCompra>();
         private List<Producto> _todosLosProductos = new List<Producto>();
+        private Usuario _usuarioActual;
 
-        public ComprasForm()
+        public ComprasForm( Usuario usuario)
         {
             InitializeComponent();
+            _usuarioActual = usuario;
 
             // --- GARANTÍA DE TECLAS RÁPIDAS ---
             this.KeyPreview = true;

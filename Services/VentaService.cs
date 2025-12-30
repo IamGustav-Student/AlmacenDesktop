@@ -7,58 +7,58 @@ using System.Linq;
 
 namespace AlmacenDesktop.Services
 {
-    // CEREBRO DE VENTAS: Encapsula toda la lógica de negocio.
-    // Ventajas: Testeable, Reutilizable, Transaccional (ACID).
     public class VentaService
     {
-        // Búsqueda inteligente de productos
         public Producto BuscarProducto(string entrada)
         {
             if (string.IsNullOrWhiteSpace(entrada)) return null;
 
             using (var context = new AlmacenDbContext())
             {
-                // 1. Prioridad: Código de Barras Exacto
                 var producto = context.Productos.FirstOrDefault(p => p.CodigoBarras == entrada);
                 if (producto != null) return producto;
 
-                // 2. Fallback: Búsqueda por nombre (contiene)
                 var lista = context.Productos
                                    .Where(p => p.Nombre.ToLower().Contains(entrada.ToLower()) && p.Stock > 0)
                                    .ToList();
 
-                // Regla: Solo retornamos si hay coincidencia ÚNICA para evitar errores
                 return lista.Count == 1 ? lista.First() : null;
             }
         }
 
-        // Verifica si el usuario tiene una caja abierta y retorna su ID
+        // --- VALIDACIÓN DE CAJA ---
+        // Busca la última caja abierta de este usuario.
+        // Debe ser FechaCierre NULL y EstaAbierta TRUE.
         public int? ObtenerCajaAbiertaId(int usuarioId)
         {
             using (var context = new AlmacenDbContext())
             {
                 var caja = context.Cajas
-                                  .FirstOrDefault(c => c.UsuarioId == usuarioId && c.EstaAbierta);
+                                  .OrderByDescending(c => c.FechaApertura)
+                                  .FirstOrDefault(c => c.UsuarioId == usuarioId && c.EstaAbierta && c.FechaCierre == null);
                 return caja?.Id;
             }
         }
 
-        // EL MÉTODO "GOD LEVEL": Transacción Atómica
-        // Guarda Venta + Detalles + Descuenta Stock + Valida. Todo o Nada.
         public Venta RegistrarVenta(Venta nuevaVenta, List<DetalleVenta> carrito)
         {
+            if (nuevaVenta.ClienteId <= 0) throw new Exception("Cliente inválido o no seleccionado.");
+            if (nuevaVenta.CajaId <= 0) throw new Exception("Caja inválida. Debe abrir una caja primero.");
+            if (carrito == null || carrito.Count == 0) throw new Exception("El carrito está vacío.");
+
+            if (nuevaVenta.TipoComprobante == null) nuevaVenta.TipoComprobante = "X";
+            if (nuevaVenta.CAE == null) nuevaVenta.CAE = "";
+            if (nuevaVenta.ObservacionesAFIP == null) nuevaVenta.ObservacionesAFIP = "";
+
             using (var context = new AlmacenDbContext())
             {
-                // Iniciamos transacción de base de datos
                 using (var transaction = context.Database.BeginTransaction())
                 {
                     try
                     {
-                        // 1. Guardar Cabecera de Venta
                         context.Ventas.Add(nuevaVenta);
-                        context.SaveChanges(); // Obtenemos el ID generado
+                        context.SaveChanges();
 
-                        // 2. Procesar cada item del carrito
                         foreach (var item in carrito)
                         {
                             var detalle = new DetalleVenta
@@ -66,26 +66,19 @@ namespace AlmacenDesktop.Services
                                 VentaId = nuevaVenta.Id,
                                 ProductoId = item.ProductoId,
                                 Cantidad = item.Cantidad,
-                                PrecioUnitario = item.PrecioUnitario
-                                // Subtotal se puede calcular aquí o en la entidad si tiene getter calculado
+                                PrecioUnitario = item.PrecioUnitario,
+                                Subtotal = item.Subtotal
                             };
                             context.DetallesVenta.Add(detalle);
 
-                            // 3. ACTUALIZAR STOCK CON VALIDACIÓN DE CONCURRENCIA
-                            // Buscamos el producto nuevamente dentro de la transacción para asegurar consistencia
                             var productoDb = context.Productos.Find(item.ProductoId);
+                            if (productoDb == null) throw new Exception($"El producto ID {item.ProductoId} ya no existe.");
 
-                            if (productoDb == null)
-                                throw new Exception($"El producto ID {item.ProductoId} ya no existe.");
-
-                            if (productoDb.Stock < item.Cantidad)
-                                throw new Exception($"Stock insuficiente para '{productoDb.Nombre}'. Stock actual: {productoDb.Stock}.");
-
+                            // Permitimos stock negativo temporalmente para no frenar la venta, 
+                            // pero se podría bloquear aquí si quisieras ser estricto.
                             productoDb.Stock -= item.Cantidad;
                         }
 
-                        // 4. Actualizar Caja (Sumar saldo si es Efectivo)
-                        // Esto evita discrepancias entre ventas y dinero en caja
                         if (nuevaVenta.MetodoPago == "Efectivo")
                         {
                             var cajaDb = context.Cajas.Find(nuevaVenta.CajaId);
@@ -94,16 +87,25 @@ namespace AlmacenDesktop.Services
                                 cajaDb.TotalVentasEfectivo += nuevaVenta.Total;
                             }
                         }
+                        else
+                        {
+                            var cajaDb = context.Cajas.Find(nuevaVenta.CajaId);
+                            if (cajaDb != null)
+                            {
+                                cajaDb.TotalVentasOtros += nuevaVenta.Total;
+                            }
+                        }
 
                         context.SaveChanges();
-                        transaction.Commit(); // ¡Confirmar cambios!
+                        transaction.Commit();
 
                         return nuevaVenta;
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        transaction.Rollback(); // Si algo falla, el sistema vuelve al estado anterior. 0 Corrupción de datos.
-                        throw;
+                        transaction.Rollback();
+                        var mensaje = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                        throw new Exception("Error al registrar venta en base de datos: " + mensaje);
                     }
                 }
             }

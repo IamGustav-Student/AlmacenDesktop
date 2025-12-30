@@ -1,223 +1,120 @@
-using AlmacenDesktop.Modelos;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using AlmacenDesktop.Modelos;
 
 namespace AlmacenDesktop.Forms
 {
     public partial class MenuPrincipal : Form
     {
+        private Button currentButton;
+        private Form activeForm;
         private Usuario _usuarioActual;
 
         public MenuPrincipal(Usuario usuario)
         {
             InitializeComponent();
             _usuarioActual = usuario;
-
-            // Conectar evento Load
-            this.Load += new EventHandler(MenuPrincipal_Load);
-
-            lblUsuarioInfo.Text = $"Conectado como: {_usuarioActual.NombreCompleto} ({_usuarioActual.ObtenerRol()})";
-
-            if (_usuarioActual.NombreUsuario != "admin")
-            {
-                tsmiAdmin.Visible = false;
-            }
-
-            ConfigurarFondoMDI();
+            string nombreUsuario = _usuarioActual != null ? _usuarioActual.NombreUsuario : "Admin";
+            this.Text = $"VENDEMAX - Usuario: {nombreUsuario}";
         }
 
-        private void MenuPrincipal_Load(object sender, EventArgs e)
+        private void ActivateButton(object btnSender)
         {
-            MostrarDashboard();
-        }
-
-        public void MostrarDashboard() // Hacemos público por si queremos llamarlo desde fuera
-        {
-            foreach (Form f in this.MdiChildren)
+            if (btnSender != null)
             {
-                if (f is DashboardForm)
+                if (currentButton != (Button)btnSender)
                 {
-                    f.BringToFront();
-                    return;
-                }
-            }
-
-            DashboardForm form = new DashboardForm();
-            form.MdiParent = this;
-            form.Dock = DockStyle.Fill;
-            form.Show();
-        }
-
-        private void ConfigurarFondoMDI()
-        {
-            foreach (Control ctl in this.Controls)
-            {
-                if (ctl is MdiClient mdi)
-                {
-                    mdi.BackColor = Color.FromArgb(240, 240, 240);
-                    break;
+                    DisableButton();
+                    Color color = Color.FromArgb(0, 150, 136); // Color VENDEMAX
+                    currentButton = (Button)btnSender;
+                    currentButton.BackColor = color;
+                    currentButton.ForeColor = Color.White;
+                    currentButton.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
                 }
             }
         }
 
-        private void tsmiSalir_Click(object sender, EventArgs e)
+        private void DisableButton()
+        {
+            foreach (Control previousBtn in panelMenu.Controls)
+            {
+                if (previousBtn.GetType() == typeof(Button))
+                {
+                    previousBtn.BackColor = Color.FromArgb(51, 51, 76);
+                    previousBtn.ForeColor = Color.Gainsboro;
+                    previousBtn.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+                }
+            }
+        }
+
+        private void OpenChildForm(Form childForm, object btnSender)
+        {
+            if (activeForm != null)
+                activeForm.Close();
+
+            ActivateButton(btnSender);
+            activeForm = childForm;
+            childForm.TopLevel = false;
+            childForm.FormBorderStyle = FormBorderStyle.None;
+            childForm.Dock = DockStyle.Fill;
+            this.panelDesktop.Controls.Add(childForm);
+            this.panelDesktop.Tag = childForm;
+            childForm.BringToFront();
+            childForm.Show();
+            lblBienvenida.Visible = false;
+        }
+
+        // --- EVENTOS PRINCIPALES ---
+
+        private void btnVentas_Click(object sender, EventArgs e)
+        {
+            OpenChildForm(new VentasForm(_usuarioActual), sender);
+        }
+
+        private void btnProductos_Click(object sender, EventArgs e)
+        {
+            OpenChildForm(new ProductosForm(), sender);
+        }
+
+        private void btnClientes_Click(object sender, EventArgs e)
+        {
+            OpenChildForm(new ClientesForm(), sender); // Restaurado
+        }
+
+        private void btnProveedores_Click(object sender, EventArgs e)
+        {
+            OpenChildForm(new ProveedoresForm(), sender); // Restaurado
+        }
+
+        private void btnCompras_Click(object sender, EventArgs e)
+        {
+            OpenChildForm(new ComprasForm(_usuarioActual), sender); // Restaurado
+        }
+
+        private void btnCaja_Click(object sender, EventArgs e)
+        {
+            OpenChildForm(new ControlCajaForm(_usuarioActual), sender);
+        }
+
+        private void btnCtaCte_Click(object sender, EventArgs e)
+        {
+            OpenChildForm(new CuentaCorrienteForm(), sender); // Restaurado
+        }
+
+        private void btnReportes_Click(object sender, EventArgs e)
+        {
+            OpenChildForm(new ReporteGananciasForm(), sender);
+        }
+
+        private void btnConfiguracion_Click(object sender, EventArgs e)
+        {
+            OpenChildForm(new ConfiguracionForm(), sender);
+        }
+
+        private void btnSalir_Click(object sender, EventArgs e)
         {
             Application.Exit();
-        }
-
-        // --- CAMBIO CLAVE: DE PRIVATE A PUBLIC ---
-        public void tsmiProductos_Click(object sender, EventArgs e)
-        {
-            foreach (Form f in this.MdiChildren)
-            {
-                if (f is ProductosForm)
-                {
-                    f.BringToFront();
-                    return;
-                }
-            }
-
-            ProductosForm form = new ProductosForm();
-            form.MdiParent = this;
-            form.Show();
-        }
-
-        public void tsmiClientes_Click(object sender, EventArgs e)
-        {
-            foreach (Form f in this.MdiChildren)
-            {
-                if (f is ClientesForm)
-                {
-                    f.BringToFront();
-                    return;
-                }
-            }
-
-            ClientesForm form = new ClientesForm();
-            form.MdiParent = this;
-            form.Show();
-        }
-
-        // --- CAMBIO CLAVE: DE PRIVATE A PUBLIC ---
-        public void tsmiNuevaVenta_Click(object sender, EventArgs e)
-        {
-            VentasForm form = new VentasForm(_usuarioActual);
-            form.MdiParent = this;
-            form.Show();
-        }
-
-        private void tsmiHistorial_Click(object sender, EventArgs e)
-        {
-            foreach (Form f in this.MdiChildren)
-            {
-                if (f is HistorialVentasForm)
-                {
-                    f.BringToFront();
-                    return;
-                }
-            }
-
-            HistorialVentasForm form = new HistorialVentasForm();
-            form.MdiParent = this;
-            form.Show();
-        }
-
-
-
-        public void inicioToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            MostrarDashboard();
-        }
-
-        // Lo dejamos public para poder llamarlo si hiciera falta
-        public void controlDeCajaToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ControlCajaForm form = new ControlCajaForm(_usuarioActual);
-            form.ShowDialog();
-            MostrarDashboard();
-        }
-
-        private void configuracionPersonalizadaToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ConfiguracionForm form = new ConfiguracionForm();
-            form.MdiParent = this;
-            form.Show();
-        }
-
-        private void cuentasCorrientesToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            // Reemplazamos el reporte simple por el gestor completo
-            CuentaCorrienteForm form = new CuentaCorrienteForm();
-            form.MdiParent = this; // O form.ShowDialog() si prefieres modal
-            form.Show();
-        }
-
-        private void tsmiProveedores_Click(object sender, EventArgs e)
-        {
-            ProveedoresForm form = new ProveedoresForm();
-
-            form.MdiParent = this;
-            form.Show();
-        }
-
-        private void comprasToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ComprasForm form = new ComprasForm();
-            form.MdiParent = this;
-            form.Show();
-        }
-
-        private void etiquetasToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            foreach (Form f in this.MdiChildren)
-            {
-                if (f is EtiquetasForm)
-                {
-                    f.BringToFront();
-                    return;
-                }
-            }
-
-            EtiquetasForm form = new EtiquetasForm();
-            form.MdiParent = this;
-            form.Show();
-        }
-
-        public void tsmiReporteGanancias_Click(object sender, EventArgs e)
-        {
-            // Solo el admin debería ver esto
-            if (_usuarioActual.NombreUsuario != "admin")
-            {
-                MessageBox.Show("Acceso denegado. Solo administradores.", "Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                return;
-            }
-
-            ReporteGananciasForm form = new ReporteGananciasForm();
-            form.MdiParent = this;
-            form.Show();
-        }
-
-        public void tsmiHistorialCajas_Click(object sender, EventArgs e)
-        {
-            // Solo admin
-            if (_usuarioActual.NombreUsuario != "admin") return;
-
-            HistorialCajasForm form = new HistorialCajasForm();
-            form.MdiParent = this;
-            form.Show();
-        }
-
-        private void lblUsuarioInfo_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void importarExcelToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ImportarProductosForm form = new ImportarProductosForm();
-            form.MdiParent = this;
-            form.Show();
         }
     }
 }

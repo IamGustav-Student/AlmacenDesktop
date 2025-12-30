@@ -6,250 +6,303 @@
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
+            if (disposing && (components != null)) components.Dispose();
             base.Dispose(disposing);
         }
 
+        #region Windows Form Designer generated code
+
         private void InitializeComponent()
         {
-            menuStrip1 = new MenuStrip();
-            tsmiArchivo = new ToolStripMenuItem();
-            tsmiSalir = new ToolStripMenuItem();
-            tsmiGestion = new ToolStripMenuItem();
-            tsmiProductos = new ToolStripMenuItem();
-            tsmiClientes = new ToolStripMenuItem();
-            tsmiProveedores = new ToolStripMenuItem();
-            comprasToolStripMenuItem = new ToolStripMenuItem();
-            etiquetasToolStripMenuItem = new ToolStripMenuItem();
-            tsmiReporteGanancias = new ToolStripMenuItem();
-            tsmiHistorialCajas = new ToolStripMenuItem();
-            tsmiVentas = new ToolStripMenuItem();
-            tsmiNuevaVenta = new ToolStripMenuItem();
-            tsmiHistorial = new ToolStripMenuItem();
-            controlDeCajaToolStripMenuItem = new ToolStripMenuItem();
-            configuracionPersonalizadaToolStripMenuItem = new ToolStripMenuItem();
-            cuentasCorrientesToolStripMenuItem = new ToolStripMenuItem();
-            tsmiAdmin = new ToolStripMenuItem();
-            tsmiUsuarios = new ToolStripMenuItem();
-            statusStrip1 = new StatusStrip();
-            lblUsuarioInfo = new ToolStripStatusLabel();
-            importarExcelToolStripMenuItem = new ToolStripMenuItem();
-            menuStrip1.SuspendLayout();
-            statusStrip1.SuspendLayout();
-            SuspendLayout();
+            this.panelMenu = new System.Windows.Forms.Panel();
+            this.btnSalir = new System.Windows.Forms.Button();
+            this.btnConfiguracion = new System.Windows.Forms.Button();
+            this.btnReportes = new System.Windows.Forms.Button();
+            this.btnCtaCte = new System.Windows.Forms.Button();
+            this.btnCaja = new System.Windows.Forms.Button();
+            this.btnCompras = new System.Windows.Forms.Button();
+            this.btnProveedores = new System.Windows.Forms.Button();
+            this.btnClientes = new System.Windows.Forms.Button();
+            this.btnProductos = new System.Windows.Forms.Button();
+            this.btnVentas = new System.Windows.Forms.Button();
+            this.panelLogo = new System.Windows.Forms.Panel();
+            this.lblLogo = new System.Windows.Forms.Label();
+            this.panelDesktop = new System.Windows.Forms.Panel();
+            this.lblBienvenida = new System.Windows.Forms.Label();
+            this.panelMenu.SuspendLayout();
+            this.panelLogo.SuspendLayout();
+            this.panelDesktop.SuspendLayout();
+            this.SuspendLayout();
             // 
-            // menuStrip1
+            // panelMenu
             // 
-            menuStrip1.AutoSize = false;
-            menuStrip1.BackColor = Color.Yellow;
-            menuStrip1.Items.AddRange(new ToolStripItem[] { tsmiArchivo, tsmiGestion, tsmiVentas, controlDeCajaToolStripMenuItem, configuracionPersonalizadaToolStripMenuItem, cuentasCorrientesToolStripMenuItem, tsmiAdmin });
-            menuStrip1.Location = new Point(0, 0);
-            menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(800, 30);
-            menuStrip1.TabIndex = 0;
-            menuStrip1.Text = "menuStrip1";
+            this.panelMenu.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(51)))), ((int)(((byte)(76)))));
+            this.panelMenu.Controls.Add(this.btnSalir);
+            this.panelMenu.Controls.Add(this.btnConfiguracion);
+            this.panelMenu.Controls.Add(this.btnReportes);
+            this.panelMenu.Controls.Add(this.btnCtaCte);
+            this.panelMenu.Controls.Add(this.btnCaja);
+            this.panelMenu.Controls.Add(this.btnCompras);
+            this.panelMenu.Controls.Add(this.btnProveedores);
+            this.panelMenu.Controls.Add(this.btnClientes);
+            this.panelMenu.Controls.Add(this.btnProductos);
+            this.panelMenu.Controls.Add(this.btnVentas);
+            this.panelMenu.Controls.Add(this.panelLogo);
+            this.panelMenu.Dock = System.Windows.Forms.DockStyle.Left;
+            this.panelMenu.Location = new System.Drawing.Point(0, 0);
+            this.panelMenu.Name = "panelMenu";
+            this.panelMenu.Size = new System.Drawing.Size(220, 700); // Aumentado altura para botones
+            this.panelMenu.TabIndex = 0;
             // 
-            // tsmiArchivo
+            // btnSalir
             // 
-            tsmiArchivo.DropDownItems.AddRange(new ToolStripItem[] { tsmiSalir });
-            tsmiArchivo.Name = "tsmiArchivo";
-            tsmiArchivo.Size = new Size(60, 26);
-            tsmiArchivo.Text = "Archivo";
+            this.btnSalir.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.btnSalir.FlatAppearance.BorderSize = 0;
+            this.btnSalir.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSalir.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnSalir.ForeColor = System.Drawing.Color.Gainsboro;
+            this.btnSalir.Location = new System.Drawing.Point(0, 640);
+            this.btnSalir.Name = "btnSalir";
+            this.btnSalir.Padding = new System.Windows.Forms.Padding(12, 0, 0, 0);
+            this.btnSalir.Size = new System.Drawing.Size(220, 60);
+            this.btnSalir.TabIndex = 10;
+            this.btnSalir.Text = "Cerrar Sesión";
+            this.btnSalir.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnSalir.UseVisualStyleBackColor = true;
+            this.btnSalir.Click += new System.EventHandler(this.btnSalir_Click);
             // 
-            // tsmiSalir
+            // btnConfiguracion
             // 
-            tsmiSalir.Name = "tsmiSalir";
-            tsmiSalir.Size = new Size(159, 22);
-            tsmiSalir.Text = "Salir del Sistema";
-            tsmiSalir.Click += tsmiSalir_Click;
+            this.btnConfiguracion.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnConfiguracion.FlatAppearance.BorderSize = 0;
+            this.btnConfiguracion.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnConfiguracion.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnConfiguracion.ForeColor = System.Drawing.Color.Gainsboro;
+            this.btnConfiguracion.Location = new System.Drawing.Point(0, 560);
+            this.btnConfiguracion.Name = "btnConfiguracion";
+            this.btnConfiguracion.Padding = new System.Windows.Forms.Padding(12, 0, 0, 0);
+            this.btnConfiguracion.Size = new System.Drawing.Size(220, 60);
+            this.btnConfiguracion.TabIndex = 9;
+            this.btnConfiguracion.Text = "⚙  Configuración";
+            this.btnConfiguracion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnConfiguracion.UseVisualStyleBackColor = true;
+            this.btnConfiguracion.Click += new System.EventHandler(this.btnConfiguracion_Click);
             // 
-            // tsmiGestion
+            // btnReportes
             // 
-            tsmiGestion.DropDownItems.AddRange(new ToolStripItem[] { tsmiProductos, tsmiClientes, tsmiProveedores, comprasToolStripMenuItem, etiquetasToolStripMenuItem, tsmiReporteGanancias, tsmiHistorialCajas });
-            tsmiGestion.Name = "tsmiGestion";
-            tsmiGestion.Size = new Size(59, 26);
-            tsmiGestion.Text = "Gestión";
+            this.btnReportes.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnReportes.FlatAppearance.BorderSize = 0;
+            this.btnReportes.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnReportes.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnReportes.ForeColor = System.Drawing.Color.Gainsboro;
+            this.btnReportes.Location = new System.Drawing.Point(0, 500);
+            this.btnReportes.Name = "btnReportes";
+            this.btnReportes.Padding = new System.Windows.Forms.Padding(12, 0, 0, 0);
+            this.btnReportes.Size = new System.Drawing.Size(220, 60);
+            this.btnReportes.TabIndex = 8;
+            this.btnReportes.Text = "📊  Reportes";
+            this.btnReportes.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnReportes.UseVisualStyleBackColor = true;
+            this.btnReportes.Click += new System.EventHandler(this.btnReportes_Click);
             // 
-            // tsmiProductos
+            // btnCtaCte
             // 
-            tsmiProductos.DropDownItems.AddRange(new ToolStripItem[] { importarExcelToolStripMenuItem });
-            tsmiProductos.Name = "tsmiProductos";
-            tsmiProductos.Size = new Size(182, 22);
-            tsmiProductos.Text = "Productos";
-            tsmiProductos.Click += tsmiProductos_Click;
+            this.btnCtaCte.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnCtaCte.FlatAppearance.BorderSize = 0;
+            this.btnCtaCte.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCtaCte.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnCtaCte.ForeColor = System.Drawing.Color.Gainsboro;
+            this.btnCtaCte.Location = new System.Drawing.Point(0, 440);
+            this.btnCtaCte.Name = "btnCtaCte";
+            this.btnCtaCte.Padding = new System.Windows.Forms.Padding(12, 0, 0, 0);
+            this.btnCtaCte.Size = new System.Drawing.Size(220, 60);
+            this.btnCtaCte.TabIndex = 7;
+            this.btnCtaCte.Text = "📒  Cuentas Corrientes";
+            this.btnCtaCte.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnCtaCte.UseVisualStyleBackColor = true;
+            this.btnCtaCte.Click += new System.EventHandler(this.btnCtaCte_Click);
             // 
-            // tsmiClientes
+            // btnCaja
             // 
-            tsmiClientes.Name = "tsmiClientes";
-            tsmiClientes.Size = new Size(182, 22);
-            tsmiClientes.Text = "Clientes";
-            tsmiClientes.Click += tsmiClientes_Click;
+            this.btnCaja.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnCaja.FlatAppearance.BorderSize = 0;
+            this.btnCaja.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCaja.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnCaja.ForeColor = System.Drawing.Color.Gainsboro;
+            this.btnCaja.Location = new System.Drawing.Point(0, 380);
+            this.btnCaja.Name = "btnCaja";
+            this.btnCaja.Padding = new System.Windows.Forms.Padding(12, 0, 0, 0);
+            this.btnCaja.Size = new System.Drawing.Size(220, 60);
+            this.btnCaja.TabIndex = 6;
+            this.btnCaja.Text = "💵  Caja Diaria";
+            this.btnCaja.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnCaja.UseVisualStyleBackColor = true;
+            this.btnCaja.Click += new System.EventHandler(this.btnCaja_Click);
             // 
-            // tsmiProveedores
+            // btnCompras
             // 
-            tsmiProveedores.Name = "tsmiProveedores";
-            tsmiProveedores.Size = new Size(182, 22);
-            tsmiProveedores.Text = "Proveedores";
-            tsmiProveedores.Click += tsmiProveedores_Click;
+            this.btnCompras.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnCompras.FlatAppearance.BorderSize = 0;
+            this.btnCompras.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCompras.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnCompras.ForeColor = System.Drawing.Color.Gainsboro;
+            this.btnCompras.Location = new System.Drawing.Point(0, 320);
+            this.btnCompras.Name = "btnCompras";
+            this.btnCompras.Padding = new System.Windows.Forms.Padding(12, 0, 0, 0);
+            this.btnCompras.Size = new System.Drawing.Size(220, 60);
+            this.btnCompras.TabIndex = 5;
+            this.btnCompras.Text = "📥  Compras / Stock";
+            this.btnCompras.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnCompras.UseVisualStyleBackColor = true;
+            this.btnCompras.Click += new System.EventHandler(this.btnCompras_Click);
             // 
-            // comprasToolStripMenuItem
+            // btnProveedores
             // 
-            comprasToolStripMenuItem.Name = "comprasToolStripMenuItem";
-            comprasToolStripMenuItem.Size = new Size(182, 22);
-            comprasToolStripMenuItem.Text = "Compras";
-            comprasToolStripMenuItem.Click += comprasToolStripMenuItem_Click;
+            this.btnProveedores.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnProveedores.FlatAppearance.BorderSize = 0;
+            this.btnProveedores.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnProveedores.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnProveedores.ForeColor = System.Drawing.Color.Gainsboro;
+            this.btnProveedores.Location = new System.Drawing.Point(0, 260);
+            this.btnProveedores.Name = "btnProveedores";
+            this.btnProveedores.Padding = new System.Windows.Forms.Padding(12, 0, 0, 0);
+            this.btnProveedores.Size = new System.Drawing.Size(220, 60);
+            this.btnProveedores.TabIndex = 4;
+            this.btnProveedores.Text = "🚚  Proveedores";
+            this.btnProveedores.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnProveedores.UseVisualStyleBackColor = true;
+            this.btnProveedores.Click += new System.EventHandler(this.btnProveedores_Click);
             // 
-            // etiquetasToolStripMenuItem
+            // btnClientes
             // 
-            etiquetasToolStripMenuItem.Name = "etiquetasToolStripMenuItem";
-            etiquetasToolStripMenuItem.Size = new Size(182, 22);
-            etiquetasToolStripMenuItem.Text = "Etiquetas";
-            etiquetasToolStripMenuItem.Click += etiquetasToolStripMenuItem_Click;
+            this.btnClientes.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnClientes.FlatAppearance.BorderSize = 0;
+            this.btnClientes.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnClientes.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnClientes.ForeColor = System.Drawing.Color.Gainsboro;
+            this.btnClientes.Location = new System.Drawing.Point(0, 200);
+            this.btnClientes.Name = "btnClientes";
+            this.btnClientes.Padding = new System.Windows.Forms.Padding(12, 0, 0, 0);
+            this.btnClientes.Size = new System.Drawing.Size(220, 60);
+            this.btnClientes.TabIndex = 3;
+            this.btnClientes.Text = "👥  Clientes";
+            this.btnClientes.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnClientes.UseVisualStyleBackColor = true;
+            this.btnClientes.Click += new System.EventHandler(this.btnClientes_Click);
             // 
-            // tsmiReporteGanancias
+            // btnProductos
             // 
-            tsmiReporteGanancias.Name = "tsmiReporteGanancias";
-            tsmiReporteGanancias.Size = new Size(182, 22);
-            tsmiReporteGanancias.Text = "Report de Ganancias";
-            tsmiReporteGanancias.Click += tsmiReporteGanancias_Click;
+            this.btnProductos.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnProductos.FlatAppearance.BorderSize = 0;
+            this.btnProductos.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnProductos.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnProductos.ForeColor = System.Drawing.Color.Gainsboro;
+            this.btnProductos.Location = new System.Drawing.Point(0, 140);
+            this.btnProductos.Name = "btnProductos";
+            this.btnProductos.Padding = new System.Windows.Forms.Padding(12, 0, 0, 0);
+            this.btnProductos.Size = new System.Drawing.Size(220, 60);
+            this.btnProductos.TabIndex = 2;
+            this.btnProductos.Text = "📦  Productos";
+            this.btnProductos.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnProductos.UseVisualStyleBackColor = true;
+            this.btnProductos.Click += new System.EventHandler(this.btnProductos_Click);
             // 
-            // tsmiHistorialCajas
+            // btnVentas
             // 
-            tsmiHistorialCajas.Name = "tsmiHistorialCajas";
-            tsmiHistorialCajas.Size = new Size(182, 22);
-            tsmiHistorialCajas.Text = "Historial de Caja";
-            tsmiHistorialCajas.Click += tsmiHistorialCajas_Click;
+            this.btnVentas.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnVentas.FlatAppearance.BorderSize = 0;
+            this.btnVentas.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnVentas.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnVentas.ForeColor = System.Drawing.Color.Gainsboro;
+            this.btnVentas.Location = new System.Drawing.Point(0, 80);
+            this.btnVentas.Name = "btnVentas";
+            this.btnVentas.Padding = new System.Windows.Forms.Padding(12, 0, 0, 0);
+            this.btnVentas.Size = new System.Drawing.Size(220, 60);
+            this.btnVentas.TabIndex = 1;
+            this.btnVentas.Text = "🛒  Vender (F1)";
+            this.btnVentas.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnVentas.UseVisualStyleBackColor = true;
+            this.btnVentas.Click += new System.EventHandler(this.btnVentas_Click);
             // 
-            // tsmiVentas
+            // panelLogo
             // 
-            tsmiVentas.DropDownItems.AddRange(new ToolStripItem[] { tsmiNuevaVenta, tsmiHistorial });
-            tsmiVentas.Name = "tsmiVentas";
-            tsmiVentas.Size = new Size(53, 26);
-            tsmiVentas.Text = "Ventas";
+            this.panelLogo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(39)))), ((int)(((byte)(58)))));
+            this.panelLogo.Controls.Add(this.lblLogo);
+            this.panelLogo.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panelLogo.Location = new System.Drawing.Point(0, 0);
+            this.panelLogo.Name = "panelLogo";
+            this.panelLogo.Size = new System.Drawing.Size(220, 80);
+            this.panelLogo.TabIndex = 0;
             // 
-            // tsmiNuevaVenta
+            // lblLogo
             // 
-            tsmiNuevaVenta.Name = "tsmiNuevaVenta";
-            tsmiNuevaVenta.Size = new Size(140, 22);
-            tsmiNuevaVenta.Text = "Nueva Venta";
-            tsmiNuevaVenta.Click += tsmiNuevaVenta_Click;
+            this.lblLogo.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblLogo.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblLogo.ForeColor = System.Drawing.Color.LightGray;
+            this.lblLogo.Location = new System.Drawing.Point(0, 0);
+            this.lblLogo.Name = "lblLogo";
+            this.lblLogo.Size = new System.Drawing.Size(220, 80);
+            this.lblLogo.TabIndex = 0;
+            this.lblLogo.Text = "VENDEMAX";
+            this.lblLogo.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // tsmiHistorial
+            // panelDesktop
             // 
-            tsmiHistorial.Name = "tsmiHistorial";
-            tsmiHistorial.Size = new Size(140, 22);
-            tsmiHistorial.Text = "Historial";
-            tsmiHistorial.Click += tsmiHistorial_Click;
+            this.panelDesktop.BackColor = System.Drawing.Color.White;
+            this.panelDesktop.Controls.Add(this.lblBienvenida);
+            this.panelDesktop.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelDesktop.Location = new System.Drawing.Point(220, 0);
+            this.panelDesktop.Name = "panelDesktop";
+            this.panelDesktop.Size = new System.Drawing.Size(780, 700);
+            this.panelDesktop.TabIndex = 1;
             // 
-            // controlDeCajaToolStripMenuItem
+            // lblBienvenida
             // 
-            controlDeCajaToolStripMenuItem.Name = "controlDeCajaToolStripMenuItem";
-            controlDeCajaToolStripMenuItem.Size = new Size(102, 26);
-            controlDeCajaToolStripMenuItem.Text = "Control De Caja";
-            controlDeCajaToolStripMenuItem.Click += controlDeCajaToolStripMenuItem_Click;
-            // 
-            // configuracionPersonalizadaToolStripMenuItem
-            // 
-            configuracionPersonalizadaToolStripMenuItem.Name = "configuracionPersonalizadaToolStripMenuItem";
-            configuracionPersonalizadaToolStripMenuItem.Size = new Size(170, 26);
-            configuracionPersonalizadaToolStripMenuItem.Text = "Configuracion Personalizada";
-            configuracionPersonalizadaToolStripMenuItem.Click += configuracionPersonalizadaToolStripMenuItem_Click;
-            // 
-            // cuentasCorrientesToolStripMenuItem
-            // 
-            cuentasCorrientesToolStripMenuItem.Name = "cuentasCorrientesToolStripMenuItem";
-            cuentasCorrientesToolStripMenuItem.Size = new Size(119, 26);
-            cuentasCorrientesToolStripMenuItem.Text = "Cuentas Corrientes";
-            cuentasCorrientesToolStripMenuItem.Click += cuentasCorrientesToolStripMenuItem_Click;
-            // 
-            // tsmiAdmin
-            // 
-            tsmiAdmin.DropDownItems.AddRange(new ToolStripItem[] { tsmiUsuarios });
-            tsmiAdmin.Name = "tsmiAdmin";
-            tsmiAdmin.Size = new Size(100, 26);
-            tsmiAdmin.Text = "Administración";
-            // 
-            // tsmiUsuarios
-            // 
-            tsmiUsuarios.Name = "tsmiUsuarios";
-            tsmiUsuarios.Size = new Size(178, 22);
-            tsmiUsuarios.Text = "Gestión de Usuarios";
-            // 
-            // statusStrip1
-            // 
-            statusStrip1.AutoSize = false;
-            statusStrip1.BackColor = Color.LightGray;
-            statusStrip1.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            statusStrip1.Items.AddRange(new ToolStripItem[] { lblUsuarioInfo });
-            statusStrip1.Location = new Point(0, 400);
-            statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new Size(800, 50);
-            statusStrip1.Stretch = false;
-            statusStrip1.TabIndex = 1;
-            // 
-            // lblUsuarioInfo
-            // 
-            lblUsuarioInfo.BackColor = Color.Lime;
-            lblUsuarioInfo.BorderStyle = Border3DStyle.Adjust;
-            lblUsuarioInfo.Font = new Font("Segoe UI Emoji", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblUsuarioInfo.Margin = new Padding(5, 3, 0, 2);
-            lblUsuarioInfo.Name = "lblUsuarioInfo";
-            lblUsuarioInfo.Size = new Size(180, 45);
-            lblUsuarioInfo.Text = "Usuario: Desconocido";
-            lblUsuarioInfo.Click += lblUsuarioInfo_Click;
-            // 
-            // importarExcelToolStripMenuItem
-            // 
-            importarExcelToolStripMenuItem.Name = "importarExcelToolStripMenuItem";
-            importarExcelToolStripMenuItem.Size = new Size(180, 22);
-            importarExcelToolStripMenuItem.Text = "Importar Excel";
-            importarExcelToolStripMenuItem.Click += importarExcelToolStripMenuItem_Click;
+            this.lblBienvenida.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.lblBienvenida.AutoSize = true;
+            this.lblBienvenida.Font = new System.Drawing.Font("Segoe UI", 32F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblBienvenida.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.lblBienvenida.Location = new System.Drawing.Point(225, 300);
+            this.lblBienvenida.Name = "lblBienvenida";
+            this.lblBienvenida.Size = new System.Drawing.Size(270, 59);
+            this.lblBienvenida.TabIndex = 0;
+            this.lblBienvenida.Text = "VENDEMAX";
             // 
             // MenuPrincipal
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
-            BackgroundImageLayout = ImageLayout.Center;
-            ClientSize = new Size(800, 450);
-            Controls.Add(statusStrip1);
-            Controls.Add(menuStrip1);
-            IsMdiContainer = true;
-            MainMenuStrip = menuStrip1;
-            Name = "MenuPrincipal";
-            Text = "Sistema de Gestión - AlmacenDesktop";
-            WindowState = FormWindowState.Maximized;
-            menuStrip1.ResumeLayout(false);
-            menuStrip1.PerformLayout();
-            statusStrip1.ResumeLayout(false);
-            statusStrip1.PerformLayout();
-            ResumeLayout(false);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(1000, 700);
+            this.Controls.Add(this.panelDesktop);
+            this.Controls.Add(this.panelMenu);
+            this.Name = "MenuPrincipal";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "VENDEMAX - Sistema de Gestión Comercial";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            this.panelMenu.ResumeLayout(false);
+            this.panelLogo.ResumeLayout(false);
+            this.panelDesktop.ResumeLayout(false);
+            this.panelDesktop.PerformLayout();
+            this.ResumeLayout(false);
+
         }
 
-        private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem tsmiArchivo;
-        private System.Windows.Forms.ToolStripMenuItem tsmiSalir;
-        private System.Windows.Forms.ToolStripMenuItem tsmiGestion;
-        private System.Windows.Forms.ToolStripMenuItem tsmiProductos;
-        private System.Windows.Forms.ToolStripMenuItem tsmiClientes;
-        private System.Windows.Forms.ToolStripMenuItem tsmiProveedores;
-        private System.Windows.Forms.ToolStripMenuItem tsmiVentas;
-        private System.Windows.Forms.ToolStripMenuItem tsmiNuevaVenta;
-        private System.Windows.Forms.ToolStripMenuItem tsmiHistorial;
-        private System.Windows.Forms.ToolStripMenuItem tsmiAdmin;
-        private System.Windows.Forms.ToolStripMenuItem tsmiUsuarios;
-        private System.Windows.Forms.StatusStrip statusStrip1;
-        private System.Windows.Forms.ToolStripStatusLabel lblUsuarioInfo;
-        private ToolStripMenuItem controlDeCajaToolStripMenuItem;
-        private ToolStripMenuItem configuracionPersonalizadaToolStripMenuItem;
-        private ToolStripMenuItem cuentasCorrientesToolStripMenuItem;
-        private ToolStripMenuItem comprasToolStripMenuItem;
-        private ToolStripMenuItem etiquetasToolStripMenuItem;
-        private ToolStripMenuItem tsmiReporteGanancias;
-        private ToolStripMenuItem tsmiHistorialCajas;
-        private ToolStripMenuItem importarExcelToolStripMenuItem;
+        #endregion
+
+        private System.Windows.Forms.Panel panelMenu;
+        private System.Windows.Forms.Button btnVentas;
+        private System.Windows.Forms.Panel panelLogo;
+        private System.Windows.Forms.Button btnSalir;
+        private System.Windows.Forms.Button btnConfiguracion;
+        private System.Windows.Forms.Button btnReportes;
+        private System.Windows.Forms.Button btnCaja;
+        private System.Windows.Forms.Button btnCtaCte; // Nuevo
+        private System.Windows.Forms.Button btnCompras; // Nuevo
+        private System.Windows.Forms.Button btnProveedores; // Nuevo
+        private System.Windows.Forms.Button btnClientes; // Nuevo
+        private System.Windows.Forms.Button btnProductos;
+        private System.Windows.Forms.Panel panelDesktop;
+        private System.Windows.Forms.Label lblLogo;
+        private System.Windows.Forms.Label lblBienvenida;
     }
 }
-

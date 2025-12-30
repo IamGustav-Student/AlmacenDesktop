@@ -24,9 +24,6 @@ namespace AlmacenDesktop.Data
         public DbSet<MovimientoCaja> MovimientosCaja { get; set; }
         public DbSet<Pago> Pagos { get; set; }
 
-        // ELIMINADO: MovimientoCtaCte no es una tabla, es un reporte en memoria.
-        // public DbSet<MovimientoCtaCte> MovimientosCtaCte { get; set; } 
-
         // --- CONFIGURACIÓN GENERAL ---
         public DbSet<DatosNegocio> DatosNegocio { get; set; }
         public DbSet<ConfiguracionAfip> ConfiguracionesAfip { get; set; }
@@ -40,24 +37,30 @@ namespace AlmacenDesktop.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // CONFIGURACIÓN DE PRECISIÓN DECIMAL
+            // Es vital que las propiedades existan y tengan 'set' en los modelos
+
             modelBuilder.Entity<Producto>().Property(p => p.Costo).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Producto>().Property(p => p.Precio).HasColumnType("decimal(18,2)");
 
             modelBuilder.Entity<Venta>().Property(v => v.Total).HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<DetalleVenta>().Property(d => d.PrecioUnitario).HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<DetalleVenta>().Property(d => d.Subtotal).HasColumnType("decimal(18,2)");
 
             modelBuilder.Entity<Compra>().Property(c => c.Total).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<DetalleCompra>().Property(d => d.CostoUnitario).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<DetalleCompra>().Property(d => d.Subtotal).HasColumnType("decimal(18,2)");
 
             modelBuilder.Entity<Caja>().Property(c => c.SaldoInicial).HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<Caja>().Property(c => c.TotalVentasEfectivo).HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<Caja>().Property(c => c.TotalVentasOtros).HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<Caja>().Property(c => c.SaldoFinalSistema).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Caja>().Property(c => c.SaldoFinalReal).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Caja>().Property(c => c.Diferencia).HasColumnType("decimal(18,2)");
 
             modelBuilder.Entity<MovimientoCaja>().Property(m => m.Monto).HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<Pago>().Property(p => p.Monto).HasColumnType("decimal(18,2)");
 
-            // ELIMINADO: Configuración de MovimientoCtaCte porque no es una tabla
-
-            // ÍNDICES PARA PERFORMANCE
+            // ÍNDICES
             modelBuilder.Entity<Producto>().HasIndex(p => p.CodigoBarras).IsUnique();
             modelBuilder.Entity<Cliente>().HasIndex(c => c.DniCuit);
         }
