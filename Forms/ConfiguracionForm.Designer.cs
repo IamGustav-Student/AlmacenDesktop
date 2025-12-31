@@ -2,34 +2,22 @@
 {
     partial class ConfiguracionForm
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
+            if (disposing && (components != null)) components.Dispose();
             base.Dispose(disposing);
         }
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             this.lblTitulo = new System.Windows.Forms.Label();
             this.grpDatos = new System.Windows.Forms.GroupBox();
+            this.cboImpresoras = new System.Windows.Forms.ComboBox();
+            this.lblImpresora = new System.Windows.Forms.Label();
             this.txtMensaje = new System.Windows.Forms.TextBox();
             this.lblMensaje = new System.Windows.Forms.Label();
             this.txtDireccion = new System.Windows.Forms.TextBox();
@@ -61,6 +49,8 @@
             // 
             // grpDatos
             // 
+            this.grpDatos.Controls.Add(this.cboImpresoras);
+            this.grpDatos.Controls.Add(this.lblImpresora);
             this.grpDatos.Controls.Add(this.txtMensaje);
             this.grpDatos.Controls.Add(this.lblMensaje);
             this.grpDatos.Controls.Add(this.txtDireccion);
@@ -76,10 +66,29 @@
             this.grpDatos.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.grpDatos.Location = new System.Drawing.Point(25, 70);
             this.grpDatos.Name = "grpDatos";
-            this.grpDatos.Size = new System.Drawing.Size(530, 350);
+            this.grpDatos.Size = new System.Drawing.Size(530, 420); // Aumenté altura para impresora
             this.grpDatos.TabIndex = 1;
             this.grpDatos.TabStop = false;
             this.grpDatos.Text = "Datos para el Ticket";
+            // 
+            // cboImpresoras
+            // 
+            this.cboImpresoras.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboImpresoras.FormattingEnabled = true;
+            this.cboImpresoras.Location = new System.Drawing.Point(20, 365);
+            this.cboImpresoras.Name = "cboImpresoras";
+            this.cboImpresoras.Size = new System.Drawing.Size(480, 25);
+            this.cboImpresoras.TabIndex = 13;
+            // 
+            // lblImpresora
+            // 
+            this.lblImpresora.AutoSize = true;
+            this.lblImpresora.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblImpresora.Location = new System.Drawing.Point(20, 343);
+            this.lblImpresora.Name = "lblImpresora";
+            this.lblImpresora.Size = new System.Drawing.Size(158, 19);
+            this.lblImpresora.TabIndex = 12;
+            this.lblImpresora.Text = "Impresora de Tickets";
             // 
             // txtMensaje
             // 
@@ -185,7 +194,7 @@
             this.btnGuardar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnGuardar.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnGuardar.ForeColor = System.Drawing.Color.White;
-            this.btnGuardar.Location = new System.Drawing.Point(375, 440);
+            this.btnGuardar.Location = new System.Drawing.Point(375, 510);
             this.btnGuardar.Name = "btnGuardar";
             this.btnGuardar.Size = new System.Drawing.Size(180, 45);
             this.btnGuardar.TabIndex = 2;
@@ -200,7 +209,7 @@
             this.btnCancelar.FlatAppearance.BorderColor = System.Drawing.Color.Silver;
             this.btnCancelar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnCancelar.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnCancelar.Location = new System.Drawing.Point(25, 440);
+            this.btnCancelar.Location = new System.Drawing.Point(25, 510);
             this.btnCancelar.Name = "btnCancelar";
             this.btnCancelar.Size = new System.Drawing.Size(120, 45);
             this.btnCancelar.TabIndex = 3;
@@ -229,7 +238,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(584, 511);
+            this.ClientSize = new System.Drawing.Size(584, 580); // Altura aumentada
             this.Controls.Add(this.btnConfigAfip);
             this.Controls.Add(this.btnCancelar);
             this.Controls.Add(this.btnGuardar);
@@ -245,7 +254,6 @@
             this.grpDatos.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion
@@ -266,6 +274,9 @@
         private System.Windows.Forms.Label lblMensaje;
         private System.Windows.Forms.Button btnGuardar;
         private System.Windows.Forms.Button btnCancelar;
-        private System.Windows.Forms.Button btnConfigAfip; // Botón nuevo para AFIP
+        private System.Windows.Forms.Button btnConfigAfip;
+        // NUEVOS CONTROLES IMPRESORA
+        private System.Windows.Forms.Label lblImpresora;
+        private System.Windows.Forms.ComboBox cboImpresoras;
     }
 }

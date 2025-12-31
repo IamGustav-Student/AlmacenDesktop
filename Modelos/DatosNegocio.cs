@@ -1,13 +1,31 @@
-﻿namespace AlmacenDesktop.Modelos
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace AlmacenDesktop.Modelos
 {
     public class DatosNegocio
     {
         public int Id { get; set; }
-        public string NombreFantasia { get; set; } // El nombre del cartel (ej. "Kiosco Pepe")
-        public string RazonSocial { get; set; } // Nombre legal (ej. "José Pérez")
+
+        [StringLength(100)]
+        public string NombreFantasia { get; set; }
+
+        [StringLength(100)]
+        public string RazonSocial { get; set; }
+
+        [StringLength(13)] // CUIT 11 digitos + guiones opcionales
         public string CUIT { get; set; }
+
+        [StringLength(200)]
         public string Direccion { get; set; }
+
+        [StringLength(50)]
         public string Telefono { get; set; }
-        public string MensajeTicket { get; set; } // Pie de página (ej. "No se aceptan devoluciones")
+
+        [StringLength(255)]
+        public string MensajeTicket { get; set; }
+
+        // --- NUEVO CAMPO: IMPRESORA SELECCIONADA ---
+        [StringLength(100)]
+        public string NombreImpresora { get; set; } // Ej: "Epson TM-T20II"
     }
 }

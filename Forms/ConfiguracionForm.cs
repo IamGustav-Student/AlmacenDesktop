@@ -1,9 +1,10 @@
 ﻿using AlmacenDesktop.Data;
 using AlmacenDesktop.Modelos;
-using AlmacenDesktop.Helpers; // Para AudioHelper
+using AlmacenDesktop.Helpers;
 using System;
 using System.Linq;
 using System.Windows.Forms;
+using System.Drawing.Printing; // Necesario para PrinterSettings
 
 namespace AlmacenDesktop.Forms
 {
@@ -12,15 +13,31 @@ namespace AlmacenDesktop.Forms
         public ConfiguracionForm()
         {
             InitializeComponent();
-
-            // Habilitar teclas rápidas
             this.KeyPreview = true;
             this.KeyDown += new KeyEventHandler(ConfiguracionForm_KeyDown);
         }
 
         private void ConfiguracionForm_Load(object sender, EventArgs e)
         {
+            CargarImpresoras();
             CargarDatos();
+        }
+
+        private void CargarImpresoras()
+        {
+            cboImpresoras.Items.Clear();
+            foreach (string printer in PrinterSettings.InstalledPrinters)
+            {
+                cboImpresoras.Items.Add(printer);
+            }
+
+            // Si hay impresora por defecto y no se ha guardado otra, seleccionarla
+            if (cboImpresoras.Items.Count > 0)
+            {
+                // Intenta seleccionar la predeterminada si no hay config
+                PrinterSettings settings = new PrinterSettings();
+                cboImpresoras.SelectedItem = settings.PrinterName;
+            }
         }
 
         private void CargarDatos()
@@ -38,10 +55,18 @@ namespace AlmacenDesktop.Forms
                         txtDireccion.Text = datos.Direccion;
                         txtTelefono.Text = datos.Telefono;
                         txtMensaje.Text = datos.MensajeTicket;
+
+                        // Cargar impresora guardada
+                        if (!string.IsNullOrEmpty(datos.NombreImpresora))
+                        {
+                            if (cboImpresoras.Items.Contains(datos.NombreImpresora))
+                                cboImpresoras.SelectedItem = datos.NombreImpresora;
+                            else
+                                cboImpresoras.Items.Add(datos.NombreImpresora); // Agregar aunque no esté (por si se desconectó)
+                        }
                     }
                     else
                     {
-                        // Valores por defecto si es la primera vez
                         txtMensaje.Text = "¡Gracias por su compra!";
                     }
                 }
@@ -57,25 +82,19 @@ namespace AlmacenDesktop.Forms
             GuardarDatos();
         }
 
-        private void btnCancelar_Click(object sender, EventArgs e)
-        {
-            this.Close();
-        }
+        private void btnCancelar_Click(object sender, EventArgs e) => this.Close();
 
-        // --- Integración con AFIP ---
         private void btnConfigAfip_Click(object sender, EventArgs e)
         {
-            // Abre el formulario de configuración de AFIP que creamos anteriormente
             var formAfip = new ConfiguracionAfipForm();
             formAfip.ShowDialog();
         }
 
         private void GuardarDatos()
         {
-            // Validaciones básicas de negocio
             if (string.IsNullOrWhiteSpace(txtNombre.Text))
             {
-                MessageBox.Show("El nombre de fantasía es obligatorio para el ticket.");
+                MessageBox.Show("El nombre de fantasía es obligatorio.");
                 txtNombre.Focus();
                 return;
             }
@@ -98,6 +117,10 @@ namespace AlmacenDesktop.Forms
                     datos.Telefono = txtTelefono.Text.Trim();
                     datos.MensajeTicket = txtMensaje.Text.Trim();
 
+                    // Guardar Impresora
+                    if (cboImpresoras.SelectedItem != null)
+                        datos.NombreImpresora = cboImpresoras.SelectedItem.ToString();
+
                     context.SaveChanges();
 
                     AudioHelper.PlayOk();
@@ -112,17 +135,10 @@ namespace AlmacenDesktop.Forms
             }
         }
 
-        // --- Atajos de Teclado ---
         private void ConfiguracionForm_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Escape)
-            {
-                this.Close();
-            }
-            if (e.KeyCode == Keys.F10) // Guardar con F10 (Estándar de sistemas de gestión)
-            {
-                GuardarDatos();
-            }
+            if (e.KeyCode == Keys.Escape) this.Close();
+            if (e.KeyCode == Keys.F10) GuardarDatos();
         }
     }
 }
