@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+<Obfuscator>
+  <!-- Rutas relativas del proyecto -->
+  <Var name="InPath" value="." />
+  <Var name="OutPath" value=".\Obfuscated" />
+  
+  <!-- Opciones generales de ofuscación -->
+  <Var name="KeepPublicApi" value="false" />
+  <Var name="HidePrivateApi" value="true" />
+  <Var name="RenameProperties" value="true" />
+  <Var name="RenameEvents" value="true" />
+  <Var name="RenameFields" value="true" />
+  <Var name="UseUnicodeNames" value="false" />
+  <Var name="OptimizeMethods" value="true" />
+  <Var name="SuppressIldasm" value="true" />
+  
+  <!-- Ensamblado principal a ofuscar -->
+  <Module file="$(InPath)\AlmacenDesktop.dll" />
+</Obfuscator>

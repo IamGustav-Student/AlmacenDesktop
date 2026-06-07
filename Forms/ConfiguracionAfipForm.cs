@@ -7,6 +7,7 @@ using System.Linq;
 using System.Windows.Forms;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
+using System.Drawing; // Necesario para cambiar colores de labels
 
 namespace AlmacenDesktop.Forms
 {
@@ -34,14 +35,39 @@ namespace AlmacenDesktop.Forms
                         txtCuit.Text = config.CuitEmisor.ToString();
                         numPuntoVenta.Value = config.PuntoVenta;
                         txtCertificadoPath.Text = config.CertificadoPath;
-                        txtPassword.Text = config.CertificadoPassword;
                         chkProduccion.Checked = config.EsProduccion;
+
+                        // LÓGICA DE RECUPERACIÓN DE CONTRASEÑA
+                        if (!string.IsNullOrEmpty(config.CertificadoPassword))
+                        {
+                            string passDesencriptada = SecurityHelper.DesencriptarSecreto(config.CertificadoPassword);
+
+                            if (passDesencriptada == null)
+                            {
+                                // CASO CRÍTICO: Había algo en la BD pero no se pudo desencriptar.
+                                // Significa que es una contraseña vieja en texto plano.
+                                txtPassword.Text = "";
+                                txtPassword.BackColor = Color.LightYellow;
+                                lblEstado.Text = "⚠️ Re-ingrese su contraseña";
+                                lblEstado.ForeColor = Color.OrangeRed;
+                                MessageBox.Show(
+                                    "Actualización de Seguridad:\n\n" +
+                                    "Se ha detectado una configuración antigua no segura.\n" +
+                                    "Por favor, vuelva a escribir la contraseña de su certificado y guarde los cambios para encriptarla.",
+                                    "Seguridad VENDEMAX", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            }
+                            else
+                            {
+                                // Todo OK, contraseña segura recuperada
+                                txtPassword.Text = passDesencriptada;
+                            }
+                        }
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("No se pudo cargar la configuración previa: " + ex.Message);
+                MessageBox.Show("Error al leer configuración: " + ex.Message);
             }
         }
 
@@ -49,7 +75,7 @@ namespace AlmacenDesktop.Forms
         {
             using (var ofd = new OpenFileDialog())
             {
-                ofd.Filter = "Certificados Digitales (*.p12;*.pfx)|*.p12;*.pfx|Todos los archivos (*.*)|*.*";
+                ofd.Filter = "Certificados P12 (*.p12)|*.p12|Todos (*.*)|*.*";
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
                     txtCertificadoPath.Text = ofd.FileName;
@@ -75,88 +101,103 @@ namespace AlmacenDesktop.Forms
                     config.CuitEmisor = long.Parse(txtCuit.Text);
                     config.PuntoVenta = (int)numPuntoVenta.Value;
                     config.CertificadoPath = txtCertificadoPath.Text;
-                    config.CertificadoPassword = txtPassword.Text;
                     config.EsProduccion = chkProduccion.Checked;
 
-                    // Resetear token al cambiar configuración para forzar nueva autenticación
+                    // ENCRIPTACIÓN OBLIGATORIA
+                    // Si el usuario deja vacío, asumimos que no quiere cambiarla (si ya existía) 
+                    // PERO si era nula por error de desencriptación, debe ingresarla sí o sí.
+
+                    if (string.IsNullOrWhiteSpace(txtPassword.Text))
+                    {
+                        // Si está vacío, solo permitimos guardar si NO estamos arreglando una pass rota
+                        // Como es difícil saberlo aquí, mejor obligamos siempre a ponerla si está vacía.
+                        MessageBox.Show("Por seguridad, debe ingresar la contraseña del certificado nuevamente.", "Atención", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        txtPassword.Focus();
+                        return;
+                    }
+
+                    config.CertificadoPassword = SecurityHelper.EncriptarSecreto(txtPassword.Text);
+
+                    // Resetear tokens para forzar login limpio
                     config.Token = null;
                     config.Sign = null;
                     config.ExpiracionToken = null;
 
                     context.SaveChanges();
+
                     AudioHelper.PlayOk();
-                    MessageBox.Show("Configuración guardada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Configuración guardada y ENCRIPTADA correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     this.Close();
                 }
             }
             catch (Exception ex)
             {
                 AudioHelper.PlayError();
-                MessageBox.Show("Error al guardar en base de datos: " + ex.Message, "Error BD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error al guardar: " + ex.Message, "Error BD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private async void btnProbar_Click(object sender, EventArgs e)
         {
+            // Validaciones previas
             if (!ValidarDatos()) return;
-
-            // Validar existencia física del certificado ANTES de llamar al servicio
+            if (string.IsNullOrWhiteSpace(txtPassword.Text))
+            {
+                MessageBox.Show("Ingrese la contraseña para probar.");
+                return;
+            }
             if (!File.Exists(txtCertificadoPath.Text))
             {
-                MessageBox.Show("El archivo del certificado no existe en la ruta especificada.", "Archivo no encontrado", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("El archivo .p12 no existe en la ruta indicada.");
                 return;
             }
 
-            // Validar que la contraseña abra el certificado (Check rápido local)
+            // Prueba local de contraseña (rápida)
             try
             {
                 new X509Certificate2(txtCertificadoPath.Text, txtPassword.Text);
             }
-            catch (Exception exCert)
+            catch (Exception ex)
             {
-                MessageBox.Show("La contraseña del certificado es incorrecta o el archivo está dañado.\nError: " + exCert.Message, "Certificado Inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("La contraseña es incorrecta para este certificado.\n" + ex.Message, "Error Clave", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             btnProbar.Enabled = false;
-            lblEstado.Text = "Conectando con AFIP...";
-            lblEstado.ForeColor = System.Drawing.Color.Blue;
+            lblEstado.Text = "Conectando...";
+            lblEstado.ForeColor = Color.Blue;
             this.Cursor = Cursors.WaitCursor;
 
             try
             {
-                // Configuración temporal en memoria para la prueba
-                var configTemp = new ConfiguracionAfip
-                {
-                    Id = 0, // ID 0 indica modo test manual (no guardar token en BD)
-                    CuitEmisor = long.Parse(txtCuit.Text),
-                    PuntoVenta = (int)numPuntoVenta.Value,
-                    CertificadoPath = txtCertificadoPath.Text,
-                    CertificadoPassword = txtPassword.Text,
-                    EsProduccion = chkProduccion.Checked
-                };
+                // Creamos config temporal en memoria (con pass PLANA porque AfipService la encriptará internamente o usará el servicio Auth)
+                // OJO: AfipService espera leer de BD la pass encriptada si le pasamos config NULL.
+                // Si le pasamos config explícita, debemos ser consistentes.
 
-                var servicio = new AfipService(configTemp); // Inyección de dependencia manual
-                await servicio.AutenticarAsync(); // Intento de Login (WSAA)
+                // MEJOR ESTRATEGIA: Guardar primero, luego probar.
+                // Pero si queremos probar sin guardar, el AfipService debe manejar pass plana en el constructor temporal?
+                // En mi implementación anterior de AfipService, NO usaba SecurityHelper si le pasabas el objeto config.
+                // Vamos a usar una instancia directa de AfipAuthService para la prueba, es más directo.
+
+                var auth = new AfipAuthService();
+                var ticket = await auth.ObtenerTicketAccesoAsync(
+                    txtCertificadoPath.Text,
+                    txtPassword.Text, // Pasamos la pass plana que el usuario acaba de tipear
+                    long.Parse(txtCuit.Text),
+                    chkProduccion.Checked
+                );
 
                 AudioHelper.PlayOk();
                 lblEstado.Text = "¡Conexión Exitosa!";
-                lblEstado.ForeColor = System.Drawing.Color.Green;
-                MessageBox.Show("¡Conexión con AFIP exitosa!\n\nSe obtuvo Token y Sign correctamente.\nEl sistema está listo para facturar.", "Prueba OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                lblEstado.ForeColor = Color.Green;
+                MessageBox.Show($"¡Prueba Exitosa!\n\nToken recibido OK.\nExpiración: {ticket.Expiracion}", "AFIP Online", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
                 AudioHelper.PlayError();
-                lblEstado.Text = "Error de Conexión";
-                lblEstado.ForeColor = System.Drawing.Color.Red;
-
-                string mensajeAyuda = "\n\nPosibles causas:\n" +
-                                      "1. CUIT incorrecto (Debe coincidir con el certificado).\n" +
-                                      "2. Certificado vencido o revocado.\n" +
-                                      "3. Servicio de AFIP caído (intente más tarde).\n" +
-                                      "4. Hora de la PC desincronizada.";
-
-                MessageBox.Show("Fallo de conexión con AFIP:\n" + ex.Message + mensajeAyuda, "Error AFIP", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                lblEstado.Text = "Fallo Conexión";
+                lblEstado.ForeColor = Color.Red;
+                MessageBox.Show("Error conectando a AFIP:\n" + ex.Message, "Fallo", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -167,20 +208,8 @@ namespace AlmacenDesktop.Forms
 
         private bool ValidarDatos()
         {
-            if (string.IsNullOrWhiteSpace(txtCuit.Text) || !long.TryParse(txtCuit.Text, out _))
-            {
-                MessageBox.Show("Ingrese un CUIT numérico válido (11 dígitos).");
-                txtCuit.Focus();
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(txtCertificadoPath.Text))
-            {
-                MessageBox.Show("Seleccione el archivo .p12");
-                btnBuscarCertificado.Focus();
-                return false;
-            }
-
+            if (string.IsNullOrWhiteSpace(txtCuit.Text)) { MessageBox.Show("Falta CUIT"); return false; }
+            if (string.IsNullOrWhiteSpace(txtCertificadoPath.Text)) { MessageBox.Show("Falta Certificado"); return false; }
             return true;
         }
     }

@@ -1,4 +1,4 @@
-﻿using AlmacenDesktop.Data;
+using AlmacenDesktop.Data;
 using AlmacenDesktop.Modelos;
 using ClosedXML.Excel;
 using System;
@@ -36,11 +36,18 @@ namespace AlmacenDesktop.Services
 
             using (var context = new AlmacenDbContext())
             {
-                // Cache local de proveedores para velocidad (evita consultar BD por cada fila)
-                var cacheProveedores = context.Proveedores.ToDictionary(p => p.Nombre.ToUpper(), p => p.Id);
+                // Cache local de proveedores mapeados por Nombre en mayúsculas para velocidad y consistencia
+                var cacheProveedores = context.Proveedores.ToDictionary(p => p.Nombre.ToUpper().Trim(), p => p);
 
                 // Aseguramos un Proveedor General por defecto
-                int idProvGeneral = ObtenerOCrearProveedorId(context, cacheProveedores, "PROVEEDOR GENERAL");
+                var provGeneral = ObtenerOCrearProveedor(context, cacheProveedores, "PROVEEDOR GENERAL");
+
+                // Cache local de productos mapeados por Código de Barras (incluye inactivos)
+                var cacheProductos = context.Productos
+                    .Where(p => !string.IsNullOrEmpty(p.CodigoBarras))
+                    .AsEnumerable()
+                    .GroupBy(p => p.CodigoBarras.Trim())
+                    .ToDictionary(g => g.Key, g => g.First());
 
                 using (var workbook = new XLWorkbook(rutaArchivo))
                 {
@@ -55,37 +62,54 @@ namespace AlmacenDesktop.Services
                             resultado.Procesados++;
                             string codigo = LeerCelda(fila, mapa["codigo"]);
                             if (string.IsNullOrEmpty(codigo)) continue;
+                            codigo = codigo.Trim();
+
+                            // Validaciones previas de formato para evitar fallas a nivel de base de datos
+                            if (codigo.Length > 50)
+                            {
+                                throw new ArgumentException("El código de barras no puede superar los 50 caracteres.");
+                            }
 
                             string nombre = LeerCelda(fila, mapa["nombre"]);
+                            if (nombre.Length > 100)
+                            {
+                                nombre = nombre.Substring(0, 100); // Truncar para cumplir con StringLength(100)
+                            }
+
                             decimal precio = LeerDecimal(fila, mapa["precio"]);
                             decimal costo = LeerDecimal(fila, mapa["costo"]);
                             int stock = LeerInt(fila, mapa["stock"]);
 
-                            // LÓGICA INTELIGENTE DE PROVEEDOR
-                            int idProvFinal = idProvGeneral;
+                            if (precio < 0) throw new ArgumentException("El precio de venta no puede ser negativo.");
+                            if (costo < 0) throw new ArgumentException("El costo no puede ser negativo.");
+                            if (stock < 0) throw new ArgumentException("El stock no puede ser negativo.");
+
+                            // LÓGICA INTELIGENTE DE PROVEEDOR (sin SaveChanges() intermedios)
+                            var provFinal = provGeneral;
                             if (mapa.ContainsKey("proveedor") && mapa["proveedor"] != -1)
                             {
                                 string nombreProvExcel = LeerCelda(fila, mapa["proveedor"]);
                                 if (!string.IsNullOrWhiteSpace(nombreProvExcel))
                                 {
-                                    idProvFinal = ObtenerOCrearProveedorId(context, cacheProveedores, nombreProvExcel);
+                                    provFinal = ObtenerOCrearProveedor(context, cacheProveedores, nombreProvExcel);
                                 }
                             }
 
-                            var productoExistente = context.Productos.FirstOrDefault(p => p.CodigoBarras == codigo);
-
-                            if (productoExistente != null)
+                            if (cacheProductos.TryGetValue(codigo, out var productoExistente))
                             {
                                 // UPDATE
                                 if (!string.IsNullOrEmpty(nombre)) productoExistente.Nombre = nombre;
                                 if (precio > 0) productoExistente.Precio = precio;
                                 if (costo > 0) productoExistente.Costo = costo;
                                 if (mapa["stock"] != -1) productoExistente.Stock = stock;
+                                
+                                // Si estaba inactivo, lo reactivamos (logical delete recovery)
+                                productoExistente.Activo = true;
 
-                                // Si el Excel especifica proveedor, actualizamos. Si no, dejamos el que tenía.
+                                // Si el Excel especifica proveedor, actualizamos la relación
                                 if (mapa.ContainsKey("proveedor") && mapa["proveedor"] != -1)
                                 {
-                                    productoExistente.ProveedorId = idProvFinal;
+                                    productoExistente.Proveedor = provFinal;
                                 }
 
                                 resultado.Actualizados++;
@@ -101,10 +125,12 @@ namespace AlmacenDesktop.Services
                                     Costo = costo,
                                     Stock = stock,
                                     StockMinimo = 5,
-                                    ProveedorId = idProvFinal,
-                                    Impuesto = 0
+                                    Proveedor = provFinal,
+                                    Impuesto = 0,
+                                    Activo = true
                                 };
                                 context.Productos.Add(nuevo);
+                                cacheProductos.Add(codigo, nuevo); // Agregar al cache para manejar filas duplicadas en el Excel
                                 resultado.Nuevos++;
                             }
                         }
@@ -120,15 +146,18 @@ namespace AlmacenDesktop.Services
             return resultado;
         }
 
-        private int ObtenerOCrearProveedorId(AlmacenDbContext context, Dictionary<string, int> cache, string nombreProveedor)
+        private Proveedor ObtenerOCrearProveedor(AlmacenDbContext context, Dictionary<string, Proveedor> cache, string nombreProveedor)
         {
             string key = nombreProveedor.ToUpper().Trim();
 
-            if (cache.ContainsKey(key)) return cache[key];
+            if (cache.TryGetValue(key, out var proveedor))
+            {
+                return proveedor;
+            }
 
             var nuevoProv = new Proveedor
             {
-                Nombre = nombreProveedor,
+                Nombre = nombreProveedor.Trim(),
                 Cuit = "-",
                 Direccion = "-",
                 Telefono = "-",
@@ -136,10 +165,8 @@ namespace AlmacenDesktop.Services
             };
 
             context.Proveedores.Add(nuevoProv);
-            context.SaveChanges();
-
-            cache.Add(key, nuevoProv.Id);
-            return nuevoProv.Id;
+            cache.Add(key, nuevoProv);
+            return nuevoProv;
         }
 
         // =============================================================

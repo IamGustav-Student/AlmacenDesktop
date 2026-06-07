@@ -10,273 +10,194 @@
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
-
         private void InitializeComponent()
         {
-            this.lblTitulo = new System.Windows.Forms.Label();
-            this.grpDatos = new System.Windows.Forms.GroupBox();
-            this.cboImpresoras = new System.Windows.Forms.ComboBox();
-            this.lblImpresora = new System.Windows.Forms.Label();
-            this.txtMensaje = new System.Windows.Forms.TextBox();
-            this.lblMensaje = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.txtNombreNegocio = new System.Windows.Forms.TextBox();
             this.txtDireccion = new System.Windows.Forms.TextBox();
-            this.lblDireccion = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
             this.txtTelefono = new System.Windows.Forms.TextBox();
-            this.lblTelefono = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             this.txtCuit = new System.Windows.Forms.TextBox();
-            this.lblCuit = new System.Windows.Forms.Label();
-            this.txtRazon = new System.Windows.Forms.TextBox();
-            this.lblRazon = new System.Windows.Forms.Label();
-            this.txtNombre = new System.Windows.Forms.TextBox();
-            this.lblNombre = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.txtEmail = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.txtMensajeTicket = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
             this.btnGuardar = new System.Windows.Forms.Button();
-            this.btnCancelar = new System.Windows.Forms.Button();
-            this.btnConfigAfip = new System.Windows.Forms.Button();
-            this.grpDatos.SuspendLayout();
+            this.btnBackup = new System.Windows.Forms.Button();
+            this.btnConfigurarAfip = new System.Windows.Forms.Button();
+
+            // CAMBIO: Ahora es un ComboBox
+            this.cboImpresoras = new System.Windows.Forms.ComboBox();
+
             this.SuspendLayout();
-            // 
-            // lblTitulo
-            // 
-            this.lblTitulo.AutoSize = true;
-            this.lblTitulo.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblTitulo.ForeColor = System.Drawing.Color.DimGray;
-            this.lblTitulo.Location = new System.Drawing.Point(20, 20);
-            this.lblTitulo.Name = "lblTitulo";
-            this.lblTitulo.Size = new System.Drawing.Size(270, 30);
-            this.lblTitulo.TabIndex = 0;
-            this.lblTitulo.Text = "Configuración del Negocio";
-            // 
-            // grpDatos
-            // 
-            this.grpDatos.Controls.Add(this.cboImpresoras);
-            this.grpDatos.Controls.Add(this.lblImpresora);
-            this.grpDatos.Controls.Add(this.txtMensaje);
-            this.grpDatos.Controls.Add(this.lblMensaje);
-            this.grpDatos.Controls.Add(this.txtDireccion);
-            this.grpDatos.Controls.Add(this.lblDireccion);
-            this.grpDatos.Controls.Add(this.txtTelefono);
-            this.grpDatos.Controls.Add(this.lblTelefono);
-            this.grpDatos.Controls.Add(this.txtCuit);
-            this.grpDatos.Controls.Add(this.lblCuit);
-            this.grpDatos.Controls.Add(this.txtRazon);
-            this.grpDatos.Controls.Add(this.lblRazon);
-            this.grpDatos.Controls.Add(this.txtNombre);
-            this.grpDatos.Controls.Add(this.lblNombre);
-            this.grpDatos.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.grpDatos.Location = new System.Drawing.Point(25, 70);
-            this.grpDatos.Name = "grpDatos";
-            this.grpDatos.Size = new System.Drawing.Size(530, 420); // Aumenté altura para impresora
-            this.grpDatos.TabIndex = 1;
-            this.grpDatos.TabStop = false;
-            this.grpDatos.Text = "Datos para el Ticket";
-            // 
-            // cboImpresoras
-            // 
+
+            // label1 (Nombre)
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(30, 30);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(107, 15);
+            this.label1.Text = "Nombre del Negocio";
+
+            // txtNombreNegocio
+            this.txtNombreNegocio.Location = new System.Drawing.Point(30, 48);
+            this.txtNombreNegocio.Name = "txtNombreNegocio";
+            this.txtNombreNegocio.Size = new System.Drawing.Size(250, 23);
+
+            // label2 (Dirección)
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(30, 85);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(57, 15);
+            this.label2.Text = "Dirección";
+
+            // txtDireccion
+            this.txtDireccion.Location = new System.Drawing.Point(30, 103);
+            this.txtDireccion.Name = "txtDireccion";
+            this.txtDireccion.Size = new System.Drawing.Size(250, 23);
+
+            // label3 (Teléfono)
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(30, 140);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(52, 15);
+            this.label3.Text = "Teléfono";
+
+            // txtTelefono
+            this.txtTelefono.Location = new System.Drawing.Point(30, 158);
+            this.txtTelefono.Name = "txtTelefono";
+            this.txtTelefono.Size = new System.Drawing.Size(250, 23);
+
+            // label4 (CUIT)
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(310, 30);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(32, 15);
+            this.label4.Text = "CUIT";
+
+            // txtCuit
+            this.txtCuit.Location = new System.Drawing.Point(310, 48);
+            this.txtCuit.Name = "txtCuit";
+            this.txtCuit.Size = new System.Drawing.Size(250, 23);
+
+            // label5 (Email)
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(310, 85);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(36, 15);
+            this.label5.Text = "Email";
+
+            // txtEmail
+            this.txtEmail.Location = new System.Drawing.Point(310, 103);
+            this.txtEmail.Name = "txtEmail";
+            this.txtEmail.Size = new System.Drawing.Size(250, 23);
+
+            // label6 (Impresora)
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(310, 140);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(109, 15);
+            this.label6.Text = "Impresora de Tickets";
+
+            // cboImpresoras (Nuevo)
             this.cboImpresoras.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboImpresoras.FormattingEnabled = true;
-            this.cboImpresoras.Location = new System.Drawing.Point(20, 365);
+            this.cboImpresoras.Location = new System.Drawing.Point(310, 158);
             this.cboImpresoras.Name = "cboImpresoras";
-            this.cboImpresoras.Size = new System.Drawing.Size(480, 25);
-            this.cboImpresoras.TabIndex = 13;
-            // 
-            // lblImpresora
-            // 
-            this.lblImpresora.AutoSize = true;
-            this.lblImpresora.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblImpresora.Location = new System.Drawing.Point(20, 343);
-            this.lblImpresora.Name = "lblImpresora";
-            this.lblImpresora.Size = new System.Drawing.Size(158, 19);
-            this.lblImpresora.TabIndex = 12;
-            this.lblImpresora.Text = "Impresora de Tickets";
-            // 
-            // txtMensaje
-            // 
-            this.txtMensaje.Location = new System.Drawing.Point(20, 300);
-            this.txtMensaje.Name = "txtMensaje";
-            this.txtMensaje.Size = new System.Drawing.Size(480, 25);
-            this.txtMensaje.TabIndex = 11;
-            // 
-            // lblMensaje
-            // 
-            this.lblMensaje.AutoSize = true;
-            this.lblMensaje.Location = new System.Drawing.Point(20, 278);
-            this.lblMensaje.Name = "lblMensaje";
-            this.lblMensaje.Size = new System.Drawing.Size(127, 19);
-            this.lblMensaje.TabIndex = 10;
-            this.lblMensaje.Text = "Mensaje Despedida";
-            // 
-            // txtDireccion
-            // 
-            this.txtDireccion.Location = new System.Drawing.Point(20, 240);
-            this.txtDireccion.Name = "txtDireccion";
-            this.txtDireccion.Size = new System.Drawing.Size(480, 25);
-            this.txtDireccion.TabIndex = 9;
-            // 
-            // lblDireccion
-            // 
-            this.lblDireccion.AutoSize = true;
-            this.lblDireccion.Location = new System.Drawing.Point(20, 218);
-            this.lblDireccion.Name = "lblDireccion";
-            this.lblDireccion.Size = new System.Drawing.Size(65, 19);
-            this.lblDireccion.TabIndex = 8;
-            this.lblDireccion.Text = "Dirección";
-            // 
-            // txtTelefono
-            // 
-            this.txtTelefono.Location = new System.Drawing.Point(280, 180);
-            this.txtTelefono.Name = "txtTelefono";
-            this.txtTelefono.Size = new System.Drawing.Size(220, 25);
-            this.txtTelefono.TabIndex = 7;
-            // 
-            // lblTelefono
-            // 
-            this.lblTelefono.AutoSize = true;
-            this.lblTelefono.Location = new System.Drawing.Point(280, 158);
-            this.lblTelefono.Name = "lblTelefono";
-            this.lblTelefono.Size = new System.Drawing.Size(60, 19);
-            this.lblTelefono.TabIndex = 6;
-            this.lblTelefono.Text = "Teléfono";
-            // 
-            // txtCuit
-            // 
-            this.txtCuit.Location = new System.Drawing.Point(20, 180);
-            this.txtCuit.Name = "txtCuit";
-            this.txtCuit.Size = new System.Drawing.Size(220, 25);
-            this.txtCuit.TabIndex = 5;
-            // 
-            // lblCuit
-            // 
-            this.lblCuit.AutoSize = true;
-            this.lblCuit.Location = new System.Drawing.Point(20, 158);
-            this.lblCuit.Name = "lblCuit";
-            this.lblCuit.Size = new System.Drawing.Size(39, 19);
-            this.lblCuit.TabIndex = 4;
-            this.lblCuit.Text = "CUIT";
-            // 
-            // txtRazon
-            // 
-            this.txtRazon.Location = new System.Drawing.Point(20, 120);
-            this.txtRazon.Name = "txtRazon";
-            this.txtRazon.Size = new System.Drawing.Size(480, 25);
-            this.txtRazon.TabIndex = 3;
-            // 
-            // lblRazon
-            // 
-            this.lblRazon.AutoSize = true;
-            this.lblRazon.Location = new System.Drawing.Point(20, 98);
-            this.lblRazon.Name = "lblRazon";
-            this.lblRazon.Size = new System.Drawing.Size(86, 19);
-            this.lblRazon.TabIndex = 2;
-            this.lblRazon.Text = "Razón Social";
-            // 
-            // txtNombre
-            // 
-            this.txtNombre.Location = new System.Drawing.Point(20, 60);
-            this.txtNombre.Name = "txtNombre";
-            this.txtNombre.Size = new System.Drawing.Size(480, 25);
-            this.txtNombre.TabIndex = 1;
-            // 
-            // lblNombre
-            // 
-            this.lblNombre.AutoSize = true;
-            this.lblNombre.Location = new System.Drawing.Point(20, 38);
-            this.lblNombre.Name = "lblNombre";
-            this.lblNombre.Size = new System.Drawing.Size(111, 19);
-            this.lblNombre.TabIndex = 0;
-            this.lblNombre.Text = "Nombre Fantasía";
-            // 
+            this.cboImpresoras.Size = new System.Drawing.Size(250, 23);
+
+            // label7 (Mensaje Ticket)
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(30, 195);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(149, 15);
+            this.label7.Text = "Mensaje al pie del Ticket";
+
+            // txtMensajeTicket
+            this.txtMensajeTicket.Location = new System.Drawing.Point(30, 213);
+            this.txtMensajeTicket.Name = "txtMensajeTicket";
+            this.txtMensajeTicket.Size = new System.Drawing.Size(530, 23);
+
             // btnGuardar
-            // 
-            this.btnGuardar.BackColor = System.Drawing.Color.SeaGreen;
-            this.btnGuardar.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnGuardar.FlatAppearance.BorderSize = 0;
-            this.btnGuardar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnGuardar.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnGuardar.BackColor = System.Drawing.Color.ForestGreen;
             this.btnGuardar.ForeColor = System.Drawing.Color.White;
-            this.btnGuardar.Location = new System.Drawing.Point(375, 510);
+            this.btnGuardar.Location = new System.Drawing.Point(410, 260);
             this.btnGuardar.Name = "btnGuardar";
-            this.btnGuardar.Size = new System.Drawing.Size(180, 45);
-            this.btnGuardar.TabIndex = 2;
-            this.btnGuardar.Text = "GUARDAR CAMBIOS";
+            this.btnGuardar.Size = new System.Drawing.Size(150, 40);
+            this.btnGuardar.Text = "GUARDAR DATOS";
             this.btnGuardar.UseVisualStyleBackColor = false;
             this.btnGuardar.Click += new System.EventHandler(this.btnGuardar_Click);
-            // 
-            // btnCancelar
-            // 
-            this.btnCancelar.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.btnCancelar.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnCancelar.FlatAppearance.BorderColor = System.Drawing.Color.Silver;
-            this.btnCancelar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnCancelar.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnCancelar.Location = new System.Drawing.Point(25, 510);
-            this.btnCancelar.Name = "btnCancelar";
-            this.btnCancelar.Size = new System.Drawing.Size(120, 45);
-            this.btnCancelar.TabIndex = 3;
-            this.btnCancelar.Text = "Cancelar";
-            this.btnCancelar.UseVisualStyleBackColor = false;
-            this.btnCancelar.Click += new System.EventHandler(this.btnCancelar_Click);
-            // 
-            // btnConfigAfip
-            // 
-            this.btnConfigAfip.BackColor = System.Drawing.Color.SteelBlue;
-            this.btnConfigAfip.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnConfigAfip.FlatAppearance.BorderSize = 0;
-            this.btnConfigAfip.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnConfigAfip.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnConfigAfip.ForeColor = System.Drawing.Color.White;
-            this.btnConfigAfip.Location = new System.Drawing.Point(405, 20);
-            this.btnConfigAfip.Name = "btnConfigAfip";
-            this.btnConfigAfip.Size = new System.Drawing.Size(150, 35);
-            this.btnConfigAfip.TabIndex = 4;
-            this.btnConfigAfip.Text = "⚙ Configurar AFIP";
-            this.btnConfigAfip.UseVisualStyleBackColor = false;
-            this.btnConfigAfip.Click += new System.EventHandler(this.btnConfigAfip_Click);
-            // 
-            // ConfiguracionForm
-            // 
+
+            // btnBackup
+            this.btnBackup.BackColor = System.Drawing.Color.SteelBlue;
+            this.btnBackup.ForeColor = System.Drawing.Color.White;
+            this.btnBackup.Location = new System.Drawing.Point(30, 260);
+            this.btnBackup.Name = "btnBackup";
+            this.btnBackup.Size = new System.Drawing.Size(150, 40);
+            this.btnBackup.Text = "GENERAR BACKUP";
+            this.btnBackup.UseVisualStyleBackColor = false;
+            this.btnBackup.Click += new System.EventHandler(this.btnBackup_Click);
+
+            // btnConfigurarAfip
+            this.btnConfigurarAfip.BackColor = System.Drawing.Color.Orange;
+            this.btnConfigurarAfip.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnConfigurarAfip.ForeColor = System.Drawing.Color.Black;
+            this.btnConfigurarAfip.Location = new System.Drawing.Point(220, 260);
+            this.btnConfigurarAfip.Name = "btnConfigurarAfip";
+            this.btnConfigurarAfip.Size = new System.Drawing.Size(150, 40);
+            this.btnConfigurarAfip.Text = "CONFIGURAR AFIP";
+            this.btnConfigurarAfip.UseVisualStyleBackColor = false;
+            this.btnConfigurarAfip.Click += new System.EventHandler(this.btnConfigurarAfip_Click);
+
+            // Form
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(584, 580); // Altura aumentada
-            this.Controls.Add(this.btnConfigAfip);
-            this.Controls.Add(this.btnCancelar);
+            this.ClientSize = new System.Drawing.Size(600, 330);
+            this.Controls.Add(this.btnConfigurarAfip);
+            this.Controls.Add(this.btnBackup);
             this.Controls.Add(this.btnGuardar);
-            this.Controls.Add(this.grpDatos);
-            this.Controls.Add(this.lblTitulo);
+            this.Controls.Add(this.txtMensajeTicket);
+            this.Controls.Add(this.label7);
+            this.Controls.Add(this.cboImpresoras); // Agregado
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.txtEmail);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.txtCuit);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.txtTelefono);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.txtDireccion);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.txtNombreNegocio);
+            this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.Name = "ConfiguracionForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Configuración";
+            this.Text = "Configuración del Sistema";
             this.Load += new System.EventHandler(this.ConfiguracionForm_Load);
-            this.grpDatos.ResumeLayout(false);
-            this.grpDatos.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
         }
 
-        #endregion
-
-        private System.Windows.Forms.Label lblTitulo;
-        private System.Windows.Forms.GroupBox grpDatos;
-        private System.Windows.Forms.Label lblNombre;
-        private System.Windows.Forms.TextBox txtNombre;
-        private System.Windows.Forms.TextBox txtRazon;
-        private System.Windows.Forms.Label lblRazon;
-        private System.Windows.Forms.TextBox txtCuit;
-        private System.Windows.Forms.Label lblCuit;
-        private System.Windows.Forms.TextBox txtTelefono;
-        private System.Windows.Forms.Label lblTelefono;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox txtNombreNegocio;
         private System.Windows.Forms.TextBox txtDireccion;
-        private System.Windows.Forms.Label lblDireccion;
-        private System.Windows.Forms.TextBox txtMensaje;
-        private System.Windows.Forms.Label lblMensaje;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox txtTelefono;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox txtCuit;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox txtEmail;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TextBox txtMensajeTicket;
+        private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Button btnGuardar;
-        private System.Windows.Forms.Button btnCancelar;
-        private System.Windows.Forms.Button btnConfigAfip;
-        // NUEVOS CONTROLES IMPRESORA
-        private System.Windows.Forms.Label lblImpresora;
-        private System.Windows.Forms.ComboBox cboImpresoras;
+        private System.Windows.Forms.Button btnBackup;
+        private System.Windows.Forms.Button btnConfigurarAfip;
+        private System.Windows.Forms.ComboBox cboImpresoras; // Variable nueva
     }
 }

@@ -1,523 +1,331 @@
-﻿namespace AlmacenDesktop.Forms
+namespace AlmacenDesktop.Forms
 {
     partial class ProductosForm
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
+            if (disposing && (components != null)) components.Dispose();
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
-
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            this.panelLateral = new System.Windows.Forms.Panel();
-            this.label8 = new System.Windows.Forms.Label();
-            this.cboProveedor = new System.Windows.Forms.ComboBox();
-            this.label7 = new System.Windows.Forms.Label();
-            this.numStockMinimo = new System.Windows.Forms.NumericUpDown();
-            this.label6 = new System.Windows.Forms.Label();
-            this.numStock = new System.Windows.Forms.NumericUpDown();
-            this.label5 = new System.Windows.Forms.Label();
-            this.numPrecio = new System.Windows.Forms.NumericUpDown();
-            this.label4 = new System.Windows.Forms.Label();
-            this.numCosto = new System.Windows.Forms.NumericUpDown();
-            this.label3 = new System.Windows.Forms.Label();
-            this.txtDescripcion = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.txtNombre = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.txtCodigo = new System.Windows.Forms.TextBox();
+            System.Windows.Forms.DataGridViewCellStyle cellStyleHeader = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle cellStyleRow = new System.Windows.Forms.DataGridViewCellStyle();
+
+            this.panelEditor = new System.Windows.Forms.Panel();
+            this.lblModo = new System.Windows.Forms.Label();
             this.btnLimpiar = new System.Windows.Forms.Button();
-            this.btnEliminar = new System.Windows.Forms.Button();
             this.btnGuardar = new System.Windows.Forms.Button();
-            this.lblTituloPanel = new System.Windows.Forms.Label();
-            this.panelTop = new System.Windows.Forms.Panel();
-            this.btnExportar = new System.Windows.Forms.Button();
-            this.btnImportar = new System.Windows.Forms.Button();
-            this.label9 = new System.Windows.Forms.Label();
-            this.txtBuscar = new System.Windows.Forms.TextBox();
-            this.panelGrilla = new System.Windows.Forms.Panel();
+
+            // Campos
+            this.lblCodigo = new System.Windows.Forms.Label();
+            this.txtCodigo = new System.Windows.Forms.TextBox();
+            this.lblNombre = new System.Windows.Forms.Label();
+            this.txtNombre = new System.Windows.Forms.TextBox();
+            this.lblDescripcion = new System.Windows.Forms.Label();
+            this.txtDescripcion = new System.Windows.Forms.TextBox();
+            this.lblProveedor = new System.Windows.Forms.Label();
+            this.cboProveedor = new System.Windows.Forms.ComboBox();
+
+            // Numéricos
+            this.lblCosto = new System.Windows.Forms.Label();
+            this.numCosto = new System.Windows.Forms.NumericUpDown();
+            this.lblPrecio = new System.Windows.Forms.Label();
+            this.numPrecio = new System.Windows.Forms.NumericUpDown();
+            this.lblStock = new System.Windows.Forms.Label();
+            this.numStock = new System.Windows.Forms.NumericUpDown();
+            this.lblStockMinimo = new System.Windows.Forms.Label();
+            this.numStockMinimo = new System.Windows.Forms.NumericUpDown();
+            this.lblImpuesto = new System.Windows.Forms.Label();
+            this.numImpuesto = new System.Windows.Forms.NumericUpDown();
+
+            // Panel Principal
+            this.panelMain = new System.Windows.Forms.Panel();
+            this.lblTitulo = new System.Windows.Forms.Label();
+            this.txtBusqueda = new System.Windows.Forms.TextBox();
+            this.lblBuscar = new System.Windows.Forms.Label();
+            this.lblTotalProductos = new System.Windows.Forms.Label();
+
+            // Botones de Acción Grid
+            this.btnEditar = new System.Windows.Forms.Button();
+            this.btnEliminar = new System.Windows.Forms.Button();
+
+            // Grid
             this.dgvProductos = new System.Windows.Forms.DataGridView();
-            this.panelLateral.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numStockMinimo)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numStock)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numPrecio)).BeginInit();
+
+            // Columnas Grid
+            this.colId = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colCodigo = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colNombre = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colPrecio = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colStock = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colProveedor = new System.Windows.Forms.DataGridViewTextBoxColumn();
+
+            this.panelEditor.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numCosto)).BeginInit();
-            this.panelTop.SuspendLayout();
-            this.panelGrilla.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numPrecio)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numStock)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numStockMinimo)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numImpuesto)).BeginInit();
+            this.panelMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvProductos)).BeginInit();
             this.SuspendLayout();
-            // 
-            // panelLateral
-            // 
-            this.panelLateral.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.panelLateral.Controls.Add(this.label8);
-            this.panelLateral.Controls.Add(this.cboProveedor);
-            this.panelLateral.Controls.Add(this.label7);
-            this.panelLateral.Controls.Add(this.numStockMinimo);
-            this.panelLateral.Controls.Add(this.label6);
-            this.panelLateral.Controls.Add(this.numStock);
-            this.panelLateral.Controls.Add(this.label5);
-            this.panelLateral.Controls.Add(this.numPrecio);
-            this.panelLateral.Controls.Add(this.label4);
-            this.panelLateral.Controls.Add(this.numCosto);
-            this.panelLateral.Controls.Add(this.label3);
-            this.panelLateral.Controls.Add(this.txtDescripcion);
-            this.panelLateral.Controls.Add(this.label2);
-            this.panelLateral.Controls.Add(this.txtNombre);
-            this.panelLateral.Controls.Add(this.label1);
-            this.panelLateral.Controls.Add(this.txtCodigo);
-            this.panelLateral.Controls.Add(this.btnLimpiar);
-            this.panelLateral.Controls.Add(this.btnEliminar);
-            this.panelLateral.Controls.Add(this.btnGuardar);
-            this.panelLateral.Controls.Add(this.lblTituloPanel);
-            this.panelLateral.Dock = System.Windows.Forms.DockStyle.Left;
-            this.panelLateral.Location = new System.Drawing.Point(0, 0);
-            this.panelLateral.Name = "panelLateral";
-            this.panelLateral.Padding = new System.Windows.Forms.Padding(15);
-            this.panelLateral.Size = new System.Drawing.Size(300, 611);
-            this.panelLateral.TabIndex = 0;
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label8.ForeColor = System.Drawing.Color.DimGray;
-            this.label8.Location = new System.Drawing.Point(18, 430);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(61, 15);
-            this.label8.TabIndex = 19;
-            this.label8.Text = "Proveedor";
-            // 
-            // cboProveedor
-            // 
-            this.cboProveedor.BackColor = System.Drawing.Color.White;
+
+            // ---------------------------------------------------------
+            // PANEL EDITOR (IZQUIERDA)
+            // ---------------------------------------------------------
+            this.panelEditor.BackColor = System.Drawing.Color.White;
+            this.panelEditor.Dock = System.Windows.Forms.DockStyle.Left;
+            this.panelEditor.Width = 300;
+            this.panelEditor.Controls.Add(this.lblModo);
+            this.panelEditor.Controls.Add(this.txtCodigo); this.panelEditor.Controls.Add(this.lblCodigo);
+            this.panelEditor.Controls.Add(this.txtNombre); this.panelEditor.Controls.Add(this.lblNombre);
+            this.panelEditor.Controls.Add(this.txtDescripcion); this.panelEditor.Controls.Add(this.lblDescripcion);
+            this.panelEditor.Controls.Add(this.cboProveedor); this.panelEditor.Controls.Add(this.lblProveedor);
+
+            this.panelEditor.Controls.Add(this.numCosto); this.panelEditor.Controls.Add(this.lblCosto);
+            this.panelEditor.Controls.Add(this.numPrecio); this.panelEditor.Controls.Add(this.lblPrecio);
+            this.panelEditor.Controls.Add(this.numStock); this.panelEditor.Controls.Add(this.lblStock);
+            this.panelEditor.Controls.Add(this.numStockMinimo); this.panelEditor.Controls.Add(this.lblStockMinimo);
+            this.panelEditor.Controls.Add(this.numImpuesto); this.panelEditor.Controls.Add(this.lblImpuesto);
+
+            this.panelEditor.Controls.Add(this.btnGuardar);
+            this.panelEditor.Controls.Add(this.btnLimpiar);
+
+            // Título Modo
+            this.lblModo.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
+            this.lblModo.ForeColor = System.Drawing.Color.ForestGreen;
+            this.lblModo.Location = new System.Drawing.Point(15, 15);
+            this.lblModo.Size = new System.Drawing.Size(270, 30);
+            this.lblModo.Text = "Nuevo Producto";
+            this.lblModo.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+
+            // Campos Texto
+            int y = 60;
+            this.lblCodigo.Text = "Código de Barras:"; this.lblCodigo.Location = new System.Drawing.Point(15, y);
+            this.txtCodigo.Location = new System.Drawing.Point(15, y + 20); this.txtCodigo.Width = 260;
+
+            y += 50;
+            this.lblNombre.Text = "Nombre Producto:"; this.lblNombre.Location = new System.Drawing.Point(15, y);
+            this.txtNombre.Location = new System.Drawing.Point(15, y + 20); this.txtNombre.Width = 260;
+
+            y += 50;
+            this.lblDescripcion.Text = "Descripción (Opcional):"; this.lblDescripcion.Location = new System.Drawing.Point(15, y);
+            this.txtDescripcion.Location = new System.Drawing.Point(15, y + 20); this.txtDescripcion.Width = 260;
+
+            y += 50;
+            this.lblProveedor.Text = "Proveedor:"; this.lblProveedor.Location = new System.Drawing.Point(15, y);
+            this.cboProveedor.Location = new System.Drawing.Point(15, y + 20); this.cboProveedor.Width = 260;
             this.cboProveedor.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cboProveedor.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.cboProveedor.FormattingEnabled = true;
-            this.cboProveedor.Location = new System.Drawing.Point(18, 448);
-            this.cboProveedor.Name = "cboProveedor";
-            this.cboProveedor.Size = new System.Drawing.Size(264, 25);
-            this.cboProveedor.TabIndex = 8;
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label7.ForeColor = System.Drawing.Color.DimGray;
-            this.label7.Location = new System.Drawing.Point(153, 370);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(81, 15);
-            this.label7.TabIndex = 17;
-            this.label7.Text = "Stock Mínimo";
-            // 
-            // numStockMinimo
-            // 
-            this.numStockMinimo.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.numStockMinimo.Location = new System.Drawing.Point(153, 388);
-            this.numStockMinimo.Maximum = new decimal(new int[] {
-            10000,
-            0,
-            0,
-            0});
-            this.numStockMinimo.Name = "numStockMinimo";
-            this.numStockMinimo.Size = new System.Drawing.Size(129, 25);
-            this.numStockMinimo.TabIndex = 7;
-            this.numStockMinimo.Value = new decimal(new int[] {
-            5,
-            0,
-            0,
-            0});
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label6.ForeColor = System.Drawing.Color.DimGray;
-            this.label6.Location = new System.Drawing.Point(18, 370);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(73, 15);
-            this.label6.TabIndex = 15;
-            this.label6.Text = "Stock Actual";
-            // 
-            // numStock
-            // 
-            this.numStock.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.numStock.Location = new System.Drawing.Point(18, 388);
-            this.numStock.Maximum = new decimal(new int[] {
-            100000,
-            0,
-            0,
-            0});
-            this.numStock.Name = "numStock";
-            this.numStock.Size = new System.Drawing.Size(129, 25);
-            this.numStock.TabIndex = 6;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label5.ForeColor = System.Drawing.Color.SeaGreen;
-            this.label5.Location = new System.Drawing.Point(153, 310);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(76, 15);
-            this.label5.TabIndex = 13;
-            this.label5.Text = "Precio Venta";
-            // 
-            // numPrecio
-            // 
-            this.numPrecio.DecimalPlaces = 2;
-            this.numPrecio.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.numPrecio.ForeColor = System.Drawing.Color.SeaGreen;
-            this.numPrecio.Location = new System.Drawing.Point(153, 328);
-            this.numPrecio.Maximum = new decimal(new int[] {
-            1000000,
-            0,
-            0,
-            0});
-            this.numPrecio.Name = "numPrecio";
-            this.numPrecio.Size = new System.Drawing.Size(129, 27);
-            this.numPrecio.TabIndex = 5;
-            this.numPrecio.ThousandsSeparator = true;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label4.ForeColor = System.Drawing.Color.DimGray;
-            this.label4.Location = new System.Drawing.Point(18, 310);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(74, 15);
-            this.label4.TabIndex = 11;
-            this.label4.Text = "Costo Inicial";
-            // 
-            // numCosto
-            // 
-            this.numCosto.DecimalPlaces = 2;
-            this.numCosto.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.numCosto.Location = new System.Drawing.Point(18, 328);
-            this.numCosto.Maximum = new decimal(new int[] {
-            1000000,
-            0,
-            0,
-            0});
-            this.numCosto.Name = "numCosto";
-            this.numCosto.Size = new System.Drawing.Size(129, 25);
-            this.numCosto.TabIndex = 4;
-            this.numCosto.ThousandsSeparator = true;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label3.ForeColor = System.Drawing.Color.DimGray;
-            this.label3.Location = new System.Drawing.Point(18, 200);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(69, 15);
-            this.label3.TabIndex = 9;
-            this.label3.Text = "Descripción";
-            // 
-            // txtDescripcion
-            // 
-            this.txtDescripcion.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.txtDescripcion.Location = new System.Drawing.Point(18, 218);
-            this.txtDescripcion.Multiline = true;
-            this.txtDescripcion.Name = "txtDescripcion";
-            this.txtDescripcion.Size = new System.Drawing.Size(264, 73);
-            this.txtDescripcion.TabIndex = 3;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label2.ForeColor = System.Drawing.Color.DimGray;
-            this.label2.Location = new System.Drawing.Point(18, 140);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(103, 15);
-            this.label2.TabIndex = 7;
-            this.label2.Text = "Nombre Producto";
-            // 
-            // txtNombre
-            // 
-            this.txtNombre.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.txtNombre.Location = new System.Drawing.Point(18, 158);
-            this.txtNombre.Name = "txtNombre";
-            this.txtNombre.Size = new System.Drawing.Size(264, 25);
-            this.txtNombre.TabIndex = 2;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label1.ForeColor = System.Drawing.Color.DimGray;
-            this.label1.Location = new System.Drawing.Point(18, 80);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(98, 15);
-            this.label1.TabIndex = 5;
-            this.label1.Text = "Código de Barras";
-            // 
-            // txtCodigo
-            // 
-            this.txtCodigo.BackColor = System.Drawing.Color.Ivory;
-            this.txtCodigo.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.txtCodigo.Location = new System.Drawing.Point(18, 98);
-            this.txtCodigo.Name = "txtCodigo";
-            this.txtCodigo.Size = new System.Drawing.Size(264, 27);
-            this.txtCodigo.TabIndex = 1;
-            // 
-            // btnLimpiar
-            // 
-            this.btnLimpiar.BackColor = System.Drawing.Color.White;
-            this.btnLimpiar.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnLimpiar.FlatAppearance.BorderColor = System.Drawing.Color.Silver;
-            this.btnLimpiar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnLimpiar.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnLimpiar.ForeColor = System.Drawing.Color.DimGray;
-            this.btnLimpiar.Location = new System.Drawing.Point(18, 550);
-            this.btnLimpiar.Name = "btnLimpiar";
-            this.btnLimpiar.Size = new System.Drawing.Size(80, 40);
-            this.btnLimpiar.TabIndex = 10;
-            this.btnLimpiar.Text = "Limpiar";
-            this.btnLimpiar.UseVisualStyleBackColor = false;
-            this.btnLimpiar.Click += new System.EventHandler(this.btnLimpiar_Click);
-            // 
-            // btnEliminar
-            // 
-            this.btnEliminar.BackColor = System.Drawing.Color.IndianRed;
-            this.btnEliminar.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnEliminar.FlatAppearance.BorderSize = 0;
-            this.btnEliminar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnEliminar.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnEliminar.ForeColor = System.Drawing.Color.White;
-            this.btnEliminar.Location = new System.Drawing.Point(108, 550);
-            this.btnEliminar.Name = "btnEliminar";
-            this.btnEliminar.Size = new System.Drawing.Size(80, 40);
-            this.btnEliminar.TabIndex = 11;
-            this.btnEliminar.Text = "Eliminar";
-            this.btnEliminar.UseVisualStyleBackColor = false;
-            this.btnEliminar.Click += new System.EventHandler(this.btnEliminar_Click);
-            // 
-            // btnGuardar
-            // 
-            this.btnGuardar.BackColor = System.Drawing.Color.SeaGreen;
-            this.btnGuardar.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnGuardar.FlatAppearance.BorderSize = 0;
-            this.btnGuardar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnGuardar.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+
+            // Campos Numéricos (2 columnas)
+            y += 60;
+            this.lblCosto.Text = "Costo ($):"; this.lblCosto.Location = new System.Drawing.Point(15, y);
+            this.numCosto.Location = new System.Drawing.Point(15, y + 20); this.numCosto.Width = 120;
+            this.numCosto.DecimalPlaces = 2; this.numCosto.Maximum = 99999999;
+            this.numCosto.ValueChanged += new System.EventHandler(this.numCosto_ValueChanged);
+
+            this.lblPrecio.Text = "Precio Venta ($):"; this.lblPrecio.Location = new System.Drawing.Point(155, y);
+            this.numPrecio.Location = new System.Drawing.Point(155, y + 20); this.numPrecio.Width = 120;
+            this.numPrecio.DecimalPlaces = 2; this.numPrecio.Maximum = 99999999;
+
+            y += 50;
+            this.lblStock.Text = "Stock Actual:"; this.lblStock.Location = new System.Drawing.Point(15, y);
+            this.numStock.Location = new System.Drawing.Point(15, y + 20); this.numStock.Width = 120;
+            this.numStock.Maximum = 10000;
+
+            this.lblStockMinimo.Text = "Stock Mínimo:"; this.lblStockMinimo.Location = new System.Drawing.Point(155, y);
+            this.numStockMinimo.Location = new System.Drawing.Point(155, y + 20); this.numStockMinimo.Width = 120;
+            this.numStockMinimo.Maximum = 1000;
+
+            y += 50;
+            this.lblImpuesto.Text = "Impuesto (%):"; this.lblImpuesto.Location = new System.Drawing.Point(15, y);
+            this.numImpuesto.Location = new System.Drawing.Point(15, y + 20); this.numImpuesto.Width = 120;
+
+            // Botones Editor
+            this.btnGuardar.Text = "Guardar (F5)";
+            this.btnGuardar.BackColor = System.Drawing.Color.ForestGreen;
             this.btnGuardar.ForeColor = System.Drawing.Color.White;
-            this.btnGuardar.Location = new System.Drawing.Point(18, 500);
-            this.btnGuardar.Name = "btnGuardar";
-            this.btnGuardar.Size = new System.Drawing.Size(264, 45);
-            this.btnGuardar.TabIndex = 9;
-            this.btnGuardar.Text = "GUARDAR PRODUCTO";
-            this.btnGuardar.UseVisualStyleBackColor = false;
+            this.btnGuardar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnGuardar.Location = new System.Drawing.Point(15, 450);
+            this.btnGuardar.Size = new System.Drawing.Size(260, 40);
             this.btnGuardar.Click += new System.EventHandler(this.btnGuardar_Click);
-            // 
-            // lblTituloPanel
-            // 
-            this.lblTituloPanel.AutoSize = true;
-            this.lblTituloPanel.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblTituloPanel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.lblTituloPanel.Location = new System.Drawing.Point(18, 25);
-            this.lblTituloPanel.Name = "lblTituloPanel";
-            this.lblTituloPanel.Size = new System.Drawing.Size(135, 25);
-            this.lblTituloPanel.TabIndex = 0;
-            this.lblTituloPanel.Text = "Editar Detalle";
-            // 
-            // panelTop
-            // 
-            this.panelTop.BackColor = System.Drawing.Color.White;
-            this.panelTop.Controls.Add(this.btnExportar);
-            this.panelTop.Controls.Add(this.btnImportar);
-            this.panelTop.Controls.Add(this.label9);
-            this.panelTop.Controls.Add(this.txtBuscar);
-            this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelTop.Location = new System.Drawing.Point(300, 0);
-            this.panelTop.Name = "panelTop";
-            this.panelTop.Size = new System.Drawing.Size(684, 80);
-            this.panelTop.TabIndex = 1;
-            // 
-            // btnExportar
-            // 
-            this.btnExportar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnExportar.BackColor = System.Drawing.Color.SteelBlue;
-            this.btnExportar.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnExportar.FlatAppearance.BorderSize = 0;
-            this.btnExportar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnExportar.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnExportar.ForeColor = System.Drawing.Color.White;
-            this.btnExportar.Location = new System.Drawing.Point(560, 25);
-            this.btnExportar.Name = "btnExportar";
-            this.btnExportar.Size = new System.Drawing.Size(100, 35);
-            this.btnExportar.TabIndex = 13;
-            this.btnExportar.Text = "Exportar";
-            this.btnExportar.UseVisualStyleBackColor = false;
-            this.btnExportar.Click += new System.EventHandler(this.btnExportar_Click);
-            // 
-            // btnImportar
-            // 
-            this.btnImportar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnImportar.BackColor = System.Drawing.Color.DarkOrange;
-            this.btnImportar.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnImportar.FlatAppearance.BorderSize = 0;
-            this.btnImportar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnImportar.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnImportar.ForeColor = System.Drawing.Color.White;
-            this.btnImportar.Location = new System.Drawing.Point(450, 25);
-            this.btnImportar.Name = "btnImportar";
-            this.btnImportar.Size = new System.Drawing.Size(100, 35);
-            this.btnImportar.TabIndex = 12;
-            this.btnImportar.Text = "Importar";
-            this.btnImportar.UseVisualStyleBackColor = false;
-            this.btnImportar.Click += new System.EventHandler(this.btnImportar_Click);
-            // 
-            // label9
-            // 
-            this.label9.AutoSize = true;
-            this.label9.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label9.ForeColor = System.Drawing.Color.DimGray;
-            this.label9.Location = new System.Drawing.Point(20, 32);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(49, 19);
-            this.label9.TabIndex = 21;
-            this.label9.Text = "Buscar";
-            // 
-            // txtBuscar
-            // 
-            this.txtBuscar.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.txtBuscar.Location = new System.Drawing.Point(75, 29);
-            this.txtBuscar.Name = "txtBuscar";
-            this.txtBuscar.PlaceholderText = "Nombre o Código...";
-            this.txtBuscar.Size = new System.Drawing.Size(300, 27);
-            this.txtBuscar.TabIndex = 0;
-            this.txtBuscar.TextChanged += new System.EventHandler(this.txtBuscar_TextChanged);
-            // 
-            // panelGrilla
-            // 
-            this.panelGrilla.Controls.Add(this.dgvProductos);
-            this.panelGrilla.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelGrilla.Location = new System.Drawing.Point(300, 80);
-            this.panelGrilla.Name = "panelGrilla";
-            this.panelGrilla.Padding = new System.Windows.Forms.Padding(20);
-            this.panelGrilla.Size = new System.Drawing.Size(684, 531);
-            this.panelGrilla.TabIndex = 2;
-            // 
-            // dgvProductos
-            // 
-            this.dgvProductos.AllowUserToAddRows = false;
-            this.dgvProductos.AllowUserToDeleteRows = false;
-            this.dgvProductos.AllowUserToResizeRows = false;
+
+            this.btnLimpiar.Text = "Cancelar / Nuevo (Esc)";
+            this.btnLimpiar.BackColor = System.Drawing.Color.Gray;
+            this.btnLimpiar.ForeColor = System.Drawing.Color.White;
+            this.btnLimpiar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnLimpiar.Location = new System.Drawing.Point(15, 500);
+            this.btnLimpiar.Size = new System.Drawing.Size(260, 30);
+            this.btnLimpiar.Click += new System.EventHandler(this.btnLimpiar_Click);
+
+
+            // ---------------------------------------------------------
+            // PANEL PRINCIPAL (DERECHA)
+            // ---------------------------------------------------------
+            this.panelMain.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelMain.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.panelMain.Controls.Add(this.lblTitulo);
+            this.panelMain.Controls.Add(this.lblBuscar);
+            this.panelMain.Controls.Add(this.txtBusqueda);
+            this.panelMain.Controls.Add(this.dgvProductos);
+            this.panelMain.Controls.Add(this.btnEditar);
+            this.panelMain.Controls.Add(this.btnEliminar);
+            this.panelMain.Controls.Add(this.lblTotalProductos);
+
+            // Título
+            this.lblTitulo.Text = "Gestión de Productos";
+            this.lblTitulo.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold);
+            this.lblTitulo.Location = new System.Drawing.Point(20, 15);
+            this.lblTitulo.AutoSize = true;
+
+            // Buscador
+            this.lblBuscar.Text = "Buscar (Nombre o Código):";
+            this.lblBuscar.Location = new System.Drawing.Point(20, 60);
+            this.lblBuscar.AutoSize = true;
+
+            this.txtBusqueda.Location = new System.Drawing.Point(20, 80);
+            this.txtBusqueda.Size = new System.Drawing.Size(400, 23);
+            this.txtBusqueda.TextChanged += new System.EventHandler(this.txtBusqueda_TextChanged);
+
+            // Botones Acción Grid
+            this.btnEditar.Text = "✏️ Editar";
+            this.btnEditar.BackColor = System.Drawing.Color.SteelBlue;
+            this.btnEditar.ForeColor = System.Drawing.Color.White;
+            this.btnEditar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnEditar.Location = new System.Drawing.Point(440, 70);
+            this.btnEditar.Size = new System.Drawing.Size(100, 35);
+            this.btnEditar.Click += new System.EventHandler(this.btnEditar_Click);
+
+            this.btnEliminar.Text = "🗑️ Eliminar";
+            this.btnEliminar.BackColor = System.Drawing.Color.IndianRed;
+            this.btnEliminar.ForeColor = System.Drawing.Color.White;
+            this.btnEliminar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnEliminar.Location = new System.Drawing.Point(550, 70);
+            this.btnEliminar.Size = new System.Drawing.Size(100, 35);
+            this.btnEliminar.Click += new System.EventHandler(this.btnEliminar_Click);
+
+            // Label Total
+            this.lblTotalProductos.Text = "Total: 0";
+            this.lblTotalProductos.Location = new System.Drawing.Point(670, 80);
+            this.lblTotalProductos.AutoSize = true;
+            this.lblTotalProductos.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+
+            // DataGridView
+            this.dgvProductos.Location = new System.Drawing.Point(20, 120);
+            this.dgvProductos.Size = new System.Drawing.Size(740, 420);
+            this.dgvProductos.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvProductos.BackgroundColor = System.Drawing.Color.White;
             this.dgvProductos.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.dgvProductos.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgvProductos.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            this.dgvProductos.ColumnHeadersHeight = 35;
-            this.dgvProductos.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(240)))), ((int)(((byte)(255)))));
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.Black;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgvProductos.DefaultCellStyle = dataGridViewCellStyle2;
-            this.dgvProductos.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvProductos.EnableHeadersVisualStyles = false;
-            this.dgvProductos.GridColor = System.Drawing.Color.WhiteSmoke;
-            this.dgvProductos.Location = new System.Drawing.Point(20, 20);
-            this.dgvProductos.MultiSelect = false;
-            this.dgvProductos.Name = "dgvProductos";
-            this.dgvProductos.ReadOnly = true;
             this.dgvProductos.RowHeadersVisible = false;
-            this.dgvProductos.RowTemplate.Height = 30;
+            this.dgvProductos.AllowUserToAddRows = false;
             this.dgvProductos.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvProductos.Size = new System.Drawing.Size(644, 491);
-            this.dgvProductos.TabIndex = 0;
-            this.dgvProductos.SelectionChanged += new System.EventHandler(this.dgvProductos_SelectionChanged);
-            // 
-            // ProductosForm
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(984, 611);
-            this.Controls.Add(this.panelGrilla);
-            this.Controls.Add(this.panelTop);
-            this.Controls.Add(this.panelLateral);
+            this.dgvProductos.MultiSelect = false;
+            this.dgvProductos.ReadOnly = true;
+            this.dgvProductos.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+
+            // Columnas
+            this.colId.DataPropertyName = "Id";
+            this.colId.HeaderText = "Id";
+            this.colId.Visible = false; // Oculto
+
+            this.colCodigo.DataPropertyName = "CodigoBarras";
+            this.colCodigo.HeaderText = "Código";
+            this.colCodigo.FillWeight = 80;
+
+            this.colNombre.DataPropertyName = "Nombre";
+            this.colNombre.HeaderText = "Producto";
+            this.colNombre.FillWeight = 200;
+
+            this.colPrecio.DataPropertyName = "Precio";
+            this.colPrecio.HeaderText = "Precio ($)";
+            this.colPrecio.DefaultCellStyle.Format = "N2";
+            this.colPrecio.FillWeight = 80;
+
+            this.colStock.DataPropertyName = "Stock";
+            this.colStock.HeaderText = "Stock";
+            this.colStock.FillWeight = 60;
+
+            // Nota: Para mostrar "Proveedor.Nombre", se requiere un pequeño truco en el CellFormatting
+            // o Binding avanzado. Por ahora usamos DataPropertyName simple, si falla se verá vacío.
+            this.colProveedor.DataPropertyName = "ProveedorId";
+            this.colProveedor.HeaderText = "Prov ID";
+            this.colProveedor.Visible = false; // Ocultamos por simplicidad, o lo mostramos si es útil
+
+            this.dgvProductos.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+                this.colId, this.colCodigo, this.colNombre, this.colPrecio, this.colStock, this.colProveedor
+            });
+
+            // ---------------------------------------------------------
+            // FORM
+            // ---------------------------------------------------------
+            this.ClientSize = new System.Drawing.Size(1084, 561);
+            this.Controls.Add(this.panelMain);
+            this.Controls.Add(this.panelEditor);
             this.Name = "ProductosForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Gestión de Productos";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Load += new System.EventHandler(this.ProductosForm_Load);
-            this.panelLateral.ResumeLayout(false);
-            this.panelLateral.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numStockMinimo)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numStock)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numPrecio)).EndInit();
+
+            this.panelEditor.ResumeLayout(false);
+            this.panelEditor.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numCosto)).EndInit();
-            this.panelTop.ResumeLayout(false);
-            this.panelTop.PerformLayout();
-            this.panelGrilla.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.numPrecio)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numStock)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numStockMinimo)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numImpuesto)).EndInit();
+            this.panelMain.ResumeLayout(false);
+            this.panelMain.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvProductos)).EndInit();
             this.ResumeLayout(false);
-
         }
 
-        #endregion
-
-        private System.Windows.Forms.Panel panelLateral;
-        private System.Windows.Forms.Panel panelTop;
-        private System.Windows.Forms.Panel panelGrilla;
-        private System.Windows.Forms.Label lblTituloPanel;
+        // Variables
+        private System.Windows.Forms.Panel panelEditor;
+        private System.Windows.Forms.Label lblModo;
         private System.Windows.Forms.Button btnGuardar;
-        private System.Windows.Forms.Button btnEliminar;
         private System.Windows.Forms.Button btnLimpiar;
-        private System.Windows.Forms.Label label1;
+
         private System.Windows.Forms.TextBox txtCodigo;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox txtNombre;
-        private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox txtDescripcion;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.NumericUpDown numPrecio;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.NumericUpDown numCosto;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.NumericUpDown numStockMinimo;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.NumericUpDown numStock;
-        private System.Windows.Forms.Label label8;
         private System.Windows.Forms.ComboBox cboProveedor;
-        private System.Windows.Forms.TextBox txtBuscar;
-        private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Button btnImportar;
-        private System.Windows.Forms.Button btnExportar;
+
+        private System.Windows.Forms.NumericUpDown numCosto;
+        private System.Windows.Forms.NumericUpDown numPrecio;
+        private System.Windows.Forms.NumericUpDown numStock;
+        private System.Windows.Forms.NumericUpDown numStockMinimo;
+        private System.Windows.Forms.NumericUpDown numImpuesto;
+
+        // Labels
+        private System.Windows.Forms.Label lblCodigo;
+        private System.Windows.Forms.Label lblNombre;
+        private System.Windows.Forms.Label lblDescripcion;
+        private System.Windows.Forms.Label lblProveedor;
+        private System.Windows.Forms.Label lblCosto;
+        private System.Windows.Forms.Label lblPrecio;
+        private System.Windows.Forms.Label lblStock;
+        private System.Windows.Forms.Label lblStockMinimo;
+        private System.Windows.Forms.Label lblImpuesto;
+
+        private System.Windows.Forms.Panel panelMain;
+        private System.Windows.Forms.Label lblTitulo;
+        private System.Windows.Forms.TextBox txtBusqueda;
+        private System.Windows.Forms.Label lblBuscar;
+        private System.Windows.Forms.Label lblTotalProductos;
+        private System.Windows.Forms.Button btnEditar;
+        private System.Windows.Forms.Button btnEliminar;
         private System.Windows.Forms.DataGridView dgvProductos;
+
+        // Columnas
+        private System.Windows.Forms.DataGridViewTextBoxColumn colId;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colCodigo;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colNombre;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colPrecio;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colStock;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colProveedor;
     }
 }

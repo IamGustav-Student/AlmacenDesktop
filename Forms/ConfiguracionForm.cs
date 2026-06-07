@@ -1,24 +1,36 @@
-﻿using AlmacenDesktop.Data;
+using AlmacenDesktop.Data;
 using AlmacenDesktop.Modelos;
+using AlmacenDesktop.Services;
 using AlmacenDesktop.Helpers;
 using System;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Windows.Forms;
-using System.Drawing.Printing; // Necesario para PrinterSettings
 
 namespace AlmacenDesktop.Forms
 {
     public partial class ConfiguracionForm : Form
     {
+        private BackupService _backupService;
+
         public ConfiguracionForm()
         {
             InitializeComponent();
-            this.KeyPreview = true;
-            this.KeyDown += new KeyEventHandler(ConfiguracionForm_KeyDown);
+            _backupService = new BackupService();
         }
 
         private void ConfiguracionForm_Load(object sender, EventArgs e)
         {
+            // --- SEGURIDAD: VERIFICACIÓN FINAL ---
+            // Si por alguna razón un usuario no Admin llega aquí, lo sacamos.
+            if (Program.UsuarioActualGlobal != null && Program.UsuarioActualGlobal.Rol != RolUsuario.Admin)
+            {
+                MessageBox.Show("Intento de acceso no autorizado registrado.", "Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                this.Close();
+                return;
+            }
+            // -------------------------------------
+
             CargarImpresoras();
             CargarDatos();
         }
@@ -31,13 +43,7 @@ namespace AlmacenDesktop.Forms
                 cboImpresoras.Items.Add(printer);
             }
 
-            // Si hay impresora por defecto y no se ha guardado otra, seleccionarla
-            if (cboImpresoras.Items.Count > 0)
-            {
-                // Intenta seleccionar la predeterminada si no hay config
-                PrinterSettings settings = new PrinterSettings();
-                cboImpresoras.SelectedItem = settings.PrinterName;
-            }
+            if (cboImpresoras.Items.Count == 0) cboImpresoras.Items.Add("Microsoft Print to PDF");
         }
 
         private void CargarDatos()
@@ -49,56 +55,28 @@ namespace AlmacenDesktop.Forms
                     var datos = context.DatosNegocio.FirstOrDefault();
                     if (datos != null)
                     {
-                        txtNombre.Text = datos.NombreFantasia;
-                        txtRazon.Text = datos.RazonSocial;
-                        txtCuit.Text = datos.CUIT;
+                        txtNombreNegocio.Text = datos.NombreFantasia;
                         txtDireccion.Text = datos.Direccion;
                         txtTelefono.Text = datos.Telefono;
-                        txtMensaje.Text = datos.MensajeTicket;
+                        txtCuit.Text = datos.CUIT;
+                        txtEmail.Text = datos.RazonSocial;
+                        txtMensajeTicket.Text = datos.MensajeTicket;
 
-                        // Cargar impresora guardada
-                        if (!string.IsNullOrEmpty(datos.NombreImpresora))
-                        {
-                            if (cboImpresoras.Items.Contains(datos.NombreImpresora))
-                                cboImpresoras.SelectedItem = datos.NombreImpresora;
-                            else
-                                cboImpresoras.Items.Add(datos.NombreImpresora); // Agregar aunque no esté (por si se desconectó)
-                        }
-                    }
-                    else
-                    {
-                        txtMensaje.Text = "¡Gracias por su compra!";
+                        if (!string.IsNullOrEmpty(datos.NombreImpresora) && cboImpresoras.Items.Contains(datos.NombreImpresora))
+                            cboImpresoras.SelectedItem = datos.NombreImpresora;
+                        else if (cboImpresoras.Items.Count > 0)
+                            cboImpresoras.SelectedIndex = 0;
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al cargar datos: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error al cargar datos: " + ex.Message);
             }
         }
 
         private void btnGuardar_Click(object sender, EventArgs e)
         {
-            GuardarDatos();
-        }
-
-        private void btnCancelar_Click(object sender, EventArgs e) => this.Close();
-
-        private void btnConfigAfip_Click(object sender, EventArgs e)
-        {
-            var formAfip = new ConfiguracionAfipForm();
-            formAfip.ShowDialog();
-        }
-
-        private void GuardarDatos()
-        {
-            if (string.IsNullOrWhiteSpace(txtNombre.Text))
-            {
-                MessageBox.Show("El nombre de fantasía es obligatorio.");
-                txtNombre.Focus();
-                return;
-            }
-
             try
             {
                 using (var context = new AlmacenDbContext())
@@ -110,35 +88,71 @@ namespace AlmacenDesktop.Forms
                         context.DatosNegocio.Add(datos);
                     }
 
-                    datos.NombreFantasia = txtNombre.Text.Trim();
-                    datos.RazonSocial = txtRazon.Text.Trim();
-                    datos.CUIT = txtCuit.Text.Trim();
-                    datos.Direccion = txtDireccion.Text.Trim();
-                    datos.Telefono = txtTelefono.Text.Trim();
-                    datos.MensajeTicket = txtMensaje.Text.Trim();
+                    datos.NombreFantasia = txtNombreNegocio.Text;
+                    datos.Direccion = txtDireccion.Text;
+                    datos.Telefono = txtTelefono.Text;
+                    datos.CUIT = txtCuit.Text;
+                    datos.RazonSocial = txtEmail.Text;
+                    datos.MensajeTicket = txtMensajeTicket.Text;
 
-                    // Guardar Impresora
                     if (cboImpresoras.SelectedItem != null)
                         datos.NombreImpresora = cboImpresoras.SelectedItem.ToString();
 
                     context.SaveChanges();
-
                     AudioHelper.PlayOk();
-                    MessageBox.Show("Configuración guardada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Datos guardados correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     this.Close();
                 }
             }
             catch (Exception ex)
             {
                 AudioHelper.PlayError();
-                MessageBox.Show("Error al guardar: " + ex.Message, "Error Crítico", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error al guardar: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void ConfiguracionForm_KeyDown(object sender, KeyEventArgs e)
+        private void btnBackup_Click(object sender, EventArgs e)
         {
-            if (e.KeyCode == Keys.Escape) this.Close();
-            if (e.KeyCode == Keys.F10) GuardarDatos();
+            using (var fbd = new FolderBrowserDialog())
+            {
+                fbd.Description = "Seleccione dónde guardar la copia de seguridad";
+                if (fbd.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        string archivoGenerado = _backupService.RealizarBackupManual(fbd.SelectedPath);
+                        AudioHelper.PlayOk();
+                        MessageBox.Show($"Respaldo creado con éxito en:\n{archivoGenerado}", "Backup OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        AudioHelper.PlayError();
+                        MessageBox.Show(ex.Message, "Error Backup", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        private void btnConfigurarAfip_Click(object sender, EventArgs e)
+        {
+            var res = MessageBox.Show(
+                "¿Desea iniciar el Asistente Fiscal 1-Click (Recomendado) para generar claves y CSR automáticamente?\n\n" +
+                "[Sí] = Abrir Asistente 1-Click\n" +
+                "[No] = Abrir Configuración Manual Avanzada",
+                "Asistente Fiscal VENDEMAX",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question);
+
+            if (res == DialogResult.Yes)
+            {
+                var frm = new AfipAsistenteForm();
+                frm.ShowDialog();
+            }
+            else if (res == DialogResult.No)
+            {
+                var frm = new ConfiguracionAfipForm();
+                frm.ShowDialog();
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace AlmacenDesktop.Helpers
+namespace AlmacenDesktop.Helpers
 {
     public static class Constantes
     {
@@ -13,5 +13,8 @@
 
         // Reglas de Negocio
         public const int ALERTA_STOCK_MINIMO = 5; // Umbral para el dashboard
+
+        // Servidor de Licencias HEXASTRATEGY
+        public const string API_LICENCIAS_URL = "http://localhost:3000"; // Modificar para producción
     }
 }

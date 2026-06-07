@@ -3,6 +3,7 @@ using System;
 using AlmacenDesktop.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AlmacenDesktop.Migrations
 {
     [DbContext(typeof(AlmacenDbContext))]
-    partial class AlmacenDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260101201025_pasoeauditoria")]
+    partial class pasoeauditoria
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.11");
@@ -349,9 +352,6 @@ namespace AlmacenDesktop.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("Activo")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("CodigoBarras")

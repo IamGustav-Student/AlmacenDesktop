@@ -1,118 +1,131 @@
-using System;
-using System.Drawing;
-using System.Windows.Forms;
 using AlmacenDesktop.Modelos;
+using AlmacenDesktop.Services; // Para BackupService si lo llamas manualmente
+using System;
+using System.Windows.Forms;
+using System.Drawing;
 
 namespace AlmacenDesktop.Forms
 {
     public partial class MenuPrincipal : Form
     {
-        private Button currentButton;
-        private Form activeForm;
         private Usuario _usuarioActual;
 
         public MenuPrincipal(Usuario usuario)
         {
             InitializeComponent();
             _usuarioActual = usuario;
-            string nombreUsuario = _usuarioActual != null ? _usuarioActual.NombreUsuario : "Admin";
-            this.Text = $"VENDEMAX - Usuario: {nombreUsuario}";
         }
 
-        private void ActivateButton(object btnSender)
+        private void MenuPrincipal_Load(object sender, EventArgs e)
         {
-            if (btnSender != null)
+            ConfigurarSeguridad();
+            lblBienvenida.Text = $"Hola, {_usuarioActual.Nombre} ({_usuarioActual.Rol})";
+        }
+
+        private void ConfigurarSeguridad()
+        {
+            // L�gica de Permisos "Nivel Dios"
+            // Si es ADMIN, no tocamos nada (tiene acceso a todo).
+            // Si NO es Admin, empezamos a restringir.
+
+            if (_usuarioActual.Rol != RolUsuario.Admin)
             {
-                if (currentButton != (Button)btnSender)
-                {
-                    DisableButton();
-                    Color color = Color.FromArgb(0, 150, 136); // Color VENDEMAX
-                    currentButton = (Button)btnSender;
-                    currentButton.BackColor = color;
-                    currentButton.ForeColor = Color.White;
-                    currentButton.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-                }
+                // 1. Bloquear Configuraci�n (CR�TICO)
+                BloquearBoton(btnConfiguracion);
+                BloquearBoton(btnUsuarios); // Gesti�n de usuarios solo para admins
+                BloquearBoton(btnProveedores); // Opcional, seg�n tu negocio
+
+                // 2. Bloquear Reportes Sensibles (Ganancias)
+                BloquearBoton(btnReportes);
+
+                // 3. Bloquear Gesti�n Avanzada de Stock (Importaci�n masiva, etc)
+                // btnProductos.Enabled = true; // Vendedores suelen necesitar ver productos
+                BloquearBoton(btnImportar); // Importar Excel es peligroso para un vendedor
+            }
+
+            // Si tienes un rol intermedio "Gerente", puedes agregar un 'else if' aqu�.
+        }
+
+        // M�todo auxiliar para desactivar visualmente un bot�n
+        private void BloquearBoton(Button btn)
+        {
+            if (btn != null)
+            {
+                btn.Enabled = false;
+                btn.BackColor = Color.LightGray;
+                btn.ForeColor = Color.DarkGray;
+                // Opcional: Ocultarlo del todo
+                // btn.Visible = false; 
             }
         }
 
-        private void DisableButton()
-        {
-            foreach (Control previousBtn in panelMenu.Controls)
-            {
-                if (previousBtn.GetType() == typeof(Button))
-                {
-                    previousBtn.BackColor = Color.FromArgb(51, 51, 76);
-                    previousBtn.ForeColor = Color.Gainsboro;
-                    previousBtn.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-                }
-            }
-        }
-
-        private void OpenChildForm(Form childForm, object btnSender)
-        {
-            if (activeForm != null)
-                activeForm.Close();
-
-            ActivateButton(btnSender);
-            activeForm = childForm;
-            childForm.TopLevel = false;
-            childForm.FormBorderStyle = FormBorderStyle.None;
-            childForm.Dock = DockStyle.Fill;
-            this.panelDesktop.Controls.Add(childForm);
-            this.panelDesktop.Tag = childForm;
-            childForm.BringToFront();
-            childForm.Show();
-            lblBienvenida.Visible = false;
-        }
-
-        // --- EVENTOS PRINCIPALES ---
+        // --- EVENTOS DE NAVEGACI�N (Ejemplos) ---
 
         private void btnVentas_Click(object sender, EventArgs e)
         {
-            OpenChildForm(new VentasForm(_usuarioActual), sender);
-        }
-
-        private void btnProductos_Click(object sender, EventArgs e)
-        {
-            OpenChildForm(new ProductosForm(), sender);
-        }
-
-        private void btnClientes_Click(object sender, EventArgs e)
-        {
-            OpenChildForm(new ClientesForm(), sender); // Restaurado
-        }
-
-        private void btnProveedores_Click(object sender, EventArgs e)
-        {
-            OpenChildForm(new ProveedoresForm(), sender); // Restaurado
-        }
-
-        private void btnCompras_Click(object sender, EventArgs e)
-        {
-            OpenChildForm(new ComprasForm(_usuarioActual), sender); // Restaurado
+            AbrirFormulario(new VentasForm(_usuarioActual));
         }
 
         private void btnCaja_Click(object sender, EventArgs e)
         {
-            OpenChildForm(new ControlCajaForm(_usuarioActual), sender);
+            AbrirFormulario(new ControlCajaForm(_usuarioActual));
         }
 
-        private void btnCtaCte_Click(object sender, EventArgs e)
+        private void btnProductos_Click(object sender, EventArgs e)
         {
-            OpenChildForm(new CuentaCorrienteForm(), sender); // Restaurado
-        }
-
-        private void btnReportes_Click(object sender, EventArgs e)
-        {
-            OpenChildForm(new ReporteGananciasForm(), sender);
+            // Todos pueden ver productos, pero quiz�s quieras restringir editar/borrar dentro del form
+            AbrirFormulario(new ProductosForm());
         }
 
         private void btnConfiguracion_Click(object sender, EventArgs e)
         {
-            OpenChildForm(new ConfiguracionForm(), sender);
+            // Doble chequeo de seguridad
+            if (!ValidarAccesoAdmin()) return;
+            AbrirFormulario(new ConfiguracionForm());
+        }
+
+        private void btnReportes_Click(object sender, EventArgs e)
+        {
+            if (!ValidarAccesoAdmin()) return;
+            AbrirFormulario(new ReporteGananciasForm());
+        }
+
+        private void btnUsuarios_Click(object sender, EventArgs e)
+        {
+            if (!ValidarAccesoAdmin()) return;
+            AbrirFormulario(new UsuariosForm());
+        }
+
+        // --- HELPER DE NAVEGACIN ---
+        private void AbrirFormulario(Form formulario)
+        {
+            this.Hide();
+            formulario.ShowDialog();
+            this.Show(); // Al cerrar el hijo, vuelve el men
+        }
+
+        private bool ValidarAccesoAdmin()
+        {
+            if (_usuarioActual.Rol != RolUsuario.Admin)
+            {
+                MessageBox.Show("⛔ Acceso Denegado.\nSe requieren permisos de Administrador.", "Seguridad", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            return true;
+        }
+
+        private void btnImportar_Click(object sender, EventArgs e)
+        {
+            if (!ValidarAccesoAdmin()) return;
+            AbrirFormulario(new ImportarProductosForm());
         }
 
         private void btnSalir_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void MenuPrincipal_FormClosing(object sender, FormClosingEventArgs e)
         {
             Application.Exit();
         }

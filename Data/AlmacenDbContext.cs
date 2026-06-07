@@ -7,6 +7,16 @@ namespace AlmacenDesktop.Data
 {
     public class AlmacenDbContext : DbContext
     {
+        // Constructor para Inyección de Dependencias (Futuro/Testing)
+        public AlmacenDbContext(DbContextOptions<AlmacenDbContext> options) : base(options)
+        {
+        }
+
+        // Constructor vacío para compatibilidad con código legado (WinForms Designer / new directos)
+        public AlmacenDbContext()
+        {
+        }
+
         // --- MÓDULO VENTAS Y PRODUCTOS ---
         public DbSet<Producto> Productos { get; set; }
         public DbSet<Cliente> Clientes { get; set; }
@@ -30,15 +40,26 @@ namespace AlmacenDesktop.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "almacen.db");
-            optionsBuilder.UseSqlite($"Data Source={dbPath}");
+            // Solo configuramos si no se ha configurado ya (ej: por DI)
+            if (!optionsBuilder.IsConfigured)
+            {
+                // Intenta usar la cadena global definida en Program (Mejor práctica)
+                if (!string.IsNullOrEmpty(Program.ConnectionStringGlobal))
+                {
+                    optionsBuilder.UseSqlite(Program.ConnectionStringGlobal);
+                }
+                else
+                {
+                    // Fallback por defecto si no hay configuración global
+                    string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "almacen.db");
+                    optionsBuilder.UseSqlite($"Data Source={dbPath}");
+                }
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // CONFIGURACIÓN DE PRECISIÓN DECIMAL
-            // Es vital que las propiedades existan y tengan 'set' en los modelos
-
+            // CONFIGURACIÓN DE PRECISIÓN DECIMAL (Moneda)
             modelBuilder.Entity<Producto>().Property(p => p.Costo).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Producto>().Property(p => p.Precio).HasColumnType("decimal(18,2)");
 
@@ -60,7 +81,7 @@ namespace AlmacenDesktop.Data
             modelBuilder.Entity<MovimientoCaja>().Property(m => m.Monto).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Pago>().Property(p => p.Monto).HasColumnType("decimal(18,2)");
 
-            // ÍNDICES
+            // ÍNDICES PARA PERFORMANCE
             modelBuilder.Entity<Producto>().HasIndex(p => p.CodigoBarras).IsUnique();
             modelBuilder.Entity<Cliente>().HasIndex(c => c.DniCuit);
         }

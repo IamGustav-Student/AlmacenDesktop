@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HEXASTRATEGY | VENDEMAX v2.0 - Suscripción Mensual</title>
+    <meta name="description"
+        content="La Landing Oficial de Suscripción para VENDEMAX v2.0. El punto de venta (POS) de alto rendimiento con integración oficial AFIP, cobros QR de Mercado Pago y seguridad criptográfica Windows DPAPI.">
+    <meta name="keywords"
+        content="VENDEMAX, POS, Punto de Venta, AFIP Facturación, Mercado Pago QR, Criptografía DPAPI, Suscripción Mensual, HEXASTRATEGY">
+    <meta name="author" content="HEXASTRATEGY">
+    <link rel="icon" href="https://raw.githubusercontent.com/IamGustav-Student/AlmacenDesktop/main/Resources/logo.png" type="image/png" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>'">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS & Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- GSAP & Lenis Scroll -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Space Grotesk', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        cobalt: {
+                            DEFAULT: '#1A56DB',
+                            dark: '#0D2F7A',
+                            light: '#2D6BE4',
+                            glowing: '#1e40af'
+                        },
+                        slate: {
+                            DEFAULT: '#1E2A3B',
+                            light: '#2A3A52',
+                            dark: '#0B111C',
+                            black: '#070B12',
+                            card: '#131D2E'
+                        },
+                        cyan: {
+                            DEFAULT: '#00F5C4',
+                            dim: 'rgba(0, 245, 196, 0.12)',
+                            glow: 'rgba(0, 245, 196, 0.35)'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Glowing & Hexagonal Patterns */
+        .hex-grid-bg {
+            position: relative;
+        }
+
+        .hex-grid-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='52' viewBox='0 0 60 52' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='30,1 59,17 59,49 30,65 1,49 1,17' fill='none' stroke='rgba(0, 245, 196, 0.035)' stroke-width='1'/%3E%3C/svg%3E");
+            background-size: 60px 52px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .highlight-svg-path {
+            stroke: #00F5C4;
+            stroke-width: 4;
+            stroke-linecap: round;
+            fill: none;
+        }
+
+        /* Scrollbars custom styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0B111C;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1E2A3B;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00F5C4;
+        }
+
+        /* Marquee Keyframe Animation */
+        @keyframes marquee {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .animate-marquee {
+            display: flex;
+            width: max-content;
+            animation: marquee 25s linear infinite;
+        }
+
+        /* Smooth expansion for FAQ */
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 200px;
+            opacity: 1;
+        }
+        
+        .faq-item.active .faq-icon {
+            transform: rotate(45deg);
+            color: #00F5C4;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-black text-[#E8EDF5] overflow-x-hidden antialiased font-sans">
+
+    <!-- FLOATING HEADER -->
+    <header class="header fixed w-full top-0 left-0 z-50 bg-slate-black/85 backdrop-blur-md border-b border-white/5 transition-all duration-300">
+        <nav class="nav max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#inicio" class="nav-logo flex items-center gap-3 font-bold tracking-wider text-white hover:opacity-90 transition-opacity">
+                <div class="logo-wrapper transition-transform duration-500 hover:rotate-180">
+                    <svg viewBox="0 0 40 40" fill="none" class="w-10 h-10" xmlns="http://www.w3.org/2000/svg">
+                        <polygon points="20,2 38,11 38,29 20,38 2,29 2,11" fill="none" stroke="#00F5C4" stroke-width="2" />
+                        <polygon points="20,7 33,14 33,26 20,33 7,26 7,14" fill="none" stroke="#1A56DB" stroke-width="1.5" opacity="0.6" />
+                        <circle cx="20" cy="20" r="4" fill="#00F5C4" class="animate-pulse" />
+                    </svg>
+                </div>
+                <span class="text-xl font-bold tracking-widest">HEXA<span class="text-cyan">STRATEGY</span></span>
+            </a>
+
+            <ul class="nav-links hidden md:flex items-center gap-8 text-sm font-medium">
+                <li><a href="#caracteristicas" class="hover:text-cyan transition-colors text-gray-400">Características</a></li>
+                <li><a href="#seguridad" class="hover:text-cyan transition-colors text-gray-400">Seguridad</a></li>
+                <li><a href="#suscripcion" class="hover:text-cyan transition-colors text-gray-400">Precios</a></li>
+                <li><a href="#faq" class="hover:text-cyan transition-colors text-gray-400">FAQ</a></li>
+                <li><a href="#suscripcion" class="bg-cyan hover:bg-cyan/90 text-slate-black font-bold px-5 py-2.5 rounded-lg transition-all duration-300 transform hover:-translate-y-0.5 shadow-[0_0_20px_rgba(0,245,196,0.2)]">Comenzar Suscripción</a></li>
+            </ul>
+
+            <button class="md:hidden text-white text-2xl" id="menuBtn">
+                <i class="bi bi-list"></i>
+            </button>
+        </nav>
+
+        <!-- MOBILE MENU -->
+        <div class="hidden md:hidden bg-slate-dark/95 border-b border-white/10 py-6 px-6" id="mobileMenu">
+            <ul class="flex flex-col gap-5 text-lg font-medium">
+                <li><a href="#caracteristicas" class="text-gray-300 hover:text-cyan block py-1" onclick="toggleMobileMenu()">Características</a></li>
+                <li><a href="#seguridad" class="text-gray-300 hover:text-cyan block py-1" onclick="toggleMobileMenu()">Seguridad</a></li>
+                <li><a href="#suscripcion" class="text-gray-300 hover:text-cyan block py-1" onclick="toggleMobileMenu()">Precios</a></li>
+                <li><a href="#faq" class="text-gray-300 hover:text-cyan block py-1" onclick="toggleMobileMenu()">FAQ</a></li>
+                <li><a href="#suscripcion" class="bg-cyan text-slate-black font-bold text-center block py-3 rounded-lg shadow-lg" onclick="toggleMobileMenu()">Iniciar Suscripción</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <main id="main">
+        <!-- HERO SECTION -->
+        <section class="hero min-h-[95vh] pt-32 pb-24 md:py-40 flex flex-col justify-center items-center relative hex-grid-bg overflow-hidden" id="inicio">
+            <!-- Ambient Glow Elements -->
+            <div class="absolute top-1/4 right-0 w-[45rem] h-[45rem] bg-cobalt/15 rounded-full filter blur-[150px] -z-10 pointer-events-none"></div>
+            <div class="absolute bottom-1/4 left-0 w-[35rem] h-[35rem] bg-cyan/5 rounded-full filter blur-[120px] -z-10 pointer-events-none"></div>
+
+            <div class="max-w-7xl mx-auto px-6 text-center relative z-10 flex flex-col items-center">
+                <div class="hero-label flex items-center gap-3 text-cyan text-xs font-mono tracking-[0.2em] uppercase mb-8 gsap-fade">
+                    <span class="w-8 h-[1px] bg-cyan"></span>
+                    Software POS Nivel Corporativo
+                    <span class="w-8 h-[1px] bg-cyan"></span>
+                </div>
+
+                <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-8 max-w-4xl text-white leading-none gsap-fade">
+                    Punto de Venta Híbrido <br>
+                    <span class="relative inline-block px-1 mt-2 text-cyan">
+                        Facturación sin Límites
+                        <svg class="absolute -bottom-3 left-0 w-full h-4 overflow-visible" viewBox="0 0 205 30" preserveAspectRatio="none">
+                            <path class="highlight-svg-path" d="M 10 15 C 80 28 150 2 200 20" />
+                        </svg>
+                    </span>
+                </h1>
+
+                <p class="text-lg md:text-xl text-gray-400 max-w-3xl mb-12 leading-relaxed gsap-fade">
+                    <strong>VENDEMAX v2.0</strong> unifica la velocidad y confiabilidad de una aplicación de escritorio local con la supremacía fiscal de la facturación electrónica oficial <strong class="text-white font-medium">AFIP</strong> (online/offline) y cobros dinámicos con <strong class="text-cyan font-medium">Mercado Pago QR</strong>.
+                </p>
+
+                <div class="flex flex-col sm:flex-row gap-5 items-center justify-center w-full max-w-md gsap-fade mb-16">
+                    <a href="#suscripcion" class="w-full sm:w-auto bg-cyan hover:bg-cyan/95 text-slate-black font-bold px-8 py-4 rounded-xl transition-all duration-300 shadow-[0_0_30px_rgba(0,245,196,0.25)] flex items-center justify-center gap-3 hover:-translate-y-0.5">
+                        <i class="bi bi-rocket-takeoff-fill text-lg"></i>
+                        Ver Planes y Suscribirse
+                    </a>
+                    <a href="#caracteristicas" class="w-full sm:w-auto border border-white/10 hover:border-cyan/50 hover:bg-cyan/5 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-3">
+                        Explorar Funciones
+                        <i class="bi bi-arrow-right text-lg"></i>
+                    </a>
+                </div>
+
+                <!-- Hero Technical Context Stats -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12 border-t border-white/5 pt-12 w-full max-w-5xl">
+                    <div class="text-center">
+                        <div class="text-3xl md:text-4xl font-bold text-white mb-1">100<span class="text-cyan">%</span></div>
+                        <div class="text-[10px] text-gray-500 font-mono tracking-wider uppercase">Autocontenido (.NET 8)</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl md:text-4xl font-bold text-white mb-1">7<span class="text-cyan"> Días</span></div>
+                        <div class="text-[10px] text-gray-500 font-mono tracking-wider uppercase">Operación Offline Plena</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl md:text-4xl font-bold text-white mb-1">&lt;3<span class="text-cyan"> Seg.</span></div>
+                        <div class="text-[10px] text-gray-500 font-mono tracking-wider uppercase">Verificación QR Webhook</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl md:text-4xl font-bold text-white mb-1">AES<span class="text-cyan">256</span></div>
+                        <div class="text-[10px] text-gray-500 font-mono tracking-wider uppercase">Seguridad Criptográfica</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- INFINITE SLIDING TECH MARQUEE -->
+        <div class="marquee overflow-hidden bg-cobalt/10 border-y border-cyan/20 py-5">
+            <div class="marquee-inner animate-marquee gap-8">
+                <span class="font-mono text-xs font-bold tracking-widest text-gray-400 flex items-center gap-4 uppercase">
+                    FACTURACIÓN AFIP CON CAE <span class="text-cyan text-lg">◆</span>
+                </span>
+                <span class="font-mono text-xs font-bold tracking-widest text-gray-400 flex items-center gap-4 uppercase">
+                    CONTINGENCIA OFFLINE COMPROBANTE X <span class="text-cyan text-lg">◆</span>
+                </span>
+                <span class="font-mono text-xs font-bold tracking-widest text-gray-400 flex items-center gap-4 uppercase">
+                    INTEGRACIÓN QR DINÁMICO MERCADO PAGO <span class="text-cyan text-lg">◆</span>
+                </span>
+                <span class="font-mono text-xs font-bold tracking-widest text-gray-400 flex items-center gap-4 uppercase">
+                    SEGURIDAD WINDOWS DPAPI <span class="text-cyan text-lg">◆</span>
+                </span>
+                <span class="font-mono text-xs font-bold tracking-widest text-gray-400 flex items-center gap-4 uppercase">
+                    KEYPREVIEW CAPTURA RÁPIDA DE ESCÁNER <span class="text-cyan text-lg">◆</span>
+                </span>
+                <span class="font-mono text-xs font-bold tracking-widest text-gray-400 flex items-center gap-4 uppercase">
+                    BUSINESS INTELLIGENCE INTEGRADO <span class="text-cyan text-lg">◆</span>
+                </span>
+                <!-- Duplicate for Loop -->
+                <span class="font-mono text-xs font-bold tracking-widest text-gray-400 flex items-center gap-4 uppercase">
+                    FACTURACIÓN AFIP CON CAE <span class="text-cyan text-lg">◆</span>
+                </span>
+                <span class="font-mono text-xs font-bold tracking-widest text-gray-400 flex items-center gap-4 uppercase">
+                    CONTINGENCIA OFFLINE COMPROBANTE X <span class="text-cyan text-lg">◆</span>
+                </span>
+                <span class="font-mono text-xs font-bold tracking-widest text-gray-400 flex items-center gap-4 uppercase">
+                    INTEGRACIÓN QR DINÁMICO MERCADO PAGO <span class="text-cyan text-lg">◆</span>
+                </span>
+                <span class="font-mono text-xs font-bold tracking-widest text-gray-400 flex items-center gap-4 uppercase">
+                    SEGURIDAD WINDOWS DPAPI <span class="text-cyan text-lg">◆</span>
+                </span>
+                <span class="font-mono text-xs font-bold tracking-widest text-gray-400 flex items-center gap-4 uppercase">
+                    KEYPREVIEW CAPTURA RÁPIDA DE ESCÁNER <span class="text-cyan text-lg">◆</span>
+                </span>
+                <span class="font-mono text-xs font-bold tracking-widest text-gray-400 flex items-center gap-4 uppercase">
+                    BUSINESS INTELLIGENCE INTEGRADO <span class="text-cyan text-lg">◆</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- FEATURES BENTO GRID -->
+        <section class="services bg-slate-dark py-28 relative" id="caracteristicas">
+            <div class="max-w-7xl mx-auto px-6 relative z-10">
+                <div class="max-w-3xl mb-16 gsap-fade">
+                    <div class="inline-block font-mono text-xs font-bold tracking-wider text-cyan bg-cyan-dim border border-cyan/30 px-3 py-1 rounded-md uppercase mb-4">
+                        // características élite
+                    </div>
+                    <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">Un POS de escritorio como nunca viste.</h2>
+                    <p class="text-lg text-gray-400 leading-relaxed">
+                        Desarrollado y optimizado bajo los estándares de ingeniería de **HEXASTRATEGY**. Máxima velocidad nativa de escritorio combinada con automatización de cobranzas y blindaje de datos empresariales.
+                    </p>
+                </div>
+
+                <!-- Bento Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Feature 1 -->
+                    <div class="bg-slate-card border border-white/5 hover:border-cyan/20 p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1 relative group overflow-hidden">
+                        <div class="absolute inset-0 opacity-5 bg-cover bg-center group-hover:scale-105 transition-transform duration-700 pointer-events-none"
+                            style="background-image: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000');">
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-card via-slate-card/90 to-transparent"></div>
+
+                        <div class="relative z-10">
+                            <div class="w-12 h-12 bg-cyan/10 border border-cyan/30 text-cyan rounded-xl flex items-center justify-center text-xl mb-6 shadow-inner">
+                                <i class="bi bi-lightning-charge-fill"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-3">Facturación "One-Click"</h3>
+                            <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                                Olvídate del complejo proceso de AFIP y OpenSSL. El asistente integrado de VENDEMAX genera tus claves RSA de 2048 bits y la solicitud CSR nativamente en un clic para darte de alta de inmediato.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="font-mono text-[10px] bg-slate-black text-cyan border border-cyan/15 px-2 py-0.5 rounded">RSA-2048</span>
+                                <span class="font-mono text-[10px] bg-slate-black text-cyan border border-cyan/15 px-2 py-0.5 rounded">Nativo CSR PKCS#10</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="bg-slate-card border border-white/5 hover:border-cyan/20 p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1 relative group overflow-hidden">
+                        <div class="absolute inset-0 opacity-5 bg-cover bg-center group-hover:scale-105 transition-transform duration-700 pointer-events-none"
+                            style="background-image: url('https://images.unsplash.com/photo-1544383835-bda2bc66a55d?q=80&w=1000');">
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-card via-slate-card/90 to-transparent"></div>
+
+                        <div class="relative z-10">
+                            <div class="w-12 h-12 bg-cyan/10 border border-cyan/30 text-cyan rounded-xl flex items-center justify-center text-xl mb-6">
+                                <i class="bi bi-wifi-off"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-3">Contingencia Offline Plena</h3>
+                            <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                                ¿Se cayó Internet en el comercio? No dejes de facturar. El sistema emite de inmediato un ticket provisorio "X" interno y encola el cobro para reintentar la solicitud del CAE de AFIP en cuanto vuelva la señal.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="font-mono text-[10px] bg-slate-black text-cyan border border-cyan/15 px-2 py-0.5 rounded">Cola de Reintentos</span>
+                                <span class="font-mono text-[10px] bg-slate-black text-cyan border border-cyan/15 px-2 py-0.5 rounded">Comprobante X</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="bg-slate-card border border-white/5 hover:border-cyan/20 p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1 relative group overflow-hidden">
+                        <div class="absolute inset-0 opacity-5 bg-cover bg-center group-hover:scale-105 transition-transform duration-700 pointer-events-none"
+                            style="background-image: url('https://images.unsplash.com/photo-1563013544-824ae1d704d3?q=80&w=1000');">
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-card via-slate-card/90 to-transparent"></div>
+
+                        <div class="relative z-10">
+                            <div class="w-12 h-12 bg-cyan/10 border border-cyan/30 text-cyan rounded-xl flex items-center justify-center text-xl mb-6">
+                                <i class="bi bi-qr-code-scan"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-3">QR Dinámico Mercado Pago</h3>
+                            <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                                Genera un QR dinámico con el total exacto en el monitor secundario. El sistema aguarda asíncronamente la aprobación del webhook del servidor y emite el ticket de inmediato. Cero errores de caja.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="font-mono text-[10px] bg-slate-black text-cyan border border-cyan/15 px-2 py-0.5 rounded">Interoperable MP</span>
+                                <span class="font-mono text-[10px] bg-slate-black text-cyan border border-cyan/15 px-2 py-0.5 rounded">Desbloqueo Webhook</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 4 -->
+                    <div class="bg-slate-card border border-white/5 hover:border-cyan/20 p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1 relative group overflow-hidden">
+                        <div class="absolute inset-0 opacity-5 bg-cover bg-center group-hover:scale-105 transition-transform duration-700 pointer-events-none"
+                            style="background-image: url('https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=1000');">
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-card via-slate-card/90 to-transparent"></div>
+
+                        <div class="relative z-10">
+                            <div class="w-12 h-12 bg-cyan/10 border border-cyan/30 text-cyan rounded-xl flex items-center justify-center text-xl mb-6">
+                                <i class="bi bi-keyboard-fill"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-3">Captura KeyPreview Scanner</h3>
+                            <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                                Un sistema "Teclado Primero". El software captura la entrada del lector de códigos de barras en tiempo real y la redirige al carrito automáticamente, sin importar en qué parte del sistema esté el foco.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="font-mono text-[10px] bg-slate-black text-cyan border border-cyan/15 px-2 py-0.5 rounded">Lector Omnipresente</span>
+                                <span class="font-mono text-[10px] bg-slate-black text-cyan border border-cyan/15 px-2 py-0.5 rounded">Atajos F1-F10</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 5 -->
+                    <div class="bg-slate-card border border-white/5 hover:border-cyan/20 p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1 relative group overflow-hidden">
+                        <div class="absolute inset-0 opacity-5 bg-cover bg-center group-hover:scale-105 transition-transform duration-700 pointer-events-none"
+                            style="background-image: url('https://images.unsplash.com/photo-1551836022-d5d88e9218df?q=80&w=1000');">
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-card via-slate-card/90 to-transparent"></div>
+
+                        <div class="relative z-10">
+                            <div class="w-12 h-12 bg-cyan/10 border border-cyan/30 text-cyan rounded-xl flex items-center justify-center text-xl mb-6">
+                                <i class="bi bi-graph-up-arrow"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-3">Business Intelligence & 3D Charts</h3>
+                            <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                                Analiza la marcha de tu comercio. Dashboard interactivo con gráficos de tendencia de ventas (últimos 15 días) y Doughnuts 3D con el Top 5 de artículos de mayor rotación y margen neto de ganancia.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="font-mono text-[10px] bg-slate-black text-cyan border border-cyan/15 px-2 py-0.5 rounded">3D Doughnut</span>
+                                <span class="font-mono text-[10px] bg-slate-black text-cyan border border-cyan/15 px-2 py-0.5 rounded">Tendencia Spline</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 6 -->
+                    <div class="bg-slate-card border border-white/5 hover:border-cyan/20 p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1 relative group overflow-hidden">
+                        <div class="absolute inset-0 opacity-5 bg-cover bg-center group-hover:scale-105 transition-transform duration-700 pointer-events-none"
+                            style="background-image: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1000');">
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-card via-slate-card/90 to-transparent"></div>
+
+                        <div class="relative z-10">
+                            <div class="w-12 h-12 bg-cyan/10 border border-cyan/30 text-cyan rounded-xl flex items-center justify-center text-xl mb-6">
+                                <i class="bi bi-printer-fill"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-3">Motor Dual de Impresión</h3>
+                            <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                                Velocidad inigualable. Comunicación directa en ESC/POS (binario nativo) para ticketeras térmicas ultrarrápidas con control de guillotina física, y renderizado vectorial GDI+ para impresoras clásicas A4.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="font-mono text-[10px] bg-slate-black text-cyan border border-cyan/15 px-2 py-0.5 rounded">RAW ESC/POS</span>
+                                <span class="font-mono text-[10px] bg-slate-black text-cyan border border-cyan/15 px-2 py-0.5 rounded">GDI+ Vectorial</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECURITY SECTION -->
+        <section class="projects bg-slate-black py-28 relative" id="seguridad">
+            <!-- Glow background -->
+            <div class="absolute top-1/3 left-10 w-[30rem] h-[30rem] bg-cobalt/10 rounded-full filter blur-[120px] -z-10 pointer-events-none"></div>
+
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                    <div class="lg:col-span-6 gsap-fade">
+                        <div class="inline-flex items-center gap-2 font-mono text-[10px] font-bold text-cyan bg-cyan-dim border border-cyan/30 px-3 py-1 rounded-full uppercase mb-6">
+                            <span class="w-1.5 h-1.5 bg-cyan rounded-full animate-pulse shadow-[0_0_6px_#00F5C4]"></span>
+                            Seguridad de Grado Enterprise
+                        </div>
+                        <h2 class="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight">Blindaje criptográfico de datos locales.</h2>
+                        <p class="text-gray-400 text-base leading-relaxed mb-8">
+                            A diferencia de los sistemas tradicionales que guardan las contraseñas y certificados en texto plano (vulnerables a que alguien copie el archivo de datos), VENDEMAX protege tu negocio bajo el motor de cifrado militar de Microsoft Windows:
+                        </p>
+
+                        <!-- Security Features List -->
+                        <div class="space-y-4 mb-8">
+                            <div class="flex items-start gap-4">
+                                <div class="text-cyan text-xl mt-1"><i class="bi bi-shield-fill-check"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-white">Windows DPAPI (Data Protection API)</h4>
+                                    <p class="text-gray-400 text-sm">La contraseña de tu certificado AFIP se encripta usando las credenciales del usuario de Windows actual. Es imposible exfiltrarla o descifrarla en otra computadora.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <div class="text-cyan text-xl mt-1"><i class="bi bi-lock-fill"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-white">Hashing SHA-256 de Personal</h4>
+                                    <p class="text-gray-400 text-sm">Las contraseñas de tus cajeros y administradores se protegen mediante hashes criptográficos de una sola vía. Máxima confidencialidad.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <div class="text-cyan text-xl mt-1"><i class="bi bi-hdd-network-fill"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-white">Respaldos en Caliente y Auto-Purga</h4>
+                                    <p class="text-gray-400 text-sm">Respaldos automáticos cifrados cada vez que se cierra una caja, con limpieza automática de archivos viejos de más de 30 días.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Laptop frame visualization -->
+                    <div class="lg:col-span-6 gsap-fade">
+                        <div class="relative bg-slate-card border border-cyan/20 rounded-2xl overflow-hidden shadow-2xl shadow-cyan/5 group p-8">
+                            <h3 class="font-mono text-cyan text-sm mb-4">// Cryptographic Shield Console</h3>
+                            <div class="font-mono text-xs text-[#a7f3d0] bg-slate-black/90 p-6 rounded-xl border border-white/5 space-y-2 leading-relaxed">
+                                <p><span class="text-gray-500">[SYSTEM]</span> Initializing VENDEMAX cryptographic engine...</p>
+                                <p><span class="text-gray-500">[SECURE]</span> Accessing Windows DPAPI credentials provider...</p>
+                                <p><span class="text-gray-500">[SECURE]</span> CryptProtectData successful.</p>
+                                <p><span class="text-cyan">[AFIP]</span> Certificate Password safely locked in LocalMachine context.</p>
+                                <p><span class="text-gray-500">[SYSTEM]</span> SQLite Database encryption handshake: OK (AES-256).</p>
+                                <p><span class="text-cyan">[USER]</span> Master Cashier credentials matched via SHA-256 hash digest.</p>
+                                <p><span class="text-green-400">[SHIELD]</span> System fully secure and active.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRICING SECTION -->
+        <section class="pricing bg-slate-dark py-28 relative" id="suscripcion">
+            <div class="absolute bottom-0 right-0 w-[40rem] h-[40rem] bg-cobalt/10 rounded-full filter blur-[150px] -z-10 pointer-events-none"></div>
+
+            <div class="max-w-7xl mx-auto px-6 text-center">
+                <div class="max-w-3xl mx-auto mb-16 gsap-fade flex flex-col items-center">
+                    <div class="inline-block font-mono text-xs font-bold tracking-wider text-cyan bg-cyan-dim border border-cyan/30 px-3 py-1 rounded-md uppercase mb-4">
+                        // suscripción mensual
+                    </div>
+                    <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">Planes Simples. Crecimiento Ilimitado.</h2>
+                    <p class="text-lg text-gray-400 leading-relaxed">
+                        Sin licencias de por vida obsoletas. Únete a la evolución SaaS con soporte y actualizaciones gratuitas garantizadas de por vida bajo la infraestructura de **HEXASTRATEGY**.
+                    </p>
+                </div>
+
+                <!-- Pricing Card -->
+                <div class="max-w-md mx-auto bg-slate-card border-2 border-cyan rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(0,245,196,0.15)] relative transform hover:scale-[1.01] transition-transform duration-300">
+                    <div class="absolute top-0 right-0 bg-cyan text-slate-black text-xs font-mono font-bold tracking-wider uppercase px-4 py-1.5 rounded-bl-xl shadow">
+                        Popular
+                    </div>
+                    <div class="p-8 md:p-12 text-left">
+                        <h3 class="text-2xl font-bold text-white mb-2">Plan Comercial Total</h3>
+                        <p class="text-gray-400 text-sm mb-6">Punto de Venta Completo con actualizaciones y soporte incluidos.</p>
+                        
+                        <div class="flex items-baseline gap-2 mb-8">
+                            <span class="text-5xl font-bold text-white font-sans">$9.999</span>
+                            <span class="text-gray-400 text-sm font-mono">/ mes ARS</span>
+                        </div>
+
+                        <ul class="space-y-4 mb-10 text-gray-300 text-sm">
+                            <li class="flex items-center gap-3">
+                                <span class="text-cyan"><i class="bi bi-check-circle-fill"></i></span>
+                                Facturación Electrónica AFIP Ilimitada
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <span class="text-cyan"><i class="bi bi-check-circle-fill"></i></span>
+                                Cobro Integrado con QR de Mercado Pago
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <span class="text-cyan"><i class="bi bi-check-circle-fill"></i></span>
+                                Captura Rápida de Scanner e Inventario
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <span class="text-cyan"><i class="bi bi-check-circle-fill"></i></span>
+                                Operación Offline de Respaldo por 7 Días
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <span class="text-cyan"><i class="bi bi-check-circle-fill"></i></span>
+                                Respaldos Cifrados Mensuales Automáticos
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <span class="text-cyan"><i class="bi bi-check-circle-fill"></i></span>
+                                Soporte Técnico Prioritario de HEXASTRATEGY
+                            </li>
+                        </ul>
+
+                        <!-- INTEGRATION WITH MERCADO PAGO CHECKOUT PRO -->
+                        <a href="https://www.mercadopago.com.ar" target="_blank" 
+                           class="w-full bg-cyan hover:bg-cyan/95 text-slate-black font-bold py-4 rounded-xl transition-all duration-300 shadow-[0_0_30px_rgba(0,245,196,0.25)] flex items-center justify-center gap-3">
+                            <i class="bi bi-credit-card-2-front-fill text-lg"></i>
+                            Suscribirse con Mercado Pago
+                        </a>
+                        <div class="text-center mt-4">
+                            <span class="text-[10px] text-gray-500 font-mono uppercase tracking-wider">
+                                débito automático mensual · cancela cuando quieras
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ SECTION -->
+        <section class="faq bg-slate-black py-28 relative" id="faq">
+            <div class="max-w-4xl mx-auto px-6">
+                <div class="text-center mb-20 gsap-fade">
+                    <div class="inline-block font-mono text-xs font-bold tracking-wider text-cyan bg-cyan-dim border border-cyan/30 px-3 py-1 rounded-md uppercase mb-4">
+                        // preguntas frecuentes
+                    </div>
+                    <h2 class="text-4xl md:text-5xl font-bold text-white">Preguntas Frecuentes.</h2>
+                </div>
+
+                <!-- FAQ List Accordion -->
+                <div class="space-y-4">
+                    <!-- FAQ 1 -->
+                    <div class="faq-item bg-slate-card border border-white/5 rounded-2xl overflow-hidden transition-all duration-300">
+                        <div class="faq-question p-6 flex justify-between items-center cursor-pointer hover:bg-white/5 transition-colors">
+                            <h3 class="text-lg font-bold text-white m-0">¿Cómo se activa el sistema por primera vez?</h3>
+                            <div class="faq-icon text-xl text-gray-500 transition-transform duration-300"><i class="bi bi-plus-lg"></i></div>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed">
+                                Tras suscribirte mediante Mercado Pago, recibirás automáticamente un email con tu Clave de Activación de 16 caracteres. Al abrir VENDEMAX v2.0 en tu PC de escritorio, ingresa tu email y la clave para asociar la PC de forma segura y comenzar a operar de inmediato.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ 2 -->
+                    <div class="faq-item bg-slate-card border border-white/5 rounded-2xl overflow-hidden transition-all duration-300">
+                        <div class="faq-question p-6 flex justify-between items-center cursor-pointer hover:bg-white/5 transition-colors">
+                            <h3 class="text-lg font-bold text-white m-0">¿Qué pasa si mi comercio se queda sin Internet?</h3>
+                            <div class="faq-icon text-xl text-gray-500 transition-transform duration-300"><i class="bi bi-plus-lg"></i></div>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed">
+                                ¡No te preocupes! VENDEMAX es un POS híbrido. Si pierdes la conexión, el sistema te permite seguir facturando de manera offline utilizando tu base de datos local y emitiendo comprobantes de tipo "X" por un período de gracia de hasta 7 días corridos. Al volver el internet, el sistema sincroniza automáticamente con los servidores de AFIP en segundo plano.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ 3 -->
+                    <div class="faq-item bg-slate-card border border-white/5 rounded-2xl overflow-hidden transition-all duration-300">
+                        <div class="faq-question p-6 flex justify-between items-center cursor-pointer hover:bg-white/5 transition-colors">
+                            <h3 class="text-lg font-bold text-white m-0">¿Los datos de mis tarjetas están seguros en la suscripción?</h3>
+                            <div class="faq-icon text-xl text-gray-500 transition-transform duration-300"><i class="bi bi-plus-lg"></i></div>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed">
+                                Sí, de forma absoluta. VENDEMAX no procesa ni almacena ningún dato bancario o de tarjetas en el software local ni en su servidor. Todo el procesamiento de pago y débito automático se gestiona dentro de la pasarela oficial y encriptada de **Mercado Pago**, garantizando total confidencialidad.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ 4 -->
+                    <div class="faq-item bg-slate-card border border-white/5 rounded-2xl overflow-hidden transition-all duration-300">
+                        <div class="faq-question p-6 flex justify-between items-center cursor-pointer hover:bg-white/5 transition-colors">
+                            <h3 class="text-lg font-bold text-white m-0">¿Cómo puedo cancelar o dar de baja mi suscripción?</h3>
+                            <div class="faq-icon text-xl text-gray-500 transition-transform duration-300"><i class="bi bi-plus-lg"></i></div>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed">
+                                Puedes cancelar tu suscripción mensual en cualquier momento y sin cargos extras desde el Portal de Autogestión de Mercado Pago o haciendo clic en el enlace de facturación de tu perfil de usuario dentro de VENDEMAX. Al darte de baja, el sistema bloqueará su operación al culminar el mes en curso.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-black border-t border-white/5 py-12">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-3">
+                <svg viewBox="0 0 40 40" fill="none" class="w-8 h-8" xmlns="http://www.w3.org/2000/svg">
+                    <polygon points="20,2 38,11 38,29 20,38 2,29 2,11" fill="none" stroke="#00F5C4" stroke-width="2" />
+                    <circle cx="20" cy="20" r="4" fill="#00F5C4" />
+                </svg>
+                <span class="font-mono text-sm tracking-wider text-white">HEXASTRATEGY © 2026 • VENDEMAX POS Deployment</span>
+            </div>
+            
+            <div class="flex gap-6 text-xs text-gray-500 font-mono uppercase tracking-wider">
+                <a href="#caracteristicas" class="hover:text-cyan transition-colors">Características</a>
+                <a href="#seguridad" class="hover:text-cyan transition-colors">Seguridad</a>
+                <a href="#suscripcion" class="hover:text-cyan transition-colors">Precios</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script>
+        // Smooth Scroll with Lenis
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            smooth: true
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        // Mobile Menu Interaction
+        const menuBtn = document.getElementById('menuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        function toggleMobileMenu() {
+            mobileMenu.classList.add('hidden');
+        }
+
+        // FAQ Interactive Accordion
+        const faqItems = document.querySelectorAll('.faq-item');
+
+        faqItems.forEach(item => {
+            const question = item.querySelector('.faq-question');
+            question.addEventListener('click', () => {
+                const isActive = item.classList.contains('active');
+                
+                // Close all other items
+                faqItems.forEach(otherItem => {
+                    otherItem.classList.remove('active');
+                });
+
+                // Toggle current item
+                if (!isActive) {
+                    item.classList.add('active');
+                }
+            });
+        });
+
+        // GSAP Fade-in animations
+        gsap.registerPlugin(ScrollTrigger);
+
+        gsap.utils.toArray('.gsap-fade').forEach(elem => {
+            gsap.from(elem, {
+                opacity: 0,
+                y: 30,
+                duration: 1,
+                scrollTrigger: {
+                    trigger: elem,
+                    start: 'top 85%',
+                    toggleActions: 'play none none none'
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

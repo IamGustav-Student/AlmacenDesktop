@@ -1,4 +1,4 @@
-﻿namespace AlmacenDesktop.Forms
+namespace AlmacenDesktop.Forms
 {
     partial class ImportarProductosForm
     {
@@ -16,6 +16,7 @@
             this.btnSeleccionar = new System.Windows.Forms.Button();
             this.txtArchivo = new System.Windows.Forms.TextBox();
             this.btnDescargarPlantilla = new System.Windows.Forms.Button();
+            this.btnCargarSemilla = new System.Windows.Forms.Button();
             this.btnImportar = new System.Windows.Forms.Button();
             this.lblInfo = new System.Windows.Forms.Label();
             this.panelResultados = new System.Windows.Forms.Panel();
@@ -56,20 +57,33 @@
             // 
             this.btnDescargarPlantilla.Location = new System.Drawing.Point(25, 120);
             this.btnDescargarPlantilla.Name = "btnDescargarPlantilla";
-            this.btnDescargarPlantilla.Size = new System.Drawing.Size(180, 40);
+            this.btnDescargarPlantilla.Size = new System.Drawing.Size(160, 40);
             this.btnDescargarPlantilla.TabIndex = 3;
             this.btnDescargarPlantilla.Text = "⬇ Descargar Plantilla";
             this.btnDescargarPlantilla.UseVisualStyleBackColor = true;
             this.btnDescargarPlantilla.Click += new System.EventHandler(this.btnDescargarPlantilla_Click);
+            // 
+            // btnCargarSemilla
+            // 
+            this.btnCargarSemilla.BackColor = System.Drawing.Color.SteelBlue;
+            this.btnCargarSemilla.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnCargarSemilla.ForeColor = System.Drawing.Color.White;
+            this.btnCargarSemilla.Location = new System.Drawing.Point(195, 120);
+            this.btnCargarSemilla.Name = "btnCargarSemilla";
+            this.btnCargarSemilla.Size = new System.Drawing.Size(170, 40);
+            this.btnCargarSemilla.TabIndex = 7;
+            this.btnCargarSemilla.Text = "⚡ Precargar Catálogo";
+            this.btnCargarSemilla.UseVisualStyleBackColor = false;
+            this.btnCargarSemilla.Click += new System.EventHandler(this.btnCargarSemilla_Click);
             // 
             // btnImportar
             // 
             this.btnImportar.BackColor = System.Drawing.Color.SeaGreen;
             this.btnImportar.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnImportar.ForeColor = System.Drawing.Color.White;
-            this.btnImportar.Location = new System.Drawing.Point(370, 120);
+            this.btnImportar.Location = new System.Drawing.Point(375, 120);
             this.btnImportar.Name = "btnImportar";
-            this.btnImportar.Size = new System.Drawing.Size(180, 40);
+            this.btnImportar.Size = new System.Drawing.Size(160, 40);
             this.btnImportar.TabIndex = 4;
             this.btnImportar.Text = "Iniciar Importación";
             this.btnImportar.UseVisualStyleBackColor = false;
@@ -120,6 +134,7 @@
             this.Controls.Add(this.panelResultados);
             this.Controls.Add(this.lblInfo);
             this.Controls.Add(this.btnImportar);
+            this.Controls.Add(this.btnCargarSemilla);
             this.Controls.Add(this.btnDescargarPlantilla);
             this.Controls.Add(this.txtArchivo);
             this.Controls.Add(this.btnSeleccionar);
@@ -139,6 +154,7 @@
         private System.Windows.Forms.Button btnSeleccionar;
         private System.Windows.Forms.TextBox txtArchivo;
         private System.Windows.Forms.Button btnDescargarPlantilla;
+        private System.Windows.Forms.Button btnCargarSemilla;
         private System.Windows.Forms.Button btnImportar;
         private System.Windows.Forms.Label lblInfo;
         private System.Windows.Forms.Panel panelResultados;

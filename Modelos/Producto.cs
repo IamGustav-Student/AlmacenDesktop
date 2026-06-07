@@ -36,12 +36,16 @@ namespace AlmacenDesktop.Modelos
         [Range(0, 100, ErrorMessage = "El impuesto debe ser un porcentaje entre 0 y 100.")]
         public decimal Impuesto { get; set; }
 
-        // Relación obligatoria: Todo producto debe tener un proveedor (aunque sea el Genérico)
+        // --- PROPIEDAD FALTANTE AGREGADA ---
+        // Permite el "Borrado Lógico": Desactivar en lugar de borrar.
+        public bool Activo { get; set; } = true;
+
+        // Relación obligatoria: Todo producto debe tener un proveedor
         [Required(ErrorMessage = "Debe asignar un proveedor.")]
         public int ProveedorId { get; set; }
         public virtual Proveedor Proveedor { get; set; }
 
-        // --- VALIDACIONES DE NEGOCIO ---
+        // --- MÉTODOS DE NEGOCIO ---
 
         public bool EsRentable()
         {
@@ -57,7 +61,7 @@ namespace AlmacenDesktop.Modelos
         public void ReducirStock(int cantidad)
         {
             if (cantidad < 0) throw new ArgumentException("La cantidad a reducir debe ser positiva.");
-            if (Stock - cantidad < 0) throw new InvalidOperationException($"Stock insuficiente para {Nombre}. Stock actual: {Stock}");
+            if (Stock - cantidad < 0) throw new InvalidOperationException("No hay suficiente stock para realizar esta operación.");
             Stock -= cantidad;
         }
     }

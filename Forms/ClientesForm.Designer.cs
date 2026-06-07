@@ -1,4 +1,4 @@
-﻿namespace AlmacenDesktop.Forms
+namespace AlmacenDesktop.Forms
 {
     partial class ClientesForm
     {
@@ -82,7 +82,7 @@
             btnLimpiar.Name = "btnLimpiar";
             btnLimpiar.Size = new Size(290, 30);
             btnLimpiar.TabIndex = 0;
-            btnLimpiar.Text = "Limpiar / Nuevo";
+            btnLimpiar.Text = "Limpiar / Nuevo (Esc)";
             btnLimpiar.Click += btnLimpiar_Click;
             // 
             // btnEliminar
@@ -107,7 +107,7 @@
             btnGuardar.Name = "btnGuardar";
             btnGuardar.Size = new Size(290, 40);
             btnGuardar.TabIndex = 2;
-            btnGuardar.Text = "GUARDAR CLIENTE";
+            btnGuardar.Text = "GUARDAR CLIENTE (F5)";
             btnGuardar.UseVisualStyleBackColor = false;
             btnGuardar.Click += btnGuardar_Click;
             // 

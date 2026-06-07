@@ -1,71 +1,88 @@
 ﻿using System;
 using System.IO;
-using System.Windows.Forms; // Necesario para mostrar alertas visuales
+using System.IO.Compression; // Opcional si quisieras comprimir, por ahora copia directa para velocidad
+using System.Windows.Forms;
 
 namespace AlmacenDesktop.Services
 {
-    public static class BackupService
+    public class BackupService
     {
-        private const string NOMBRE_DB = "almacen.db";
-        private const string CARPETA_BACKUP = "Backups";
+        private readonly string _dbName = "almacen.db";
+        private readonly string _backupFolder;
 
-        public static void RealizarBackupAutomatico()
+        public BackupService()
         {
-            try
+            // Carpeta "Backups" al lado del ejecutable
+            string basePath = AppDomain.CurrentDomain.BaseDirectory;
+            _backupFolder = Path.Combine(basePath, "Backups");
+
+            if (!Directory.Exists(_backupFolder))
             {
-                // 1. Verificar que la base de datos exista antes de intentar nada
-                if (!File.Exists(NOMBRE_DB)) return;
-
-                // 2. Crear carpeta si no existe
-                if (!Directory.Exists(CARPETA_BACKUP))
-                    Directory.CreateDirectory(CARPETA_BACKUP);
-
-                // 3. Generar nombre único: "Backups\almacen_2023-12-01_14-30.bak"
-                string fecha = DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
-                string nombreDestino = Path.Combine(CARPETA_BACKUP, $"almacen_{fecha}.bak");
-
-                // 4. Copiar archivo (el 'true' permite sobrescribir si ya existe)
-                File.Copy(NOMBRE_DB, nombreDestino, true);
-                MessageBox.Show($"Backup creado en: {nombreDestino}", "Test Backup", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-
-                // 5. Mantenimiento: Borrar backups muy viejos para no llenar el disco
-                LimpiarBackupsAntiguos();
-            }
-            catch (Exception ex)
-            {
-                // AHORA SÍ: Notificar al usuario si algo sale mal
-                MessageBox.Show(
-                    $"⚠️ No se pudo realizar la copia de seguridad automática.\n\nError: {ex.Message}\n\nPor favor, verifique el espacio en disco o los permisos.",
-                    "Advertencia de Seguridad",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning
-                );
+                Directory.CreateDirectory(_backupFolder);
             }
         }
 
-        private static void LimpiarBackupsAntiguos()
+        public void RealizarBackupAutomatico()
         {
             try
             {
-                // Mantenemos solo los backups de los últimos 30 días
-                var directorio = new DirectoryInfo(CARPETA_BACKUP);
-                var archivos = directorio.GetFiles("*.bak");
+                string sourcePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, _dbName);
 
-                foreach (var archivo in archivos)
+                if (!File.Exists(sourcePath)) return; // No hay nada que salvar
+
+                // Nombre formato: backup_2023-10-25_14-30-00.db
+                string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+                string destFileName = $"backup_{timestamp}.db";
+                string destPath = Path.Combine(_backupFolder, destFileName);
+
+                // Copia de seguridad
+                File.Copy(sourcePath, destPath, true);
+
+                // MANTENIMIENTO: Borrar backups muy viejos (más de 30 días) para no llenar el disco
+                LimpiarBackupsViejos();
+            }
+            catch (Exception ex)
+            {
+                // No mostramos error al usuario al cerrar para no molestar, pero podríamos loguearlo
+                System.Diagnostics.Debug.WriteLine("Error en Backup Automático: " + ex.Message);
+            }
+        }
+
+        public string RealizarBackupManual(string carpetaDestino)
+        {
+            try
+            {
+                string sourcePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, _dbName);
+                if (!File.Exists(sourcePath)) throw new FileNotFoundException("No se encuentra la base de datos.");
+
+                string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
+                string destPath = Path.Combine(carpetaDestino, $"VENDEMAX_Respaldo_{timestamp}.db");
+
+                File.Copy(sourcePath, destPath, true);
+                return destPath;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Falló el respaldo manual: " + ex.Message);
+            }
+        }
+
+        private void LimpiarBackupsViejos()
+        {
+            try
+            {
+                var directory = new DirectoryInfo(_backupFolder);
+                var files = directory.GetFiles("backup_*.db");
+
+                foreach (var file in files)
                 {
-                    // Si el archivo tiene más de 60 días de antigüedad
-                    if (archivo.CreationTime < DateTime.Now.AddDays(-60))
+                    if (file.CreationTime < DateTime.Now.AddDays(-30))
                     {
-                        archivo.Delete();
+                        file.Delete();
                     }
                 }
             }
-            catch
-            {
-                // Si falla la limpieza (ej. archivo en uso), no es crítico, lo ignoramos.
-                // Aquí el silencio es aceptable porque no pone en riesgo los datos.
-            }
+            catch { /* Ignorar errores de limpieza */ }
         }
     }
 }

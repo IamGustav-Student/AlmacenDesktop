@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
@@ -25,8 +25,11 @@
 		<PackageReference Include="System.Drawing.Common" Version="8.0.0" />
 		<PackageReference Include="System.Security.Cryptography.Pkcs" Version="8.0.0" />
 
-		<!-- NUEVA LIBRERÍA PARA GRÁFICOS -->
+		<!-- NUEVAS DEPENDENCIAS (Gráficos y Seguridad) -->
 		<PackageReference Include="System.Windows.Forms.DataVisualization" Version="1.0.0-prerelease.20110.1" />
+		<PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
+		<PackageReference Include="System.Management" Version="8.0.0" />
+		<PackageReference Include="Obfuscar" Version="2.2.38" PrivateAssets="all" GeneratePathProperty="true" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -43,5 +46,17 @@
 			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
 		</EmbeddedResource>
 	</ItemGroup>
+
+	<!-- TARGET DE OFUSCACIÓN DE CÓDIGO CON OBFUSCAR (HEXASTRATEGY) -->
+	<Target Name="ObfuscateRelease" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release'">
+		<Message Text="Iniciando ofuscación de código con Obfuscar..." Importance="high" />
+		<!-- Copiar archivo obfuscar.xml al directorio de salida para que se ejecute correctamente -->
+		<Copy SourceFiles="$(ProjectDir)obfuscar.xml" DestinationFolder="$(TargetDir)" />
+		<!-- Ejecutar el compilador de Obfuscar pasándole el XML -->
+		<Exec Command="&quot;$(PkgObfuscar)\tools\Obfuscar.Console.exe&quot; &quot;$(TargetDir)obfuscar.xml&quot;" WorkingDirectory="$(TargetDir)" />
+		<!-- Limpieza: Eliminar archivo XML temporal del directorio de salida -->
+		<Delete Files="$(TargetDir)obfuscar.xml" />
+		<Message Text="Ofuscación de código completada. Binarios seguros generados en $(TargetDir)Obfuscated\" Importance="high" />
+	</Target>
 
 </Project>

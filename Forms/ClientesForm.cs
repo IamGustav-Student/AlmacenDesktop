@@ -1,4 +1,4 @@
-﻿using AlmacenDesktop.Data;
+using AlmacenDesktop.Data;
 using AlmacenDesktop.Helpers;
 using AlmacenDesktop.Modelos;
 using System;
@@ -146,7 +146,7 @@ namespace AlmacenDesktop.Forms
             txtTelefono.Clear();
             txtDireccion.Clear();
             _clienteIdSeleccionado = 0;
-            btnGuardar.Text = "GUARDAR CLIENTE";
+            btnGuardar.Text = "GUARDAR CLIENTE (F5)";
             dgvClientes.ClearSelection();
             CargarDatos();
             // Devolvemos el foco al primer campo para seguir cargando rápido
@@ -168,7 +168,7 @@ namespace AlmacenDesktop.Forms
                 txtTelefono.Text = cliente.Telefono;
                 txtDireccion.Text = cliente.Direccion;
 
-                btnGuardar.Text = "ACTUALIZAR CLIENTE";
+                btnGuardar.Text = "ACTUALIZAR CLIENTE (F5)";
             }
         }
 

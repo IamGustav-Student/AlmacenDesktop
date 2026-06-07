@@ -1,4 +1,4 @@
-﻿using AlmacenDesktop.Data;
+using AlmacenDesktop.Data;
 using AlmacenDesktop.Modelos;
 using AlmacenDesktop.Services;
 using AlmacenDesktop.Helpers;
@@ -21,7 +21,8 @@ namespace AlmacenDesktop.Forms
 
         private decimal _subtotalBase = 0;
         private decimal _totalFinal = 0;
-        private System.Windows.Forms.Timer _timerFocus;
+
+        // Timer eliminado por mala UX. Reemplazado por KeyPreview Global.
 
         private AfipService _afipService;
 
@@ -30,64 +31,51 @@ namespace AlmacenDesktop.Forms
             InitializeComponent();
             _vendedor = vendedor;
             _ventaService = new VentaService();
-            _afipService = new AfipService();
+            _afipService = new AfipService(); // Nota: Este servicio deberá leer la pass encriptada de BD
 
+            // --- UX MEJORADA: CAPTURA INTELIGENTE DE ESCÁNER ---
             this.KeyPreview = true;
-            this.KeyDown += new KeyEventHandler(VentasForm_KeyDown);
-
-            ConfigurarFocusTimer();
+            this.KeyDown += VentasForm_KeyDown;
+            this.KeyPress += VentasForm_GlobalKeyPress;
         }
 
-        private void ConfigurarFocusTimer()
+        // Detecta input de teclado (scanner) sin importar dónde esté el foco
+        private void VentasForm_GlobalKeyPress(object sender, KeyPressEventArgs e)
         {
-            _timerFocus = new System.Windows.Forms.Timer();
-            _timerFocus.Interval = 2000;
-            _timerFocus.Tick += TimerFocus_Tick;
-            _timerFocus.Start();
-        }
-
-        private void TimerFocus_Tick(object sender, EventArgs e)
-        {
-            if (this.ActiveControl != null && this.ContainsFocus)
+            // Si el foco NO está en un campo donde el usuario escribe manualmente (Pago o Buscador de Cliente)
+            if (this.ActiveControl != txtPagaCon &&
+                this.ActiveControl != cboClientes &&
+                !cboClientes.DroppedDown)
             {
-                if (ActiveControl == txtPagaCon || ActiveControl == numCantidad ||
-                    ActiveControl == cboMetodoPago || ActiveControl == cboClientes) return;
-
-                if (ActiveControl != txtEscanear) txtEscanear.Focus();
+                // Si el caracter no es de control, redirigirlo al scanner
+                if (!char.IsControl(e.KeyChar))
+                {
+                    if (!txtEscanear.Focused)
+                    {
+                        txtEscanear.Focus();
+                        txtEscanear.Text += e.KeyChar;
+                        txtEscanear.SelectionStart = txtEscanear.Text.Length;
+                        e.Handled = true; // Evita que se escriba doble o active menús
+                    }
+                }
             }
         }
 
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            _timerFocus?.Stop();
-            _timerFocus?.Dispose();
-            base.OnFormClosing(e);
-        }
-
-        // --- VALIDACIÓN DE CAJA EN EL LOAD ---
         private void VentasForm_Load(object sender, EventArgs e)
         {
-            // Buscamos si hay caja abierta para este usuario
             _cajaIdActual = _ventaService.ObtenerCajaAbiertaId(_vendedor.Id);
 
             if (_cajaIdActual == null)
             {
                 AudioHelper.PlayError();
-                // Mensaje bloqueante
                 MessageBox.Show(
-                    "⛔ NO SE PUEDE VENDER\n\nNo tiene una Caja Abierta.\nDebe ir al módulo 'Caja Diaria' y abrir turno antes de realizar ventas.",
-                    "Caja Cerrada",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Stop);
+                    "⛔ NO SE PUEDE VENDER\n\nNo tiene una Caja Abierta.\nAbrir turno en 'Caja Diaria'.",
+                    "Caja Cerrada", MessageBoxButtons.OK, MessageBoxIcon.Stop);
 
-                // Cerramos el formulario inmediatamente.
-                // Usamos BeginInvoke para asegurar que el formulario termine de cargar antes de cerrarse
-                // y evitar excepciones de Handle.
                 this.BeginInvoke(new Action(() => { this.Close(); }));
                 return;
             }
 
-            // Si hay caja, todo sigue normal
             this.Text = $"Punto de Venta - Caja #{_cajaIdActual} - {_vendedor.NombreUsuario}";
             CargarDatosIniciales();
             ConfigurarGrilla();
@@ -136,9 +124,11 @@ namespace AlmacenDesktop.Forms
             {
                 case Keys.F1: txtEscanear.Focus(); txtEscanear.SelectAll(); e.Handled = true; break;
                 case Keys.F2: cboMetodoPago.SelectedItem = "Efectivo"; e.Handled = true; break;
+                case Keys.F3: cboMetodoPago.SelectedItem = "Billetera Virtual"; e.Handled = true; break;
+                case Keys.F4: cboMetodoPago.SelectedItem = "Fiado"; e.Handled = true; break;
                 case Keys.F5: btnFinalizar.PerformClick(); e.Handled = true; break;
                 case Keys.F10:
-                    if (MessageBox.Show("¿Cancelar venta?", "Limpiar", MessageBoxButtons.YesNo) == DialogResult.Yes) Limpiar();
+                    if (MessageBox.Show("¿Limpiar venta actual?", "Limpiar", MessageBoxButtons.YesNo) == DialogResult.Yes) Limpiar();
                     e.Handled = true; break;
                 case Keys.Delete: EliminarItemSeleccionado(); e.Handled = true; break;
             }
@@ -157,7 +147,7 @@ namespace AlmacenDesktop.Forms
                     else { AudioHelper.PlayError(); MessageBox.Show("Producto no encontrado."); }
                 }
                 txtEscanear.Clear();
-                txtEscanear.Focus();
+                // No forzamos Focus() aquí, dejamos que el flujo natural siga o el usuario decida
             }
         }
 
@@ -173,7 +163,7 @@ namespace AlmacenDesktop.Forms
             if (prod.Stock < (cantidadEnCarrito + cantidad))
             {
                 AudioHelper.PlayError();
-                MessageBox.Show($"Stock insuficiente. Stock real: {prod.Stock}.", "Stock", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"Stock insuficiente. Disponible: {prod.Stock}.", "Stock", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -256,6 +246,7 @@ namespace AlmacenDesktop.Forms
             else
             {
                 cboClientes.Enabled = false;
+                // Volver a consumidor final
                 foreach (Cliente item in cboClientes.Items)
                 {
                     if (item.DniCuit == Constantes.CLIENTE_DEF_DNI)
@@ -272,29 +263,27 @@ namespace AlmacenDesktop.Forms
         {
             if (_carrito.Count == 0) return;
 
-            // --- RE-VALIDACIÓN DE CAJA AL MOMENTO DE COBRAR ---
-            // Por si la cerraron desde otra terminal o paso mucho tiempo
             if (_cajaIdActual == null)
             {
-                MessageBox.Show("La caja se cerró o perdió sesión.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Caja cerrada o sesión perdida.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.Close();
                 return;
             }
 
-            if (cboMetodoPago.SelectedItem.ToString() == "Fiado")
+            if (cboMetodoPago.SelectedItem?.ToString() == "Fiado")
             {
-                var cli = (Cliente)cboClientes.SelectedItem;
-                if (cli.DniCuit == Constantes.CLIENTE_DEF_DNI)
+                var cli = cboClientes.SelectedItem as Cliente;
+                if (cli == null || cli.DniCuit == Constantes.CLIENTE_DEF_DNI)
                 {
                     AudioHelper.PlayError();
-                    MessageBox.Show("Para vender FIADO seleccione un cliente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Debe seleccionar un cliente para Fiado.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
             }
 
             bool facturarAfip = false;
-            var resp = MessageBox.Show("¿Desea emitir FACTURA ELECTRÓNICA (AFIP)?\n\n[SÍ] = Factura Fiscal\n[NO] = Comprobante Interno (X)",
-                                       "Tipo de Comprobante", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            var resp = MessageBox.Show("¿Emitir FACTURA ELECTRÓNICA AFIP?\n\n[SÍ] = Factura Oficial\n[NO] = Ticket Interno (X)",
+                                       "Tipo Comprobante", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
 
             if (resp == DialogResult.Cancel) return;
             facturarAfip = (resp == DialogResult.Yes);
@@ -302,29 +291,38 @@ namespace AlmacenDesktop.Forms
             btnFinalizar.Enabled = false;
             this.Cursor = Cursors.WaitCursor;
 
+            // Integración de Billetera Virtual (Mercado Pago QR Dinámico)
+            if (cboMetodoPago.SelectedItem?.ToString() == "Billetera Virtual")
+            {
+                using (var qrForm = new PagoQRForm(_totalFinal))
+                {
+                    this.Cursor = Cursors.Default;
+                    if (qrForm.ShowDialog() != DialogResult.OK)
+                    {
+                        btnFinalizar.Enabled = true;
+                        return;
+                    }
+                    this.Cursor = Cursors.WaitCursor;
+                }
+            }
+
             try
             {
-                // Validación de ClienteId antes de instanciar
-                int clienteId = (int)cboClientes.SelectedValue;
-                if (clienteId <= 0) throw new Exception("Cliente no válido seleccionado.");
-
+                int clienteId = cboClientes.SelectedValue != null ? (int)cboClientes.SelectedValue : 0;
                 var ventaNueva = new Venta
                 {
                     Fecha = DateTime.Now,
                     ClienteId = clienteId,
                     UsuarioId = _vendedor.Id,
                     Total = _totalFinal,
-                    MetodoPago = cboMetodoPago.SelectedItem.ToString(),
+                    MetodoPago = cboMetodoPago.SelectedItem?.ToString() ?? "Efectivo",
                     CajaId = (int)_cajaIdActual,
                     TipoComprobante = facturarAfip ? "PENDIENTE" : "X",
                     CAE = "",
                     ObservacionesAFIP = ""
                 };
 
-                foreach (var item in _carrito)
-                {
-                    item.Subtotal = item.SubtotalCalculado;
-                }
+                foreach (var item in _carrito) item.Subtotal = item.SubtotalCalculado;
 
                 var ventaGuardada = _ventaService.RegistrarVenta(ventaNueva, _carrito);
 
@@ -333,36 +331,22 @@ namespace AlmacenDesktop.Forms
                     try
                     {
                         var resultadoAfip = await _afipService.FacturarVentaAsync(ventaGuardada);
-
                         if (resultadoAfip.Exito)
                         {
-                            using (var db = new AlmacenDbContext())
-                            {
-                                var v = db.Ventas.Find(ventaGuardada.Id);
-                                v.CAE = resultadoAfip.CAE;
-                                v.CAEVencimiento = resultadoAfip.Vencimiento;
-                                v.NumeroFactura = resultadoAfip.NumeroComprobante;
-                                v.TipoComprobante = "C";
-                                db.SaveChanges();
-
-                                ventaGuardada.CAE = resultadoAfip.CAE;
-                                ventaGuardada.CAEVencimiento = resultadoAfip.Vencimiento;
-                                ventaGuardada.NumeroFactura = resultadoAfip.NumeroComprobante;
-                                ventaGuardada.TipoComprobante = "C";
-                            }
+                            ActualizarVentaConAfip(ventaGuardada, resultadoAfip);
                             AudioHelper.PlayCobro();
-                            MessageBox.Show($"¡Venta Autorizada!\nCAE: {resultadoAfip.CAE}", "AFIP OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show($"Factura Autorizada.\nCAE: {resultadoAfip.CAE}", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                         else
                         {
                             AudioHelper.PlayError();
-                            MessageBox.Show($"AFIP Rechazó la factura:\n{resultadoAfip.Error}\n\nLa venta se guardó como 'Presupuesto X'.", "Rechazo AFIP", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show($"Rechazo AFIP:\n{resultadoAfip.Error}", "Error AFIP", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
                     catch (Exception exAfip)
                     {
                         AudioHelper.PlayError();
-                        MessageBox.Show($"No se pudo facturar en AFIP:\n{exAfip.Message}\n\nLa venta se guardó como interna.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        MessageBox.Show($"Error de conexión AFIP. Se guardó como X.\n{exAfip.Message}", "Offline", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
                 }
                 else
@@ -370,22 +354,9 @@ namespace AlmacenDesktop.Forms
                     AudioHelper.PlayCobro();
                 }
 
-                if (MessageBox.Show("Venta Finalizada. ¿Imprimir Ticket?", "Imprimir", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                if (MessageBox.Show("¿Imprimir Ticket?", "Imprimir", MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    try
-                    {
-                        Venta ventaParaImprimir;
-                        using (var db = new AlmacenDbContext())
-                        {
-                            ventaParaImprimir = db.Ventas.Include(v => v.Cliente).FirstOrDefault(v => v.Id == ventaGuardada.Id);
-                        }
-                        var ticketService = new TicketService();
-                        ticketService.ImprimirVenta(ventaParaImprimir, _carrito);
-                    }
-                    catch (Exception exPrint)
-                    {
-                        MessageBox.Show("Error al imprimir: " + exPrint.Message);
-                    }
+                    ImprimirTicket(ventaGuardada);
                 }
 
                 Limpiar();
@@ -393,13 +364,53 @@ namespace AlmacenDesktop.Forms
             catch (Exception ex)
             {
                 AudioHelper.PlayError();
-                string detalle = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
-                MessageBox.Show($"ERROR CRÍTICO AL GUARDAR VENTA:\n{detalle}", "Fallo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error al finalizar venta: {ex.Message}", "Error Crítico", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
                 btnFinalizar.Enabled = true;
                 this.Cursor = Cursors.Default;
+            }
+        }
+
+        private void ActualizarVentaConAfip(Venta v, dynamic resultado)
+        {
+            using (var db = new AlmacenDbContext())
+            {
+                var ventaDb = db.Ventas.Find(v.Id);
+                if (ventaDb != null)
+                {
+                    ventaDb.CAE = resultado.CAE;
+                    ventaDb.CAEVencimiento = resultado.Vencimiento;
+                    ventaDb.NumeroFactura = resultado.NumeroComprobante;
+                    ventaDb.TipoComprobante = "C"; // O "B" segn corresponda
+                    db.SaveChanges();
+                }
+            }
+        }
+
+        private void ImprimirTicket(Venta v)
+        {
+            try
+            {
+                Venta? ventaFull;
+                using (var db = new AlmacenDbContext())
+                {
+                    ventaFull = db.Ventas.Include(x => x.Cliente).FirstOrDefault(x => x.Id == v.Id);
+                }
+                
+                if (ventaFull == null)
+                {
+                    MessageBox.Show("Error: No se pudo cargar los detalles de la venta para imprimir.", "Error de Impresión", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                var ticketService = new TicketService();
+                ticketService.ImprimirVenta(ventaFull, _carrito);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error impresión: " + ex.Message);
             }
         }
 
