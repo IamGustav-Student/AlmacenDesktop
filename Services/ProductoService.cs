@@ -57,14 +57,14 @@ namespace AlmacenDesktop.Services
 
             using (var context = new AlmacenDbContext())
             {
-                // Buscar si ya existe algún producto con este código de barras (activo o inactivo)
-                var productoExistente = context.Productos.FirstOrDefault(p => p.CodigoBarras == producto.CodigoBarras);
-
-                if (productoExistente != null)
+                if (producto.Id == 0)
                 {
-                    if (producto.Id == 0)
+                    // Caso A: Producto Nuevo
+                    // Buscar si ya existe algún producto con este código de barras (activo o inactivo)
+                    var productoExistente = context.Productos.FirstOrDefault(p => p.CodigoBarras == producto.CodigoBarras);
+
+                    if (productoExistente != null)
                     {
-                        // Si el producto existente ya está activo, es un duplicado prohibido
                         if (productoExistente.Activo)
                         {
                             throw new InvalidOperationException("Ya existe un producto activo con este Código de Barras.");
@@ -85,22 +85,45 @@ namespace AlmacenDesktop.Services
                         producto.Id = productoExistente.Id; // Sincronizar ID de vuelta al formulario
                         return;
                     }
-                    else if (productoExistente.Id != producto.Id)
-                    {
-                        // Si es un producto existente que intenta cambiar su código al de otro producto
-                        throw new InvalidOperationException("Ya existe un producto con este Código de Barras.");
-                    }
-                }
 
-                if (producto.Id == 0)
-                {
+                    // No existe en absoluto, agregamos
                     context.Productos.Add(producto);
+                    context.SaveChanges();
                 }
                 else
                 {
-                    context.Productos.Update(producto);
+                    // Caso B: Producto Existente (Edición)
+                    // Buscar la entidad en el contexto actual por su ID
+                    var dbProducto = context.Productos.FirstOrDefault(p => p.Id == producto.Id);
+                    if (dbProducto == null)
+                    {
+                        throw new InvalidOperationException("El producto a actualizar no existe.");
+                    }
+
+                    // Verificar si se está cambiando el código de barras y si este nuevo código ya lo tiene otro producto
+                    if (dbProducto.CodigoBarras != producto.CodigoBarras)
+                    {
+                        var duplicado = context.Productos.Any(p => p.CodigoBarras == producto.CodigoBarras && p.Id != producto.Id);
+                        if (duplicado)
+                        {
+                            throw new InvalidOperationException("Ya existe otro producto con este Código de Barras.");
+                        }
+                    }
+
+                    // Actualizar las propiedades en la entidad trackeada
+                    dbProducto.CodigoBarras = producto.CodigoBarras;
+                    dbProducto.Nombre = producto.Nombre;
+                    dbProducto.Descripcion = producto.Descripcion;
+                    dbProducto.Costo = producto.Costo;
+                    dbProducto.Precio = producto.Precio;
+                    dbProducto.Stock = producto.Stock;
+                    dbProducto.StockMinimo = producto.StockMinimo;
+                    dbProducto.Impuesto = producto.Impuesto;
+                    dbProducto.ProveedorId = producto.ProveedorId;
+                    dbProducto.Activo = producto.Activo;
+
+                    context.SaveChanges();
                 }
-                context.SaveChanges();
             }
         }
 
