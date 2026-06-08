@@ -16,7 +16,14 @@
   
   <!-- Ensamblado principal a ofuscar -->
   <Module file="$(InPath)\AlmacenDesktop.dll">
+    <!-- Excluir namespaces de la ofuscación -->
     <SkipNamespace name="AlmacenDesktop.Modelos" />
     <SkipNamespace name="AlmacenDesktop.Data" />
+    <SkipNamespace name="AlmacenDesktop.Migrations" />
+    
+    <!-- Excluir todas las clases (incluyendo clases anidadas y autogeneradas) usando Regex -->
+    <SkipType name="^AlmacenDesktop\.Modelos\..*" rx="true" />
+    <SkipType name="^AlmacenDesktop\.Data\..*" rx="true" />
+    <SkipType name="^AlmacenDesktop\.Migrations\..*" rx="true" />
   </Module>
 </Obfuscator>

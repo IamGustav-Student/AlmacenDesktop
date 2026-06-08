@@ -76,17 +76,37 @@ namespace AlmacenDesktop
                     }
                 }
 
-                var login = ServiceProvider.GetRequiredService<LoginForm>();
-                if (login.ShowDialog() == DialogResult.OK)
+                Usuario usuarioAuto = null;
+                using (var context = new AlmacenDbContext())
                 {
-                    UsuarioActualGlobal = login.UsuarioLogueado;
-                    MenuPrincipal menu = new MenuPrincipal(login.UsuarioLogueado);
+                    usuarioAuto = context.Usuarios.FirstOrDefault(u => u.NombreUsuario == "admin");
+                }
+
+                if (usuarioAuto != null)
+                {
+                    UsuarioActualGlobal = usuarioAuto;
+                    MenuPrincipal menu = new MenuPrincipal(usuarioAuto);
                     Application.Run(menu);
+                }
+                else
+                {
+                    var login = ServiceProvider.GetRequiredService<LoginForm>();
+                    if (login.ShowDialog() == DialogResult.OK)
+                    {
+                        UsuarioActualGlobal = login.UsuarioLogueado;
+                        MenuPrincipal menu = new MenuPrincipal(login.UsuarioLogueado);
+                        Application.Run(menu);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error Fatal en el inicio: {ex.Message}", "Error Cr�tico", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                try
+                {
+                    File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "startup_error.txt"), ex.ToString());
+                }
+                catch {}
+                MessageBox.Show($"Error Fatal en el inicio: {ex.Message}", "Error Crtico", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {

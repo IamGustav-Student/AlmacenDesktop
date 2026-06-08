@@ -42,23 +42,27 @@ namespace AlmacenDesktop.Forms
         // Detecta input de teclado (scanner) sin importar dónde esté el foco
         private void VentasForm_GlobalKeyPress(object sender, KeyPressEventArgs e)
         {
-            // Si el foco NO está en un campo donde el usuario escribe manualmente (Pago o Buscador de Cliente)
-            if (this.ActiveControl != txtPagaCon &&
-                this.ActiveControl != cboClientes &&
-                !cboClientes.DroppedDown)
+            // Si el foco está en campos de escritura manual, no interferir
+            if (this.ActiveControl == txtPagaCon ||
+                this.ActiveControl == cboClientes ||
+                cboClientes.DroppedDown)
             {
-                // Si el caracter no es de control, redirigirlo al scanner
-                if (!char.IsControl(e.KeyChar))
-                {
-                    if (!txtEscanear.Focused)
-                    {
-                        txtEscanear.Focus();
-                        txtEscanear.Text += e.KeyChar;
-                        txtEscanear.SelectionStart = txtEscanear.Text.Length;
-                        e.Handled = true; // Evita que se escriba doble o active menús
-                    }
-                }
+                return;
             }
+
+            // Si el caracter es de control (Backspace, Enter, etc.), dejarlo propagar
+            if (char.IsControl(e.KeyChar)) return;
+
+            // Si el foco YA está en el campo del escáner, el SO escribirá el carácter
+            // naturalmente — no hacemos nada extra para evitar duplicación.
+            if (txtEscanear.Focused) return;
+
+            // Redirigir: mover foco y agregar el carácter manualmente.
+            // e.Handled = true para que el SO NO lo escriba de nuevo en el destino.
+            e.Handled = true;
+            txtEscanear.Focus();
+            txtEscanear.Text += e.KeyChar;
+            txtEscanear.SelectionStart = txtEscanear.Text.Length;
         }
 
         private void VentasForm_Load(object sender, EventArgs e)

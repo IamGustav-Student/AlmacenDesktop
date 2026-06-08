@@ -1,4 +1,4 @@
-﻿using AlmacenDesktop.Data;
+using AlmacenDesktop.Data;
 using AlmacenDesktop.Modelos;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -16,17 +16,91 @@ namespace AlmacenDesktop.Forms
         private List<Producto> _todosLosProductos = new List<Producto>();
         private Usuario _usuarioActual;
 
-        public ComprasForm( Usuario usuario)
+        public ComprasForm(Usuario usuario)
         {
             InitializeComponent();
             _usuarioActual = usuario;
 
-            // --- GARANTÍA DE TECLAS RÁPIDAS ---
+            // --- ESCÁNER Y TECLAS RÁPIDAS ---
             this.KeyPreview = true;
             this.KeyDown += new KeyEventHandler(ComprasForm_KeyDown);
+            this.KeyPress += new KeyPressEventHandler(ComprasForm_GlobalKeyPress);
 
             cboProveedores.SelectedIndexChanged += cboProveedores_SelectedIndexChanged;
             cboProductos.SelectedIndexChanged += cboProductos_SelectedIndexChanged;
+            txtEscanear.KeyPress += new KeyPressEventHandler(txtEscanear_KeyPress);
+        }
+
+        // ── CAPTURA INTELIGENTE GLOBAL (cualquier tecla → escáner) ─────────────
+        private void ComprasForm_GlobalKeyPress(object sender, KeyPressEventArgs e)
+        {
+            // No interferir si el usuario está escribiendo en campos manuales
+            if (this.ActiveControl == numCantidad ||
+                this.ActiveControl == numCosto ||
+                cboProveedores.DroppedDown ||
+                cboProductos.DroppedDown)
+            {
+                return;
+            }
+
+            if (char.IsControl(e.KeyChar)) return;
+
+            // Si el foco ya está en el campo del escáner, el SO escribe el carácter solo
+            if (txtEscanear.Focused) return;
+
+            // Redirigir al campo de escaneo
+            e.Handled = true;
+            txtEscanear.Focus();
+            txtEscanear.Text += e.KeyChar;
+            txtEscanear.SelectionStart = txtEscanear.Text.Length;
+        }
+
+        // ── LÓGICA AL TERMINAR EL ESCANEO (Enter del pistola) ─────────────────
+        private void txtEscanear_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar != (char)Keys.Enter) return;
+            e.Handled = true;
+
+            string codigo = txtEscanear.Text.Trim();
+            if (string.IsNullOrEmpty(codigo)) return;
+
+            // Buscar en la lista completa de productos (no solo los filtrados)
+            var producto = _todosLosProductos.FirstOrDefault(
+                p => p.CodigoBarras != null &&
+                     p.CodigoBarras.Equals(codigo, StringComparison.OrdinalIgnoreCase));
+
+            if (producto == null)
+            {
+                System.Media.SystemSounds.Exclamation.Play();
+                MessageBox.Show($"Producto con código '{codigo}' no encontrado.\nVerifique el código o cárguelo primero en el módulo de Productos.",
+                    "Código no encontrado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtEscanear.Clear();
+                return;
+            }
+
+            // Si el producto tiene proveedor asignado, seleccionarlo automáticamente
+            if (producto.ProveedorId > 0)
+            {
+                cboProveedores.SelectedValue = producto.ProveedorId;
+            }
+
+            // Seleccionar el producto en el combo
+            var itemEnCombo = (cboProductos.DataSource as List<Producto>)
+                              ?.FirstOrDefault(p => p.Id == producto.Id);
+
+            if (itemEnCombo != null)
+                cboProductos.SelectedItem = itemEnCombo;
+            else
+                cboProductos.SelectedValue = producto.Id;
+
+            // Pre-cargar costo actual del producto
+            if (producto.Costo > 0)
+                numCosto.Value = producto.Costo;
+
+            System.Media.SystemSounds.Beep.Play();
+            txtEscanear.Clear();
+            numCantidad.Focus();
+            numCantidad.Select();
         }
 
         private void ComprasForm_Load(object sender, EventArgs e)
@@ -260,7 +334,8 @@ namespace AlmacenDesktop.Forms
     partial class ComprasForm
     {
         private System.ComponentModel.IContainer components = null;
-        private Label lblProv, lblProd, lblCant, lblCosto, lblTotal;
+        private Label lblEscanear, lblProv, lblProd, lblCant, lblCosto, lblTotal;
+        private TextBox txtEscanear;
         private ComboBox cboProveedores, cboProductos;
         private NumericUpDown numCantidad, numCosto;
         private Button btnAgregar, btnFinalizar;
@@ -268,33 +343,94 @@ namespace AlmacenDesktop.Forms
 
         private void InitializeComponent()
         {
-            this.Size = new Size(800, 600);
+            this.Size = new Size(840, 660);
             this.Text = "Ingreso de Mercadería (Compras)";
             this.StartPosition = FormStartPosition.CenterScreen;
+            this.Load += ComprasForm_Load;
 
-            lblProv = new Label { Text = "Proveedor:", Location = new Point(20, 20), AutoSize = true };
-            cboProveedores = new ComboBox { Location = new Point(20, 40), Width = 300, DropDownStyle = ComboBoxStyle.DropDownList };
+            // ── ZONA DE ESCÁNER ──────────────────────────────────────────────────
+            lblEscanear = new Label
+            {
+                Text = "📷  Escanear Código de Barras:",
+                Location = new Point(20, 15),
+                AutoSize = true,
+                Font = new Font("Segoe UI", 9, FontStyle.Bold)
+            };
+            txtEscanear = new TextBox
+            {
+                Location = new Point(20, 35),
+                Width = 320,
+                Height = 26,
+                PlaceholderText = "Apunte el escáner aquí y escanee...",
+                Font = new Font("Segoe UI", 10)
+            };
 
-            lblProd = new Label { Text = "Producto:", Location = new Point(20, 80), AutoSize = true };
-            cboProductos = new ComboBox { Location = new Point(20, 100), Width = 300, DropDownStyle = ComboBoxStyle.DropDownList };
+            // ── PROVEEDOR ────────────────────────────────────────────────────────
+            lblProv = new Label { Text = "Proveedor:", Location = new Point(20, 75), AutoSize = true };
+            cboProveedores = new ComboBox { Location = new Point(20, 95), Width = 300, DropDownStyle = ComboBoxStyle.DropDownList };
 
-            lblCant = new Label { Text = "Cantidad:", Location = new Point(340, 80), AutoSize = true };
-            numCantidad = new NumericUpDown { Location = new Point(340, 100), Width = 80, Minimum = 1, Maximum = 10000 };
+            // ── PRODUCTO ─────────────────────────────────────────────────────────
+            lblProd = new Label { Text = "Producto:", Location = new Point(20, 135), AutoSize = true };
+            cboProductos = new ComboBox { Location = new Point(20, 155), Width = 300, DropDownStyle = ComboBoxStyle.DropDownList };
 
-            lblCosto = new Label { Text = "Costo Unitario ($):", Location = new Point(440, 80), AutoSize = true };
-            numCosto = new NumericUpDown { Location = new Point(440, 100), Width = 120, DecimalPlaces = 2, Maximum = 1000000 };
+            // ── CANTIDAD / COSTO / BOTÓN ─────────────────────────────────────────
+            lblCant = new Label { Text = "Cantidad:", Location = new Point(340, 135), AutoSize = true };
+            numCantidad = new NumericUpDown { Location = new Point(340, 155), Width = 80, Minimum = 1, Maximum = 10000 };
 
-            btnAgregar = new Button { Text = "Agregar (+)", Location = new Point(580, 95), Width = 100, Height = 30, BackColor = Color.SteelBlue, ForeColor = Color.White };
+            lblCosto = new Label { Text = "Costo Unitario ($):", Location = new Point(440, 135), AutoSize = true };
+            numCosto = new NumericUpDown { Location = new Point(440, 155), Width = 120, DecimalPlaces = 2, Maximum = 1000000 };
+
+            btnAgregar = new Button
+            {
+                Text = "Agregar (+)",
+                Location = new Point(580, 150),
+                Width = 110,
+                Height = 30,
+                BackColor = Color.SteelBlue,
+                ForeColor = Color.White
+            };
             btnAgregar.Click += btnAgregar_Click;
 
-            dgvDetalle = new DataGridView { Location = new Point(20, 150), Size = new Size(740, 300), AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill, ReadOnly = true };
+            // ── GRILLA ───────────────────────────────────────────────────────────
+            dgvDetalle = new DataGridView
+            {
+                Location = new Point(20, 200),
+                Size = new Size(790, 320),
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                ReadOnly = true
+            };
 
-            lblTotal = new Label { Text = "Total Compra: $ 0.00", Location = new Point(450, 470), Font = new Font("Segoe UI", 16, FontStyle.Bold), AutoSize = true };
+            // ── TOTALES Y FINALIZAR ──────────────────────────────────────────────
+            lblTotal = new Label
+            {
+                Text = "Total Compra: $ 0.00",
+                Location = new Point(450, 535),
+                Font = new Font("Segoe UI", 16, FontStyle.Bold),
+                AutoSize = true
+            };
 
-            btnFinalizar = new Button { Text = "CONFIRMAR INGRESO", Location = new Point(20, 470), Width = 300, Height = 50, BackColor = Color.ForestGreen, ForeColor = Color.White, Font = new Font("Segoe UI", 12, FontStyle.Bold) };
+            btnFinalizar = new Button
+            {
+                Text = "CONFIRMAR INGRESO (F5)",
+                Location = new Point(20, 530),
+                Width = 300,
+                Height = 50,
+                BackColor = Color.ForestGreen,
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 12, FontStyle.Bold)
+            };
             btnFinalizar.Click += btnFinalizar_Click;
 
-            this.Controls.AddRange(new Control[] { lblProv, cboProveedores, lblProd, cboProductos, lblCant, numCantidad, lblCosto, numCosto, btnAgregar, dgvDetalle, lblTotal, btnFinalizar });
+            this.Controls.AddRange(new Control[]
+            {
+                lblEscanear, txtEscanear,
+                lblProv, cboProveedores,
+                lblProd, cboProductos,
+                lblCant, numCantidad,
+                lblCosto, numCosto,
+                btnAgregar, dgvDetalle,
+                lblTotal, btnFinalizar
+            });
         }
     }
 }

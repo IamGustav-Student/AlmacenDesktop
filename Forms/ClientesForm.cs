@@ -172,6 +172,14 @@ namespace AlmacenDesktop.Forms
             }
         }
 
+        private void btnVerCtaCte_Click(object sender, EventArgs e)
+        {
+            var formCtaCte = new CuentaCorrienteForm();
+            this.Hide();
+            formCtaCte.ShowDialog();
+            this.Show();
+        }
+
         // --- MANEJO DE TECLAS RÁPIDAS ---
         private void ClientesForm_KeyDown(object sender, KeyEventArgs e)
         {

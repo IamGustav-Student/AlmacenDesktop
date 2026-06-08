@@ -107,6 +107,7 @@ namespace AlmacenDesktop.Forms
             int y = 60;
             this.lblCodigo.Text = "Código de Barras:"; this.lblCodigo.Location = new System.Drawing.Point(15, y);
             this.txtCodigo.Location = new System.Drawing.Point(15, y + 20); this.txtCodigo.Width = 260;
+            this.txtCodigo.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtCodigo_KeyPress);
 
             y += 50;
             this.lblNombre.Text = "Nombre Producto:"; this.lblNombre.Location = new System.Drawing.Point(15, y);
@@ -190,6 +191,7 @@ namespace AlmacenDesktop.Forms
             this.txtBusqueda.Location = new System.Drawing.Point(20, 80);
             this.txtBusqueda.Size = new System.Drawing.Size(400, 23);
             this.txtBusqueda.TextChanged += new System.EventHandler(this.txtBusqueda_TextChanged);
+            this.txtBusqueda.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtBusqueda_KeyPress);
 
             // Botones Acción Grid
             this.btnEditar.Text = "✏️ Editar";

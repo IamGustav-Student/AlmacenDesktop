@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -10,14 +10,14 @@ namespace AlmacenDesktop.Modelos
 
         [Required(ErrorMessage = "El nombre del producto es obligatorio.")]
         [StringLength(100, ErrorMessage = "El nombre no puede superar los 100 caracteres.")]
-        public string Nombre { get; set; }
+        public string Nombre { get; set; } = string.Empty;
 
         [StringLength(255, ErrorMessage = "La descripción es demasiado larga.")]
-        public string Descripcion { get; set; }
+        public string Descripcion { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "El código de barras es obligatorio.")]
         [StringLength(50, ErrorMessage = "El código de barras es muy largo.")]
-        public string CodigoBarras { get; set; }
+        public string CodigoBarras { get; set; } = string.Empty;
 
         [Range(0, 99999999, ErrorMessage = "El costo no puede ser negativo.")]
         [Column(TypeName = "decimal(18, 2)")]
@@ -43,7 +43,7 @@ namespace AlmacenDesktop.Modelos
         // Relación obligatoria: Todo producto debe tener un proveedor
         [Required(ErrorMessage = "Debe asignar un proveedor.")]
         public int ProveedorId { get; set; }
-        public virtual Proveedor Proveedor { get; set; }
+        public virtual Proveedor Proveedor { get; set; } = null!;
 
         // --- MÉTODOS DE NEGOCIO ---
 

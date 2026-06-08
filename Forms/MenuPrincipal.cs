@@ -20,6 +20,37 @@ namespace AlmacenDesktop.Forms
         {
             ConfigurarSeguridad();
             lblBienvenida.Text = $"Hola, {_usuarioActual.Nombre} ({_usuarioActual.Rol})";
+
+            // AGREGAR GUÍA DE ADMINISTRACIÓN DE USUARIOS
+            if (_usuarioActual.Rol == RolUsuario.Admin)
+            {
+                var grpGuia = new GroupBox
+                {
+                    Text = "📘 Guía de Inicio: Configurar Usuarios del Negocio",
+                    Location = new Point(240, 70),
+                    Size = new Size(520, 160),
+                    Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                    ForeColor = Color.FromArgb(0, 122, 204),
+                    BackColor = Color.White
+                };
+
+                var lblInstrucciones = new Label
+                {
+                    Text = "¡Bienvenido a VendeMax!\n\n" +
+                           "Para configurar su comercio, le sugerimos seguir estos pasos:\n" +
+                           "1. Crear Administradores: Vaya al botón '👥 Usuarios' y registre a los socios con rol 'Admin'.\n" +
+                           "2. Crear Empleados / Cajeros: Registre a su personal de atención con el rol 'Vendedor'.\n" +
+                           "   (El sistema limitará su acceso protegiendo la caja, importaciones y reportes sensibles).\n" +
+                           "3. Seguridad: Recuerde asignar contraseñas seguras a cada cuenta registrada.",
+                    Location = new Point(15, 25),
+                    Size = new Size(490, 120),
+                    Font = new Font("Segoe UI", 9, FontStyle.Regular),
+                    ForeColor = Color.Black
+                };
+
+                grpGuia.Controls.Add(lblInstrucciones);
+                this.Controls.Add(grpGuia);
+            }
         }
 
         private void ConfigurarSeguridad()
@@ -94,6 +125,12 @@ namespace AlmacenDesktop.Forms
         {
             if (!ValidarAccesoAdmin()) return;
             AbrirFormulario(new UsuariosForm());
+        }
+
+        private void btnProveedores_Click(object sender, EventArgs e)
+        {
+            // Cargar el formulario de Clientes y cuentas corrientes (Fiados)
+            AbrirFormulario(new ClientesForm());
         }
 
         // --- HELPER DE NAVEGACIN ---

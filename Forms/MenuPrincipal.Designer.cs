@@ -108,7 +108,7 @@ namespace AlmacenDesktop.Forms
             this.btnProductos.Click += new System.EventHandler(this.btnProductos_Click);
 
             // 
-            // btnProveedores (NUEVO)
+            // btnProveedores (Clientes / Fiados)
             // 
             this.btnProveedores.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.btnProveedores.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -117,9 +117,9 @@ namespace AlmacenDesktop.Forms
             this.btnProveedores.Name = "btnProveedores";
             this.btnProveedores.Size = new System.Drawing.Size(200, 35);
             this.btnProveedores.TabIndex = 4;
-            this.btnProveedores.Text = "🚚 Proveedores";
+            this.btnProveedores.Text = "👥 Clientes / Fiados";
             this.btnProveedores.UseVisualStyleBackColor = false;
-            // this.btnProveedores.Click += ... (Si tienes form, agrégalo en MenuPrincipal.cs)
+            this.btnProveedores.Click += new System.EventHandler(this.btnProveedores_Click);
 
             // 
             // btnImportar (NUEVO)

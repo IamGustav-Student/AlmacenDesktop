@@ -26,7 +26,11 @@ app.post('/api/licencia/validar', validateLicense);
 // ENDPOINT DE WEBHOOK (Mercado Pago / Simulación -> Server)
 app.post('/api/webhook', handleWebhook);
 
-// Levantar el servidor
-app.listen(PORT, () => {
-  console.log(`VENDEMAX Licensing Server listening on port ${PORT}`);
-});
+// Levantar el servidor sólo si se ejecuta directamente (desarrollo local)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`VENDEMAX Licensing Server listening on port ${PORT}`);
+  });
+}
+
+module.exports = app;

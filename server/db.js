@@ -52,6 +52,19 @@ async function inicializarDB() {
   try {
     const client = await pool.connect();
     await client.query(queryCreateTable);
+    
+    // Sembrar licencia de prueba por defecto si no existe
+    const checkDemo = await client.query('SELECT id FROM licencias WHERE email_cliente = $1', ['demo@hexastrategy.com']);
+    if (checkDemo.rows.length === 0) {
+      const vencimientoDemo = new Date();
+      vencimientoDemo.setFullYear(vencimientoDemo.getFullYear() + 10); // 10 años de duración para pruebas
+      await client.query(
+        'INSERT INTO licencias (email_cliente, clave_activacion, estado, fecha_vencimiento) VALUES ($1, $2, $3, $4)',
+        ['demo@hexastrategy.com', 'VDMX-DEMO-TEST-2026', 'ACTIVO', vencimientoDemo]
+      );
+      console.log("✅ Seeded default demo license: demo@hexastrategy.com / VDMX-DEMO-TEST-2026");
+    }
+
     client.release();
     console.log("✅ Database initialized: 'licencias' table verified/created.");
   } catch (err) {

@@ -15,6 +15,7 @@ namespace AlmacenDesktop.Forms
             dgvClientes = new DataGridView();
             panelFormulario = new Panel();
             btnLimpiar = new Button();
+            btnVerCtaCte = new Button();
             btnEliminar = new Button();
             btnGuardar = new Button();
             txtDireccion = new TextBox();
@@ -54,6 +55,7 @@ namespace AlmacenDesktop.Forms
             // panelFormulario
             // 
             panelFormulario.BackColor = Color.WhiteSmoke;
+            panelFormulario.Controls.Add(btnVerCtaCte);
             panelFormulario.Controls.Add(btnLimpiar);
             panelFormulario.Controls.Add(btnEliminar);
             panelFormulario.Controls.Add(btnGuardar);
@@ -84,6 +86,19 @@ namespace AlmacenDesktop.Forms
             btnLimpiar.TabIndex = 0;
             btnLimpiar.Text = "Limpiar / Nuevo (Esc)";
             btnLimpiar.Click += btnLimpiar_Click;
+            // 
+            // btnVerCtaCte
+            // 
+            this.btnVerCtaCte.BackColor = Color.FromArgb(0, 122, 204);
+            this.btnVerCtaCte.FlatStyle = FlatStyle.Flat;
+            this.btnVerCtaCte.ForeColor = Color.White;
+            this.btnVerCtaCte.Location = new Point(15, 30);
+            this.btnVerCtaCte.Name = "btnVerCtaCte";
+            this.btnVerCtaCte.Size = new Size(290, 35);
+            this.btnVerCtaCte.TabIndex = 16;
+            this.btnVerCtaCte.Text = "📊 VER CUENTA CORRIENTE (FIADOS)";
+            this.btnVerCtaCte.UseVisualStyleBackColor = false;
+            this.btnVerCtaCte.Click += new EventHandler(this.btnVerCtaCte_Click);
             // 
             // btnEliminar
             // 
@@ -251,5 +266,6 @@ namespace AlmacenDesktop.Forms
         private System.Windows.Forms.Button btnGuardar;
         private System.Windows.Forms.Button btnEliminar;
         private System.Windows.Forms.Button btnLimpiar;
+        private System.Windows.Forms.Button btnVerCtaCte;
     }
 }

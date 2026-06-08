@@ -24,6 +24,59 @@ namespace AlmacenDesktop.Forms
             // --- HABILITAR ATAJOS DE TECLADO ---
             this.KeyPreview = true;
             this.KeyDown += new KeyEventHandler(ProductosForm_KeyDown);
+            this.KeyPress += new KeyPressEventHandler(ProductosForm_GlobalKeyPress);
+        }
+
+        // Captura inteligente global para escáner de código de barras
+        private void ProductosForm_GlobalKeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Obtener el control activo real
+            Control active = this.ActiveControl;
+
+            // Si el foco está en un control de edición manual, no interferir
+            if (active == txtNombre || 
+                active == txtDescripcion || 
+                active == txtBusqueda ||
+                active == numCosto || 
+                active == numPrecio || 
+                active == numStock || 
+                active == numStockMinimo || 
+                active == numImpuesto || 
+                active == cboProveedor)
+            {
+                return;
+            }
+
+            // También comprobar si es un control hijo (por ejemplo, el TextBox interno de un NumericUpDown)
+            if (active != null && active.Parent != null)
+            {
+                Control parent = active.Parent;
+                if (parent == numCosto || 
+                    parent == numPrecio || 
+                    parent == numStock || 
+                    parent == numStockMinimo || 
+                    parent == numImpuesto || 
+                    parent == cboProveedor)
+                {
+                    return;
+                }
+            }
+
+            // Si es un carácter de control (como Backspace o Enter), dejar que se propague normalmente
+            if (char.IsControl(e.KeyChar))
+            {
+                return;
+            }
+
+            // Redirigir el carácter a txtCodigo
+            e.Handled = true; // Consumir el evento aquí para controlarlo totalmente
+
+            if (!txtCodigo.Focused)
+            {
+                txtCodigo.Focus();
+            }
+
+            txtCodigo.AppendText(e.KeyChar.ToString());
         }
 
         private void ProductosForm_Load(object sender, EventArgs e)
@@ -82,6 +135,66 @@ namespace AlmacenDesktop.Forms
         {
             // Búsqueda en tiempo real
             CargarProductos(txtBusqueda.Text.Trim());
+        }
+
+        private void txtCodigo_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                e.Handled = true;
+                string barcode = txtCodigo.Text.Trim();
+                if (!string.IsNullOrEmpty(barcode))
+                {
+                    // Al presionar Enter (fin de escaneo), si el producto existe, lo cargamos para editarlo.
+                    // Si no existe, dejamos el cursor listo para escribir el nombre de este producto nuevo.
+                    using (var context = new AlmacenDbContext())
+                    {
+                        var existente = context.Productos.FirstOrDefault(p => p.CodigoBarras == barcode && p.Activo);
+                        if (existente != null)
+                        {
+                            _productoSeleccionado = existente;
+                            txtNombre.Text = existente.Nombre;
+                            txtDescripcion.Text = existente.Descripcion;
+                            numCosto.Value = existente.Costo;
+                            numPrecio.Value = existente.Precio;
+                            numStock.Value = existente.Stock;
+                            numStockMinimo.Value = existente.StockMinimo;
+                            numImpuesto.Value = existente.Impuesto;
+                            cboProveedor.SelectedValue = existente.ProveedorId;
+
+                            _modoEdicion = true;
+                            lblModo.Text = $"Editando: {existente.Nombre}";
+                            lblModo.ForeColor = Color.OrangeRed;
+                            btnGuardar.Text = "Actualizar (F5)";
+                            txtNombre.Focus();
+                            txtNombre.SelectAll();
+                            AudioHelper.PlayOk();
+                        }
+                        else
+                        {
+                            // Producto nuevo, enfocar nombre para cargarlo rápido
+                            txtNombre.Focus();
+                        }
+                    }
+                }
+            }
+        }
+
+        private void txtBusqueda_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                e.Handled = true;
+                string busqueda = txtBusqueda.Text.Trim();
+                CargarProductos(busqueda);
+                
+                // Si la búsqueda fue un código de barra exacto y hay coincidencia, seleccionarlo y editarlo
+                if (dgvProductos.Rows.Count == 1)
+                {
+                    dgvProductos.Rows[0].Selected = true;
+                    btnEditar_Click(sender, e);
+                }
+            }
         }
 
         private void btnGuardar_Click(object sender, EventArgs e)
