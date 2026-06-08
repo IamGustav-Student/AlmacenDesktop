@@ -15,6 +15,6 @@ namespace AlmacenDesktop.Helpers
         public const int ALERTA_STOCK_MINIMO = 5; // Umbral para el dashboard
 
         // Servidor de Licencias HEXASTRATEGY (Actualizar con tu URL final de Vercel)
-        public const string API_LICENCIAS_URL = "https://vendemax-licencias.vercel.app";
+        public const string API_LICENCIAS_URL = "https://vendemax.vercel.app";
     }
 }
