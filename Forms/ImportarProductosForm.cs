@@ -93,7 +93,7 @@ namespace AlmacenDesktop.Forms
         private void btnCargarSemilla_Click(object sender, EventArgs e)
         {
             var confirm = MessageBox.Show(
-                "¿Desea precargar el catálogo con más de 1,500 productos típicos del rubro almacén?\n" +
+                "¿Desea precargar el catálogo con más de 110 productos reales del rubro almacén (con códigos de barras y marcas oficiales de Argentina)?\n" +
                 "Si los productos ya existen por código de barras, se actualizarán.",
                 "Confirmar Precarga", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 

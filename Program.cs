@@ -193,7 +193,7 @@ namespace AlmacenDesktop
                     context.SaveChanges();
                 }
 
-                // Carga previa automática de productos de almacén (+1,500 productos) si está vacío
+                // Carga previa automática de productos de almacén (+110 productos reales) si está vacío
                 if (!context.Productos.Any())
                 {
                     AlmacenSeedData.SembrarProductos(context);

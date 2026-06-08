@@ -86,96 +86,8 @@ namespace AlmacenDesktop.Services
                 }
             }
 
-            // 3. Generación Combinatoria para llegar a miles (+1,500 productos)
-            var combinador = ObtenerDefinicionRubros();
-            var contadoresCodigo = new Dictionary<string, int>();
-
-            foreach (var rubro in combinador)
-            {
-                decimal costoBase = rubro.CostoBase;
-                decimal margen = rubro.Margen;
-
-                foreach (var marca in rubro.Marcas)
-                {
-                    string prefijo = GetPrefixForBrand(marca);
-                    if (!contadoresCodigo.ContainsKey(prefijo))
-                    {
-                        contadoresCodigo[prefijo] = 1;
-                    }
-
-                    foreach (var subtipo in rubro.Subtipos)
-                    {
-                        foreach (var tamano in rubro.Tamaños)
-                        {
-                            // Generar código de barras correlativo para este prefijo con checksum EAN-13 válido
-                            int correlativo = contadoresCodigo[prefijo];
-                            string barcode = CalcularCodigoEan13(prefijo, correlativo);
-                            contadoresCodigo[prefijo]++;
-
-                            // Generar costos y precios lógicos con variaciones leves
-                            decimal factorMarca = (marca.Length % 3) * 0.05m + 1.0m; // Variación basada en marca
-                            decimal factorSubtipo = (subtipo.Length % 4) * 0.03m + 1.0m;
-                            decimal costoFinal = Math.Round(costoBase * factorMarca * factorSubtipo, 2);
-                            decimal precioFinal = Math.Round(costoFinal * margen, 2);
-
-                            // Ajuste por tamaño
-                            if (tamano.Contains("1kg") || tamano.Contains("1.5L") || tamano.Contains("2.25L") || tamano.Contains("3L"))
-                            {
-                                costoFinal = Math.Round(costoFinal * 1.8m, 2);
-                                precioFinal = Math.Round(precioFinal * 1.8m, 2);
-                            }
-
-                            string prodNombre = $"{rubro.Categoria} {marca} {subtipo} {tamano}";
-                            string provName = GetProviderNameForBrand(marca);
-
-                            // Evitar sobreescribir los 100% reales precargados
-                            if (cacheProductos.TryGetValue(barcode, out var existente))
-                            {
-                                existente.Nombre = prodNombre;
-                                existente.Costo = costoFinal;
-                                existente.Precio = precioFinal;
-                                existente.Activo = true;
-                                actualizados++;
-                            }
-                            else
-                            {
-                                var nuevo = new Producto
-                                {
-                                    CodigoBarras = barcode,
-                                    Nombre = prodNombre,
-                                    Descripcion = $"{rubro.Categoria} de marca {marca} tipo {subtipo}.",
-                                    Costo = costoFinal,
-                                    Precio = precioFinal,
-                                    Stock = new Random().Next(10, 80),
-                                    StockMinimo = 5,
-                                    Impuesto = 0,
-                                    ProveedorId = providersMap[provName].Id,
-                                    Activo = true
-                                };
-                                context.Productos.Add(nuevo);
-                                cacheProductos.Add(barcode, nuevo);
-                                creados++;
-                            }
-                        }
-                    }
-                }
-            }
-
             context.SaveChanges(); // Guardado transaccional final masivo
             return (creados, actualizados);
-        }
-
-        private static string CalcularCodigoEan13(string prefijo, int correlativo)
-        {
-            string base12 = $"{prefijo}{correlativo:D5}"; // Asegura 12 dígitos
-            int suma = 0;
-            for (int i = 0; i < 12; i++)
-            {
-                int digito = base12[i] - '0';
-                suma += digito * (i % 2 == 0 ? 1 : 3);
-            }
-            int digitoVerificador = (10 - (suma % 10)) % 10;
-            return base12 + digitoVerificador;
         }
 
         private static string ExtraerMarca(string nombreCompleto)
@@ -184,9 +96,9 @@ namespace AlmacenDesktop.Services
             if (palabras.Length > 2)
             {
                 // Yerba Mate Playadito 1kg -> "Playadito" es la tercera palabra
-                if (palabras[0] == "Yerba" || palabras[0] == "Aceite" || palabras[0] == "Fideos" || palabras[0] == "Leche" || palabras[0] == "Dulce" || palabras[0] == "Puré" || palabras[0] == "Papel" || palabras[0] == "Rollos" || palabras[0] == "Jabón")
+                if (palabras[0] == "Yerba" || palabras[0] == "Aceite" || palabras[0] == "Fideos" || palabras[0] == "Leche" || palabras[0] == "Dulce" || palabras[0] == "Puré" || palabras[0] == "Papel" || palabras[0] == "Rollos" || palabras[0] == "Jabón" || palabras[0] == "Pan" || palabras[0] == "Cerveza" || palabras[0] == "Gaseosa" || palabras[0] == "Agua" || palabras[0] == "Shampoo" || palabras[0] == "Queso" || palabras[0] == "Crema" || palabras[0] == "Harina" || palabras[0] == "Arroz")
                 {
-                    if (palabras[1] == "Mate" || palabras[1] == "de" || palabras[1] == "Entera" || palabras[1] == "Descremada" || palabras[1] == "Líquido" || palabras[1] == "Higiénico" || palabras[1] == "de")
+                    if (palabras[1] == "Mate" || palabras[1] == "de" || palabras[1] == "Entera" || palabras[1] == "Descremada" || palabras[1] == "Líquido" || palabras[1] == "Higiénico" || palabras[1] == "Lactal" || palabras[1] == "Saborizada" || palabras[1] == "Mineral" || palabras[1] == "Dental" || palabras[1] == "Crema" || palabras[1] == "Rallado" || palabras[1] == "Lomo" || palabras[1] == "Firme" || palabras[1] == "Secos" || palabras[1] == "Finas")
                     {
                         return palabras[2];
                     }
@@ -203,31 +115,49 @@ namespace AlmacenDesktop.Services
                 case "Playadito":
                 case "Taragüi":
                 case "Amanda":
-                case "Cruz de Malta":
+                case "Cruz": // Cruz de Malta
+                case "La": // La Merced / La Virginia / La Campagnola
+                case "La Virginia":
                 case "La Merced":
                 case "Rosamonte":
                 case "Mañanita":
                 case "Union":
                 case "CBSe":
-                case "Nobleza Gaucha":
-                case "La Virginia":
-                    return "Molinos Río de la Plata"; // Mapped here for simplicity
+                case "Nobleza": // Nobleza Gaucha
+                case "Cabrales":
+                    return "Molinos Río de la Plata"; // Mapeados de forma simplificada
                 case "La Serenísima":
+                case "La Serenisima":
                 case "Milkaut":
                 case "Casancrem":
                 case "Ilolay":
                 case "Tregar":
+                case "Sancor":
                     return "La Serenísima / Danone";
                 case "Arcor":
                 case "Cofler":
                 case "Guaymallén":
+                case "Guaymallen":
                 case "Noel":
                 case "Jorgito":
+                case "Jorgelin":
+                case "Jorgelín":
                 case "Havanna":
                 case "Fantoche":
                 case "Saladix":
-                case "Dos Anclas":
+                case "Dos": // Dos Anclas
                 case "Celusal":
+                case "Menoyo":
+                case "Oreo":
+                case "Pepitos":
+                case "Criollitas":
+                case "Chocolinas":
+                case "Traviata":
+                case "Don": // Don Satur
+                case "Opera":
+                case "Bagley":
+                case "Ledesma":
+                case "La Campagnola":
                     return "Arcor S.A.";
                 case "Lucchetti":
                 case "Matarazzo":
@@ -237,20 +167,24 @@ namespace AlmacenDesktop.Services
                 case "Don Vicente":
                 case "Terrabusi":
                 case "Canale":
-                case "Fargo":
+                case "Pureza":
+                case "Cañuelas":
+                case "Cocinero":
+                case "Natura":
                     return "Molinos Río de la Plata";
                 case "Coca-Cola":
+                case "Pepsi":
                 case "Sprite":
                 case "Fanta":
                 case "Villavicencio":
                 case "Levité":
-                case "Paso de los Toros":
+                case "Paso": // Paso de los Toros
                 case "Manaos":
                 case "Secco":
                     return "Coca-Cola Company";
                 case "Quilmes":
                 case "Brahma":
-                case "Stella Artois":
+                case "Stella": // Stella Artois
                 case "Patagonia":
                 case "Heineken":
                 case "Corona":
@@ -268,29 +202,16 @@ namespace AlmacenDesktop.Services
                 case "Knorr":
                 case "Cif":
                 case "Drive":
+                case "Lactal":
+                case "Lays":
+                case "Doritos":
+                case "Krachitos":
+                case "Colgate":
+                case "Campanita":
+                case "Elegante":
                     return "Unilever Argentina";
                 default:
                     return "PROVEEDOR GENERAL";
-            }
-        }
-
-        private static string GetPrefixForBrand(string brand)
-        {
-            switch (brand)
-            {
-                case "Arcor": case "Cofler": case "Noel": return "7790040";
-                case "Lucchetti": case "Matarazzo": case "Gallo": case "Favorita": case "Blancaflor": case "Don Vicente": case "Terrabusi": case "Canale": return "7790060";
-                case "La Serenísima": case "Milkaut": case "Casancrem": case "Ilolay": case "Tregar": return "7790070";
-                case "Coca-Cola": case "Sprite": case "Fanta": return "5449000";
-                case "Quilmes": case "Brahma": case "Stella Artois": case "Patagonia": case "Heineken": case "Corona": case "Schneider": case "Imperial": return "7790895";
-                case "Ala": case "Skip": case "Hellmann's": case "Lux": case "Rexona": case "Axe": case "Dove": case "Sedal": case "Knorr": case "Drive": case "Cif": return "7790236";
-                case "Playadito": return "7793704";
-                case "Taragüi": case "Mañanita": return "7790380";
-                case "Amanda": return "7790450";
-                case "Rosamonte": return "7790150";
-                case "Cabrales": return "7790580";
-                case "Dos Anclas": case "Celusal": return "7790580";
-                default: return "7791234";
             }
         }
 
@@ -298,174 +219,164 @@ namespace AlmacenDesktop.Services
         {
             return new List<Producto>
             {
+                // 1. Yerba Mate
                 new Producto { CodigoBarras = "7793704000928", Nombre = "Yerba Mate Playadito 1kg", Costo = 2800m, Precio = 3900m, Stock = 50, StockMinimo = 5, Impuesto = 0, Activo = true },
-                new Producto { CodigoBarras = "7790070218217", Nombre = "Yerba Mate Taragüi 500g", Costo = 1600m, Precio = 2300m, Stock = 40, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7793704000911", Nombre = "Yerba Mate Playadito 500g", Costo = 1500m, Precio = 2100m, Stock = 40, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790380000624", Nombre = "Yerba Mate Taragüi Con Palo 500g", Costo = 1600m, Precio = 2300m, Stock = 45, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790380000617", Nombre = "Yerba Mate Taragüi Con Palo 1kg", Costo = 2950m, Precio = 4100m, Stock = 35, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790380023029", Nombre = "Yerba Mate Mañanita Con Palo 500g", Costo = 1450m, Precio = 2050m, Stock = 30, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790450048231", Nombre = "Yerba Mate Amanda Tradicional 1kg", Costo = 2700m, Precio = 3800m, Stock = 25, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790450048224", Nombre = "Yerba Mate Amanda Tradicional 500g", Costo = 1400m, Precio = 1950m, Stock = 40, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790150000850", Nombre = "Yerba Mate Rosamonte Especial 1kg", Costo = 3100m, Precio = 4400m, Stock = 20, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790150000843", Nombre = "Yerba Mate Rosamonte Especial 500g", Costo = 1650m, Precio = 2350m, Stock = 30, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7798062541334", Nombre = "Yerba Mate CBSe Hierbas Serranas 500g", Costo = 1350m, Precio = 1900m, Stock = 55, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7798062541242", Nombre = "Yerba Mate CBSe Naranja 500g", Costo = 1350m, Precio = 1900m, Stock = 25, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790380003731", Nombre = "Yerba Mate La Merced De Campo 500g", Costo = 2100m, Precio = 2950m, Stock = 15, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790380003724", Nombre = "Yerba Mate La Merced Barbacuá 500g", Costo = 2100m, Precio = 2950m, Stock = 10, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790380000815", Nombre = "Yerba Mate Unión Suave 500g", Costo = 1550m, Precio = 2200m, Stock = 30, StockMinimo = 5, Impuesto = 0, Activo = true },
+
+                // 2. Aceites y Condimentos
                 new Producto { CodigoBarras = "7790580510000", Nombre = "Aceite de Girasol Natura 1.5L", Costo = 1800m, Precio = 2500m, Stock = 30, StockMinimo = 5, Impuesto = 0, Activo = true },
-                new Producto { CodigoBarras = "7790742240805", Nombre = "Fideos Lucchetti Tallarín 500g", Costo = 700m, Precio = 1100m, Stock = 60, StockMinimo = 5, Impuesto = 0, Activo = true },
-                new Producto { CodigoBarras = "7790060023685", Nombre = "Arroz Gallo Oro 1kg", Costo = 1200m, Precio = 1800m, Stock = 45, StockMinimo = 5, Impuesto = 0, Activo = true },
-                new Producto { CodigoBarras = "7790040110404", Nombre = "Azúcar Ledesma Clásica 1kg", Costo = 800m, Precio = 1200m, Stock = 70, StockMinimo = 5, Impuesto = 0, Activo = true },
-                new Producto { CodigoBarras = "7790070318214", Nombre = "Harina Favorita Leudante 1kg", Costo = 650m, Precio = 950m, Stock = 35, StockMinimo = 5, Impuesto = 0, Activo = true },
-                new Producto { CodigoBarras = "7790070518218", Nombre = "Harina Blancaflor 0000 1kg", Costo = 900m, Precio = 1350m, Stock = 30, StockMinimo = 5, Impuesto = 0, Activo = true },
-                new Producto { CodigoBarras = "7790070012025", Nombre = "Leche Entera La Serenísima Sachet 1L", Costo = 950m, Precio = 1350m, Stock = 80, StockMinimo = 5, Impuesto = 0, Activo = true },
-                new Producto { CodigoBarras = "7790070012056", Nombre = "Leche Descremada La Serenísima Sachet 1L", Costo = 950m, Precio = 1350m, Stock = 50, StockMinimo = 5, Impuesto = 0, Activo = true },
-                new Producto { CodigoBarras = "5449000000996", Nombre = "Gaseosa Coca-Cola Original 2.25L", Costo = 2100m, Precio = 2900m, Stock = 100, StockMinimo = 5, Impuesto = 0, Activo = true },
-                new Producto { CodigoBarras = "5449000001009", Nombre = "Gaseosa Coca-Cola Zero 2.25L", Costo = 2100m, Precio = 2900m, Stock = 60, StockMinimo = 5, Impuesto = 0, Activo = true },
-                new Producto { CodigoBarras = "7790895007423", Nombre = "Gaseosa Manaos Cola 2.25L", Costo = 1100m, Precio = 1600m, Stock = 90, StockMinimo = 5, Impuesto = 0, Activo = true },
-                new Producto { CodigoBarras = "7791234500012", Nombre = "Galletitas Oreo 117g", Costo = 800m, Precio = 1200m, Stock = 55, StockMinimo = 5, Impuesto = 0, Activo = true },
-                new Producto { CodigoBarras = "7790060002147", Nombre = "Galletitas Pepitos 119g", Costo = 750m, Precio = 1100m, Stock = 50, StockMinimo = 5, Impuesto = 0, Activo = true },
-                new Producto { CodigoBarras = "7790040120205", Nombre = "Galletitas Criollitas 3 x 100g", Costo = 900m, Precio = 1350m, Stock = 120, StockMinimo = 5, Impuesto = 0, Activo = true },
-                new Producto { CodigoBarras = "7790070031125", Nombre = "Dulce de Leche La Serenísima Estilo Colonial 400g", Costo = 1400m, Precio = 2000m, Stock = 25, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790580120155", Nombre = "Aceite de Girasol Cocinero 900ml", Costo = 1100m, Precio = 1550m, Stock = 40, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790580120162", Nombre = "Aceite de Girasol Cocinero 1.5L", Costo = 1800m, Precio = 2500m, Stock = 35, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7792180001665", Nombre = "Aceite Mezcla Cañuelas 1.5L", Costo = 1650m, Precio = 2300m, Stock = 25, StockMinimo = 5, Impuesto = 0, Activo = true },
                 new Producto { CodigoBarras = "7790580131472", Nombre = "Mayonesa Hellmann's Clásica Doypack 250g", Costo = 650m, Precio = 980m, Stock = 65, StockMinimo = 5, Impuesto = 0, Activo = true },
-                new Producto { CodigoBarras = "7790111122223", Nombre = "Puré de Tomate Arcor Tetra 520g", Costo = 500m, Precio = 750m, Stock = 85, StockMinimo = 5, Impuesto = 0, Activo = true },
-                new Producto { CodigoBarras = "7790236000571", Nombre = "Detergente Ala Colágeno 750ml", Costo = 1100m, Precio = 1650m, Stock = 30, StockMinimo = 5, Impuesto = 0, Activo = true },
-                new Producto { CodigoBarras = "7790236001240", Nombre = "Jabón Líquido Ala para Lavarropas 800ml", Costo = 2400m, Precio = 3500m, Stock = 20, StockMinimo = 5, Impuesto = 0, Activo = true },
-                new Producto { CodigoBarras = "7790070231223", Nombre = "Manteca La Serenísima 200g", Costo = 1200m, Precio = 1700m, Stock = 30, StockMinimo = 5, Impuesto = 0, Activo = true },
-                new Producto { CodigoBarras = "7790111000305", Nombre = "Mermelada Arcor Durazno 390g", Costo = 950m, Precio = 1400m, Stock = 40, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790580131496", Nombre = "Mayonesa Hellmann's Clásica Doypack 475g", Costo = 1100m, Precio = 1600m, Stock = 30, StockMinimo = 5, Impuesto = 0, Activo = true },
                 new Producto { CodigoBarras = "7790580402123", Nombre = "Sal Fina Dos Anclas 500g", Costo = 450m, Precio = 680m, Stock = 50, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790580202103", Nombre = "Sal Gruesa Dos Anclas 1kg", Costo = 550m, Precio = 850m, Stock = 25, StockMinimo = 5, Impuesto = 0, Activo = true },
                 new Producto { CodigoBarras = "7790040118226", Nombre = "Vinagre de Alcohol Menoyo 1L", Costo = 600m, Precio = 900m, Stock = 25, StockMinimo = 5, Impuesto = 0, Activo = true },
-                new Producto { CodigoBarras = "7790895000516", Nombre = "Cerveza Quilmes Clásica Lata 473ml", Costo = 750m, Precio = 1100m, Stock = 150, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790639002449", Nombre = "Ketchup Hellmann's Doypack 250g", Costo = 680m, Precio = 990m, Stock = 40, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790580108603", Nombre = "Mostaza Natura Doypack 500g", Costo = 850m, Precio = 1250m, Stock = 30, StockMinimo = 5, Impuesto = 0, Activo = true },
+
+                // 3. Galletitas y Alfajores
+                new Producto { CodigoBarras = "7622300840250", Nombre = "Galletitas Oreo Original 117g", Costo = 800m, Precio = 1200m, Stock = 55, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790060002147", Nombre = "Galletitas Pepitos Original 119g", Costo = 750m, Precio = 1100m, Stock = 50, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790040120205", Nombre = "Galletitas Criollitas 3 x 100g", Costo = 900m, Precio = 1350m, Stock = 120, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790040103758", Nombre = "Galletitas Chocolinas 250g", Costo = 1300m, Precio = 1950m, Stock = 70, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790040121103", Nombre = "Galletitas Traviata Pack x3 301g", Costo = 950m, Precio = 1400m, Stock = 80, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7791690000057", Nombre = "Bizcochos de Grasa Don Satur 200g", Costo = 580m, Precio = 850m, Stock = 100, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7791690000088", Nombre = "Bizcochos Dulces Don Satur 200g", Costo = 580m, Precio = 850m, Stock = 60, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790040122247", Nombre = "Galletitas Surtido Bagley 400g", Costo = 1200m, Precio = 1750m, Stock = 90, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790040101808", Nombre = "Galletitas Rumba 112g", Costo = 650m, Precio = 980m, Stock = 45, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790040101709", Nombre = "Galletitas Mellizas 112g", Costo = 650m, Precio = 980m, Stock = 40, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790040101907", Nombre = "Galletitas Amor 112g", Costo = 680m, Precio = 1050m, Stock = 35, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790040860224", Nombre = "Alfajor Jorgito Chocolate 55g", Costo = 450m, Precio = 700m, Stock = 150, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790040860231", Nombre = "Alfajor Jorgito Glaseado Blanco 55g", Costo = 450m, Precio = 700m, Stock = 80, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790040125439", Nombre = "Obleas Opera Original 220g", Costo = 820m, Precio = 1250m, Stock = 50, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "77903518", Nombre = "Alfajor Guaymallén Chocolate 38g", Costo = 250m, Precio = 400m, Stock = 200, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "77903525", Nombre = "Alfajor Guaymallén Blanco 38g", Costo = 250m, Precio = 400m, Stock = 180, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "77903532", Nombre = "Alfajor Guaymallén Membrillo 38g", Costo = 250m, Precio = 400m, Stock = 120, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "77926830", Nombre = "Alfajor Triple Jorgelín Blanco 85g", Costo = 750m, Precio = 1100m, Stock = 90, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "77926847", Nombre = "Alfajor Triple Jorgelín Negro 85g", Costo = 750m, Precio = 1100m, Stock = 110, StockMinimo = 5, Impuesto = 0, Activo = true },
+
+                // 4. Bebidas y Gaseosas
+                new Producto { CodigoBarras = "7790895000998", Nombre = "Gaseosa Coca-Cola Original 2.25L", Costo = 2100m, Precio = 2900m, Stock = 100, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790895001018", Nombre = "Gaseosa Coca-Cola Zero 2.25L", Costo = 2100m, Precio = 2900m, Stock = 60, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790895000967", Nombre = "Gaseosa Coca-Cola Original 1.5L", Costo = 1600m, Precio = 2200m, Stock = 50, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790895010188", Nombre = "Gaseosa Sprite Sin Azúcar 2.25L", Costo = 2000m, Precio = 2800m, Stock = 70, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790895005085", Nombre = "Gaseosa Fanta Naranja 2.25L", Costo = 2000m, Precio = 2800m, Stock = 45, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7798150470080", Nombre = "Gaseosa Manaos Cola 2.25L", Costo = 1100m, Precio = 1600m, Stock = 90, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7798150470097", Nombre = "Gaseosa Manaos Pomelo 2.25L", Costo = 1100m, Precio = 1600m, Stock = 50, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7798150470127", Nombre = "Gaseosa Manaos Naranja 2.25L", Costo = 1100m, Precio = 1600m, Stock = 40, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7799061001309", Nombre = "Gaseosa Pepsi Regular 2.25L", Costo = 1950m, Precio = 2700m, Stock = 80, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7799061001903", Nombre = "Gaseosa Paso de los Toros Pomelo 2.25L", Costo = 2000m, Precio = 2800m, Stock = 65, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7799061001941", Nombre = "Gaseosa Paso de los Toros Tónica 2.25L", Costo = 2000m, Precio = 2800m, Stock = 30, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790895008543", Nombre = "Agua Mineral Villavicencio Sin Gas 1.5L", Costo = 900m, Precio = 1300m, Stock = 120, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790895008550", Nombre = "Agua Mineral Villavicencio Con Gas 1.5L", Costo = 900m, Precio = 1300m, Stock = 60, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7799061002344", Nombre = "Agua Saborizada Levité Pomelo 1.5L", Costo = 1150m, Precio = 1650m, Stock = 80, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7799061002351", Nombre = "Agua Saborizada Levité Manzana 1.5L", Costo = 1150m, Precio = 1650m, Stock = 70, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7799061002368", Nombre = "Agua Saborizada Levité Naranja 1.5L", Costo = 1150m, Precio = 1650m, Stock = 50, StockMinimo = 5, Impuesto = 0, Activo = true },
+
+                // 5. Lácteos
+                new Producto { CodigoBarras = "7790070230578", Nombre = "Leche Entera La Serenísima Sachet 1L", Costo = 950m, Precio = 1350m, Stock = 80, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790070230585", Nombre = "Leche Descremada La Serenísima Sachet 1L", Costo = 950m, Precio = 1350m, Stock = 50, StockMinimo = 5, Impuesto = 0, Activo = true },
                 new Producto { CodigoBarras = "7790070415609", Nombre = "Queso Crema Casancrem Clásico 290g", Costo = 1800m, Precio = 2600m, Stock = 35, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790070415616", Nombre = "Queso Crema Casancrem Light 290g", Costo = 1800m, Precio = 2600m, Stock = 20, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790070031125", Nombre = "Dulce de Leche Colonial La Serenísima 400g", Costo = 1400m, Precio = 2000m, Stock = 25, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790070031156", Nombre = "Dulce de Leche Clásico La Serenísima 400g", Costo = 1300m, Precio = 1850m, Stock = 40, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790070231223", Nombre = "Manteca La Serenísima 200g", Costo = 1200m, Precio = 1700m, Stock = 30, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790070231100", Nombre = "Manteca La Serenísima 100g", Costo = 700m, Precio = 1000m, Stock = 20, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790070507342", Nombre = "Queso Rallado La Serenísima Reggianito 150g", Costo = 2100m, Precio = 3000m, Stock = 30, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790070507328", Nombre = "Queso Rallado La Serenísima Reggianito 40g", Costo = 650m, Precio = 950m, Stock = 80, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790070220304", Nombre = "Crema de Leche La Serenísima 200g", Costo = 1100m, Precio = 1600m, Stock = 25, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "77931475", Nombre = "Yogur Entero Sancor Yogs Vainilla 190g", Costo = 600m, Precio = 900m, Stock = 45, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "77931482", Nombre = "Yogur Entero Sancor Yogs Frutilla 190g", Costo = 600m, Precio = 900m, Stock = 40, StockMinimo = 5, Impuesto = 0, Activo = true },
+
+                // 6. Fideos, Arroz y Harinas
+                new Producto { CodigoBarras = "7790742240805", Nombre = "Fideos Lucchetti Tallarín 500g", Costo = 700m, Precio = 1100m, Stock = 60, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790742240829", Nombre = "Fideos Lucchetti Tirabuzón 500g", Costo = 700m, Precio = 1100m, Stock = 50, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790060023685", Nombre = "Fideos Matarazzo Tirabuzón 500g", Costo = 950m, Precio = 1450m, Stock = 40, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790060023678", Nombre = "Fideos Matarazzo Tallarín 500g", Costo = 950m, Precio = 1450m, Stock = 35, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790060008323", Nombre = "Fideos Don Vicente Espagueti 500g", Costo = 1200m, Precio = 1800m, Stock = 25, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790060002130", Nombre = "Arroz Gallo Oro Largo Fino 1kg", Costo = 1200m, Precio = 1800m, Stock = 45, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790060002123", Nombre = "Arroz Gallo Oro Largo Fino 500g", Costo = 650m, Precio = 980m, Stock = 30, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790070318214", Nombre = "Harina Favorita Leudante 1kg", Costo = 650m, Precio = 950m, Stock = 35, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790070518218", Nombre = "Harina Blancaflor 0000 Leudante 1kg", Costo = 900m, Precio = 1350m, Stock = 30, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790060002444", Nombre = "Harina Pureza 0000 1kg", Costo = 750m, Precio = 1100m, Stock = 50, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790060002451", Nombre = "Harina Pureza con Levadura 1kg", Costo = 850m, Precio = 1250m, Stock = 25, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790040110404", Nombre = "Azúcar Ledesma Clásica 1kg", Costo = 800m, Precio = 1200m, Stock = 70, StockMinimo = 5, Impuesto = 0, Activo = true },
+
+                // 7. Cervezas y Bebidas con Alcohol
+                new Producto { CodigoBarras = "7790895000516", Nombre = "Cerveza Quilmes Clásica Lata 473ml", Costo = 750m, Precio = 1100m, Stock = 150, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790895000523", Nombre = "Cerveza Quilmes Clásica Botella 1L", Costo = 1200m, Precio = 1750m, Stock = 100, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790895000554", Nombre = "Cerveza Quilmes Bajo Cero Lata 473ml", Costo = 750m, Precio = 1100m, Stock = 80, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790895006006", Nombre = "Cerveza Brahma Chopp Lata 473ml", Costo = 720m, Precio = 1050m, Stock = 120, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790895006020", Nombre = "Cerveza Brahma Chopp Botella 1L", Costo = 1150m, Precio = 1680m, Stock = 90, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790895015022", Nombre = "Cerveza Patagonia Amber Lager Lata 473ml", Costo = 1200m, Precio = 1800m, Stock = 60, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790895015046", Nombre = "Cerveza Patagonia Bohemian Pilsener Lata 473ml", Costo = 1200m, Precio = 1800m, Stock = 40, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790093100067", Nombre = "Cerveza Heineken Lata 473ml", Costo = 1100m, Precio = 1600m, Stock = 140, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790093100098", Nombre = "Cerveza Heineken Botella 1L", Costo = 1800m, Precio = 2600m, Stock = 80, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790093100227", Nombre = "Cerveza Imperial Golden Lata 473ml", Costo = 850m, Precio = 1250m, Stock = 70, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790093100241", Nombre = "Cerveza Imperial Stout Lata 473ml", Costo = 850m, Precio = 1250m, Stock = 50, StockMinimo = 5, Impuesto = 0, Activo = true },
+
+                // 8. Conservas y Almacén Seco
+                new Producto { CodigoBarras = "7790111122223", Nombre = "Puré de Tomate Arcor Tetra 520g", Costo = 500m, Precio = 750m, Stock = 85, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790111000305", Nombre = "Mermelada Arcor Durazno 390g", Costo = 950m, Precio = 1400m, Stock = 40, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790111000312", Nombre = "Mermelada Arcor Frutilla 390g", Costo = 950m, Precio = 1400m, Stock = 35, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790040116031", Nombre = "Tomate Pelado Entero Arcor Lata 400g", Costo = 800m, Precio = 1200m, Stock = 30, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790111112026", Nombre = "Arvejas Secas Remojadas Arcor Lata 350g", Costo = 450m, Precio = 680m, Stock = 50, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790111112040", Nombre = "Choclo Amarillo en Granos Arcor Lata 350g", Costo = 720m, Precio = 1080m, Stock = 45, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790520000356", Nombre = "Atún Desmenuzado al Natural La Campagnola 170g", Costo = 1100m, Precio = 1650m, Stock = 30, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790520000363", Nombre = "Atún Desmenuzado en Aceite La Campagnola 170g", Costo = 1100m, Precio = 1650m, Stock = 35, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790520000509", Nombre = "Atún en Lomitos al Natural La Campagnola 170g", Costo = 1600m, Precio = 2400m, Stock = 20, StockMinimo = 5, Impuesto = 0, Activo = true },
+
+                // 9. Infusiones
+                new Producto { CodigoBarras = "7790580000211", Nombre = "Café Molido Cabrales Super Cabrales 250g", Costo = 3400m, Precio = 4900m, Stock = 15, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790580000303", Nombre = "Café Instantáneo La Virginia Clásico 100g", Costo = 1950m, Precio = 2800m, Stock = 20, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790580000327", Nombre = "Café Instantáneo La Virginia Clásico 170g", Costo = 3100m, Precio = 4500m, Stock = 15, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790580000808", Nombre = "Té en Saquitos La Virginia Clásico 50u", Costo = 780m, Precio = 1150m, Stock = 40, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790580000822", Nombre = "Té en Saquitos La Virginia Boldo 25u", Costo = 550m, Precio = 850m, Stock = 30, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790580000846", Nombre = "Té en Saquitos La Virginia Manzanilla 25u", Costo = 550m, Precio = 850m, Stock = 25, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790580000860", Nombre = "Mate Cocido en Saquitos La Virginia 50u", Costo = 750m, Precio = 1100m, Stock = 50, StockMinimo = 5, Impuesto = 0, Activo = true },
+
+                // 10. Panificados y Snacks
+                new Producto { CodigoBarras = "7791770005118", Nombre = "Pan Lactal Blanco Grande 560g", Costo = 1500m, Precio = 2200m, Stock = 30, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7791770005125", Nombre = "Pan Lactal Integral Grande 560g", Costo = 1650m, Precio = 2400m, Stock = 20, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790177000102", Nombre = "Papas Fritas Lays Clásicas 150g", Costo = 1200m, Precio = 1800m, Stock = 50, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790177000126", Nombre = "Papas Fritas Lays Clásicas 85g", Costo = 750m, Precio = 1100m, Stock = 70, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790177001222", Nombre = "Doritos Queso Mega Queso 150g", Costo = 1400m, Precio = 2100m, Stock = 40, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790315000100", Nombre = "Palitos Salados Krachitos 120g", Costo = 600m, Precio = 900m, Stock = 60, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790315000124", Nombre = "Maní Salado Krachitos 150g", Costo = 800m, Precio = 1200m, Stock = 50, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790040114006", Nombre = "Snack Saladix Jamón 80g", Costo = 550m, Precio = 800m, Stock = 90, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790040114020", Nombre = "Snack Saladix Queso 80g", Costo = 550m, Precio = 800m, Stock = 80, StockMinimo = 5, Impuesto = 0, Activo = true },
+
+                // 11. Limpieza y Perfumería
+                new Producto { CodigoBarras = "7790236000571", Nombre = "Detergente Ala Colágeno 750ml", Costo = 1100m, Precio = 1650m, Stock = 30, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790236000557", Nombre = "Detergente Ala Limón 750ml", Costo = 1100m, Precio = 1650m, Stock = 40, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790236001240", Nombre = "Jabón Líquido Ala para Lavarropas 800ml", Costo = 2400m, Precio = 3500m, Stock = 20, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790236001264", Nombre = "Jabón Líquido Ala para Lavarropas 3L", Costo = 6800m, Precio = 9800m, Stock = 15, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7509546074222", Nombre = "Crema Dental Colgate Triple Acción 90g", Costo = 600m, Precio = 900m, Stock = 50, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7509546074246", Nombre = "Crema Dental Colgate Triple Acción 180g", Costo = 1100m, Precio = 1600m, Stock = 30, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790236300404", Nombre = "Desodorante Rexona Aerosol Odorono 150ml", Costo = 950m, Precio = 1400m, Stock = 50, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790236300428", Nombre = "Desodorante Rexona Aerosol Cotton 150ml", Costo = 950m, Precio = 1400m, Stock = 40, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790236300503", Nombre = "Desodorante Axe Aerosol Apollo 150ml", Costo = 1000m, Precio = 1500m, Stock = 45, StockMinimo = 5, Impuesto = 0, Activo = true },
                 new Producto { CodigoBarras = "7790236002131", Nombre = "Jabón de Tocador Lux Suave 3x125g", Costo = 950m, Precio = 1400m, Stock = 40, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790236002155", Nombre = "Jabón de Tocador Lux Orquídea 125g", Costo = 400m, Precio = 600m, Stock = 50, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790236300800", Nombre = "Shampoo Sedal Ceramidas 400ml", Costo = 1200m, Precio = 1800m, Stock = 40, StockMinimo = 5, Impuesto = 0, Activo = true },
+                new Producto { CodigoBarras = "7790236300824", Nombre = "Acondicionador Sedal Ceramidas 400ml", Costo = 1200m, Precio = 1800m, Stock = 35, StockMinimo = 5, Impuesto = 0, Activo = true },
                 new Producto { CodigoBarras = "7791234500029", Nombre = "Rollos de Cocina Elegante 3u", Costo = 850m, Precio = 1300m, Stock = 60, StockMinimo = 5, Impuesto = 0, Activo = true },
-                new Producto { CodigoBarras = "7791234500036", Nombre = "Papel Higiénico Campanita 4 rollos", Costo = 1000m, Precio = 1500m, Stock = 80, StockMinimo = 5, Impuesto = 0, Activo = true }
+                new Producto { CodigoBarras = "7791234500036", Nombre = "Papel Higiénico Campanita 4 rollos x 30m", Costo = 1000m, Precio = 1500m, Stock = 80, StockMinimo = 5, Impuesto = 0, Activo = true }
             };
-        }
-
-        private static List<CombinacionRubro> ObtenerDefinicionRubros()
-        {
-            return new List<CombinacionRubro>
-            {
-                new CombinacionRubro {
-                    Categoria = "Yerba Mate",
-                    Marcas = new[] { "Playadito", "Taragüi", "Amanda", "Cruz de Malta", "La Merced", "Rosamonte", "Mañanita", "Union", "CBSe", "Nobleza Gaucha" },
-                    Subtipos = new[] { "Suave", "Con Palo", "Sin Palo", "Hierbas Serranas", "Despalada", "Orgánica", "Limón", "Menta" },
-                    Tamaños = new[] { "500g", "1kg" },
-                    CostoBase = 1800m,
-                    Margen = 1.40m
-                },
-                new CombinacionRubro {
-                    Categoria = "Fideos Secos",
-                    Marcas = new[] { "Matarazzo", "Lucchetti", "Don Vicente", "Terrabusi", "Canale", "Knorr", "Gallo" },
-                    Subtipos = new[] { "Tallarín", "Tirabuzón", "Codito", "Mostachol", "Moñito", "Espagueti", "Fusilli", "Nidos" },
-                    Tamaños = new[] { "500g" },
-                    CostoBase = 600m,
-                    Margen = 1.50m
-                },
-                new CombinacionRubro {
-                    Categoria = "Gaseosas y Aguas",
-                    Marcas = new[] { "Coca-Cola", "Pepsi", "Manaos", "Secco", "Paso de los Toros", "Sprite", "Fanta", "Villavicencio", "Levité" },
-                    Subtipos = new[] { "Original", "Zero", "Light", "Lima Limón", "Naranja", "Pomelo", "Tónica", "Agua Mineral", "Manzana" },
-                    Tamaños = new[] { "500ml", "1.5L", "2.25L", "3L" },
-                    CostoBase = 1200m,
-                    Margen = 1.35m
-                },
-                new CombinacionRubro {
-                    Categoria = "Galletitas",
-                    Marcas = new[] { "Oreo", "Pepitos", "Bagley", "Criollitas", "Traviata", "Don Satur", "Melba", "Lincoln", "Hogareñas", "Paseo" },
-                    Subtipos = new[] { "Dulces Rellenas", "Saladas de Agua", "Salvado", "Bizcochos de Grasa", "Pepitas de Membrillo", "Miel", "Chocolate", "Surtidas" },
-                    Tamaños = new[] { "100g", "150g", "300g" },
-                    CostoBase = 600m,
-                    Margen = 1.45m
-                },
-                new CombinacionRubro {
-                    Categoria = "Lácteos y Derivados",
-                    Marcas = new[] { "La Serenísima", "Sancor", "Milkaut", "Ilolay", "Tregar", "Casancrem" },
-                    Subtipos = new[] { "Leche Entera sachet", "Leche Descremada sachet", "Dulce de Leche Colonial", "Manteca Clásica", "Queso Crema", "Queso Rallado", "Crema de Leche", "Yogur Frutilla", "Yogur Vainilla" },
-                    Tamaños = new[] { "200g", "400g", "1L", "290g" },
-                    CostoBase = 900m,
-                    Margen = 1.35m
-                },
-                new CombinacionRubro {
-                    Categoria = "Productos de Limpieza",
-                    Marcas = new[] { "Ala", "Ayudín", "Poett", "Cif", "Magistral", "Procacen", "Vanish", "Mr Músculo" },
-                    Subtipos = new[] { "Lavandina Clásica", "Limpiador Piso Pino", "Limpiador Piso Lavanda", "Detergente Limón", "Detergente Manzana", "Antigrasa Cocina", "Desinfectante Aerosol", "Limpiador Vidrios" },
-                    Tamaños = new[] { "500ml", "900ml", "1.5L" },
-                    CostoBase = 1000m,
-                    Margen = 1.40m
-                },
-                new CombinacionRubro {
-                    Categoria = "Perfumería y Cosmética",
-                    Marcas = new[] { "Colgate", "Rexona", "Dove", "Axe", "Lux", "Sedal", "Pantene", "Oral-B" },
-                    Subtipos = new[] { "Crema Dental Triple Acción", "Desodorante Aerosol", "Jabón Tocador Suave", "Shampoo Control Caspa", "Acondicionador Brillo", "Enjuague Bucal Fresh" },
-                    Tamaños = new[] { "90g", "150ml", "3x125g", "400ml" },
-                    CostoBase = 1200m,
-                    Margen = 1.45m
-                },
-                new CombinacionRubro {
-                    Categoria = "Arroz y Cereales",
-                    Marcas = new[] { "Gallo", "Lucchetti", "Molinos", "Apóstoles", "Ala" },
-                    Subtipos = new[] { "Largo Fino", "Doble Carolina", "Integral", "Parboil (no se pasa)", "Carnaroli" },
-                    Tamaños = new[] { "500g", "1kg" },
-                    CostoBase = 800m,
-                    Margen = 1.45m
-                },
-                new CombinacionRubro {
-                    Categoria = "Harinas y Repostería",
-                    Marcas = new[] { "Blancaflor", "Favorita", "Pureza", "Cañuelas", "Chango" },
-                    Subtipos = new[] { "Harina 000", "Harina 0000", "Harina Leudante", "Premezcla Vainilla", "Premezcla Chocolate" },
-                    Tamaños = new[] { "1kg" },
-                    CostoBase = 600m,
-                    Margen = 1.40m
-                },
-                new CombinacionRubro {
-                    Categoria = "Cervezas y Alcohol",
-                    Marcas = new[] { "Quilmes", "Brahma", "Stella Artois", "Patagonia", "Heineken", "Corona", "Schneider", "Imperial" },
-                    Subtipos = new[] { "Rubia Clásica", "Bock Negra", "IPA Andina", "Red Lager", "Lager Premium" },
-                    Tamaños = new[] { "473ml (Lata)", "1L (Botella)", "730ml" },
-                    CostoBase = 800m,
-                    Margen = 1.35m
-                },
-                new CombinacionRubro {
-                    Categoria = "Conservas y Almacén",
-                    Marcas = new[] { "Arcor", "La Campagnola", "Gomes da Costa", "Cica", "Noel", "Canale" },
-                    Subtipos = new[] { "Puré de Tomates", "Tomates Pelados Enteros", "Choclo en Granos", "Arvejas Secas", "Lentejas Remojadas", "Atún al Natural", "Atún en Aceite" },
-                    Tamaños = new[] { "340g", "520g", "170g" },
-                    CostoBase = 700m,
-                    Margen = 1.45m
-                },
-                new CombinacionRubro {
-                    Categoria = "Café, Té e Infusiones",
-                    Marcas = new[] { "Cabrales", "La Virginia", "Nescafé", "Taragüi", "Green Hills", "Cruz de Malta" },
-                    Subtipos = new[] { "Café Instantáneo", "Café Molido Filtro", "Té Común Saquitos", "Té Boldo", "Té Manzanilla", "Mate Cocido Saquitos" },
-                    Tamaños = new[] { "100g", "250g", "50 saquitos" },
-                    CostoBase = 1500m,
-                    Margen = 1.40m
-                },
-                new CombinacionRubro {
-                    Categoria = "Panificados y Snacks",
-                    Marcas = new[] { "Fargo", "Bimbo", "Lays", "Doritos", "Krachitos", "Saladix" },
-                    Subtipos = new[] { "Pan Lactal Blanco", "Pan Lactal Integral", "Papas Fritas Clásicas", "Chizitos Queso", "Maní Salado", "Papas Acanaladas" },
-                    Tamaños = new[] { "100g", "350g", "500g" },
-                    CostoBase = 700m,
-                    Margen = 1.50m
-                },
-                new CombinacionRubro {
-                    Categoria = "Aceites y Vinagres",
-                    Marcas = new[] { "Natura", "Cocinero", "Cañuelas", "Menoyo", "Lira" },
-                    Subtipos = new[] { "Aceite Mezcla", "Aceite Girasol", "Aceite de Oliva", "Vinagre de Alcohol", "Vinagre de Manzana", "Aceto Balsámico" },
-                    Tamaños = new[] { "500ml", "900ml", "1.5L" },
-                    CostoBase = 1100m,
-                    Margen = 1.40m
-                },
-                new CombinacionRubro {
-                    Categoria = "Condimentos y Caldos",
-                    Marcas = new[] { "Dos Anclas", "Celusal", "Knorr", "Alicante" },
-                    Subtipos = new[] { "Sal Fina Mesa", "Sal Gruesa Parrillera", "Caldo Gallina Cubos", "Caldo Verdura Cubos", "Orégano Molido", "Provenzal Mezcla", "Pimentón Dulce" },
-                    Tamaños = new[] { "250g", "500g", "12u", "25g" },
-                    CostoBase = 500m,
-                    Margen = 1.50m
-                }
-            };
-        }
-
-        private class CombinacionRubro
-        {
-            public string Categoria { get; set; } = default!;
-            public string[] Marcas { get; set; } = default!;
-            public string[] Subtipos { get; set; } = default!;
-            public string[] Tamaños { get; set; } = default!;
-            public decimal CostoBase { get; set; }
-            public decimal Margen { get; set; }
         }
     }
 }
