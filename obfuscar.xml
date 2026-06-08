@@ -15,5 +15,8 @@
   <Var name="SuppressIldasm" value="true" />
   
   <!-- Ensamblado principal a ofuscar -->
-  <Module file="$(InPath)\AlmacenDesktop.dll" />
+  <Module file="$(InPath)\AlmacenDesktop.dll">
+    <SkipNamespace name="AlmacenDesktop.Modelos" />
+    <SkipNamespace name="AlmacenDesktop.Data" />
+  </Module>
 </Obfuscator>
