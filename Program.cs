@@ -208,10 +208,23 @@ namespace AlmacenDesktop
                     context.SaveChanges();
                 }
 
-                // Carga previa automática de productos de almacén (+110 productos reales) si está vacío
-                if (!context.Productos.Any())
+                // Ya no se precargan productos de ejemplo (no eran reales) — el catálogo
+                // se puebla solo con lo que carga el propio usuario o con lo que llega del
+                // catálogo compartido en segundo plano (CatalogoCompartidoService). Sí
+                // aseguramos un proveedor genérico para que la pantalla de Productos no
+                // quede bloqueada (el campo Proveedor es obligatorio) en una instalación
+                // recién creada que todavía no cargó ni sincronizó nada.
+                if (!context.Proveedores.Any())
                 {
-                    AlmacenSeedData.SembrarProductos(context);
+                    context.Proveedores.Add(new Proveedor
+                    {
+                        Nombre = "PROVEEDOR GENERAL",
+                        Cuit = "30-00000000-0",
+                        Direccion = "-",
+                        Telefono = "-",
+                        Contacto = "-",
+                    });
+                    context.SaveChanges();
                 }
             }
         }
