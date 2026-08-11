@@ -12,6 +12,7 @@ namespace AlmacenDesktop.Forms
 
         private void InitializeComponent()
         {
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             System.Windows.Forms.DataGridViewCellStyle cellStyleHeader = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle cellStyleRow = new System.Windows.Forms.DataGridViewCellStyle();
 

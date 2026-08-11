@@ -84,7 +84,7 @@ namespace AlmacenDesktop.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error de conexión: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error de conexión: {ExceptionHelper.ObtenerMensaje(ex)}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

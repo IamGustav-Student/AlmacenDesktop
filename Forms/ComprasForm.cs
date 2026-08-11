@@ -1,5 +1,6 @@
 using AlmacenDesktop.Data;
 using AlmacenDesktop.Modelos;
+using AlmacenDesktop.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -290,7 +291,7 @@ namespace AlmacenDesktop.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error: " + ex.Message);
+                MessageBox.Show("Error: " + ExceptionHelper.ObtenerMensaje(ex));
             }
         }
 
@@ -344,6 +345,7 @@ namespace AlmacenDesktop.Forms
 
         private void InitializeComponent()
         {
+            this.AutoScaleMode = AutoScaleMode.None;
             this.Size = new Size(840, 660);
             this.Text = "Ingreso de Mercadería (Compras)";
             this.StartPosition = FormStartPosition.CenterScreen;

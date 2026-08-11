@@ -1,6 +1,7 @@
 ﻿using AlmacenDesktop.Data;
 using AlmacenDesktop.Modelos;
 using AlmacenDesktop.Services;
+using AlmacenDesktop.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -156,7 +157,7 @@ namespace AlmacenDesktop.Forms
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error al intentar imprimir: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Error al intentar imprimir: " + ExceptionHelper.ObtenerMensaje(ex), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }

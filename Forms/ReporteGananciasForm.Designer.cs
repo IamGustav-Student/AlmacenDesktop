@@ -12,6 +12,7 @@
 
         private void InitializeComponent()
         {
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             lblTitulo = new Label();
             dtpDesde = new DateTimePicker();
             dtpHasta = new DateTimePicker();

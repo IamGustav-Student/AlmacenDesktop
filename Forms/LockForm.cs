@@ -60,7 +60,7 @@ namespace AlmacenDesktop.Forms
             catch (Exception ex)
             {
                 AudioHelper.PlayError();
-                MessageBox.Show($"Error de conexión: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error de conexión: {ExceptionHelper.ObtenerMensaje(ex)}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -82,7 +82,7 @@ namespace AlmacenDesktop.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show("No se pudo abrir el navegador: " + ex.Message);
+                MessageBox.Show("No se pudo abrir el navegador: " + ExceptionHelper.ObtenerMensaje(ex));
             }
         }
 

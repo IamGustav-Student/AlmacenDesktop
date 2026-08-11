@@ -43,7 +43,7 @@ namespace AlmacenDesktop.Forms
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Error QR: " + ex.Message);
+                System.Diagnostics.Debug.WriteLine("Error QR: " + ExceptionHelper.ObtenerMensaje(ex));
                 lblEstado.Text = "Fallo al generar QR";
                 lblEstado.ForeColor = Color.Red;
             }

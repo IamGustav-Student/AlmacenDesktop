@@ -12,6 +12,7 @@ namespace AlmacenDesktop.Forms
 
         private void InitializeComponent()
         {
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             panelGrid = new Panel();
             dgvClientes = new DataGridView();
             txtBuscar = new TextBox();
@@ -45,7 +46,7 @@ namespace AlmacenDesktop.Forms
             panelGrid.Dock = DockStyle.Right;
             panelGrid.Location = new Point(320, 0);
             panelGrid.Name = "panelGrid";
-            panelGrid.Size = new Size(580, 500);
+            panelGrid.Size = new Size(580, 540);
             panelGrid.TabIndex = 1;
             //
             // txtBuscar
@@ -72,7 +73,7 @@ namespace AlmacenDesktop.Forms
             dgvClientes.Name = "dgvClientes";
             dgvClientes.ReadOnly = true;
             dgvClientes.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvClientes.Size = new Size(580, 470);
+            dgvClientes.Size = new Size(580, 510);
             dgvClientes.TabIndex = 1;
             dgvClientes.SelectionChanged += dgvClientes_SelectionChanged;
             //
@@ -99,12 +100,12 @@ namespace AlmacenDesktop.Forms
             panelFormulario.Dock = DockStyle.Left;
             panelFormulario.Location = new Point(0, 0);
             panelFormulario.Name = "panelFormulario";
-            panelFormulario.Size = new Size(320, 500);
+            panelFormulario.Size = new Size(320, 540);
             panelFormulario.TabIndex = 0;
             // 
             // btnLimpiar
             // 
-            btnLimpiar.Location = new Point(15, 450);
+            btnLimpiar.Location = new Point(15, 490);
             btnLimpiar.Name = "btnLimpiar";
             btnLimpiar.Size = new Size(290, 30);
             btnLimpiar.TabIndex = 0;
@@ -116,7 +117,7 @@ namespace AlmacenDesktop.Forms
             this.btnVerCtaCte.BackColor = Color.FromArgb(0, 122, 204);
             this.btnVerCtaCte.FlatStyle = FlatStyle.Flat;
             this.btnVerCtaCte.ForeColor = Color.White;
-            this.btnVerCtaCte.Location = new Point(15, 30);
+            this.btnVerCtaCte.Location = new Point(15, 50);
             this.btnVerCtaCte.Name = "btnVerCtaCte";
             this.btnVerCtaCte.Size = new Size(290, 35);
             this.btnVerCtaCte.TabIndex = 16;
@@ -129,7 +130,7 @@ namespace AlmacenDesktop.Forms
             btnEliminar.BackColor = Color.Firebrick;
             btnEliminar.FlatStyle = FlatStyle.Flat;
             btnEliminar.ForeColor = Color.White;
-            btnEliminar.Location = new Point(15, 400);
+            btnEliminar.Location = new Point(15, 440);
             btnEliminar.Name = "btnEliminar";
             btnEliminar.Size = new Size(290, 40);
             btnEliminar.TabIndex = 1;
@@ -142,7 +143,7 @@ namespace AlmacenDesktop.Forms
             btnGuardar.BackColor = Color.ForestGreen;
             btnGuardar.FlatStyle = FlatStyle.Flat;
             btnGuardar.ForeColor = Color.White;
-            btnGuardar.Location = new Point(15, 350);
+            btnGuardar.Location = new Point(15, 390);
             btnGuardar.Name = "btnGuardar";
             btnGuardar.Size = new Size(290, 40);
             btnGuardar.TabIndex = 2;
@@ -152,7 +153,7 @@ namespace AlmacenDesktop.Forms
             // 
             // txtDireccion
             // 
-            txtDireccion.Location = new Point(15, 300);
+            txtDireccion.Location = new Point(15, 340);
             txtDireccion.Name = "txtDireccion";
             txtDireccion.Size = new Size(290, 23);
             txtDireccion.TabIndex = 3;
@@ -160,7 +161,7 @@ namespace AlmacenDesktop.Forms
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new Point(15, 280);
+            label6.Location = new Point(15, 320);
             label6.Name = "label6";
             label6.Size = new Size(60, 15);
             label6.TabIndex = 4;
@@ -168,7 +169,7 @@ namespace AlmacenDesktop.Forms
             // 
             // txtTelefono
             // 
-            txtTelefono.Location = new Point(15, 245);
+            txtTelefono.Location = new Point(15, 285);
             txtTelefono.Name = "txtTelefono";
             txtTelefono.Size = new Size(290, 23);
             txtTelefono.TabIndex = 5;
@@ -176,7 +177,7 @@ namespace AlmacenDesktop.Forms
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(15, 225);
+            label5.Location = new Point(15, 265);
             label5.Name = "label5";
             label5.Size = new Size(56, 15);
             label5.TabIndex = 6;
@@ -184,7 +185,7 @@ namespace AlmacenDesktop.Forms
             // 
             // txtEmail
             // 
-            txtEmail.Location = new Point(15, 190);
+            txtEmail.Location = new Point(15, 230);
             txtEmail.Name = "txtEmail";
             txtEmail.Size = new Size(290, 23);
             txtEmail.TabIndex = 7;
@@ -192,7 +193,7 @@ namespace AlmacenDesktop.Forms
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(15, 170);
+            label4.Location = new Point(15, 210);
             label4.Name = "label4";
             label4.Size = new Size(39, 15);
             label4.TabIndex = 8;
@@ -200,7 +201,7 @@ namespace AlmacenDesktop.Forms
             // 
             // txtDni
             // 
-            txtDni.Location = new Point(15, 135);
+            txtDni.Location = new Point(15, 175);
             txtDni.MaxLength = 11;
             txtDni.Name = "txtDni";
             txtDni.Size = new Size(290, 23);
@@ -209,7 +210,7 @@ namespace AlmacenDesktop.Forms
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(15, 115);
+            label3.Location = new Point(15, 155);
             label3.Name = "label3";
             label3.Size = new Size(67, 15);
             label3.TabIndex = 10;
@@ -217,7 +218,7 @@ namespace AlmacenDesktop.Forms
             // 
             // txtApellido
             // 
-            txtApellido.Location = new Point(165, 80);
+            txtApellido.Location = new Point(165, 120);
             txtApellido.Name = "txtApellido";
             txtApellido.Size = new Size(140, 23);
             txtApellido.TabIndex = 11;
@@ -225,7 +226,7 @@ namespace AlmacenDesktop.Forms
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(165, 60);
+            label2.Location = new Point(165, 100);
             label2.Name = "label2";
             label2.Size = new Size(54, 15);
             label2.TabIndex = 12;
@@ -233,7 +234,7 @@ namespace AlmacenDesktop.Forms
             // 
             // txtNombre
             // 
-            txtNombre.Location = new Point(15, 80);
+            txtNombre.Location = new Point(15, 120);
             txtNombre.Name = "txtNombre";
             txtNombre.Size = new Size(140, 23);
             txtNombre.TabIndex = 13;
@@ -241,7 +242,7 @@ namespace AlmacenDesktop.Forms
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(15, 60);
+            label1.Location = new Point(15, 100);
             label1.Name = "label1";
             label1.Size = new Size(54, 15);
             label1.TabIndex = 14;
@@ -259,7 +260,7 @@ namespace AlmacenDesktop.Forms
             // 
             // ClientesForm
             // 
-            ClientSize = new Size(900, 500);
+            ClientSize = new Size(900, 540);
             Controls.Add(panelGrid);
             Controls.Add(panelFormulario);
             Name = "ClientesForm";

@@ -83,7 +83,7 @@ namespace AlmacenDesktop.Forms
                     catch (Exception ex)
                     {
                         AudioHelper.PlayError();
-                        MessageBox.Show("Fallo al generar claves criptográficas: " + ex.Message, "Error Cripto", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Fallo al generar claves criptográficas: " + ExceptionHelper.ObtenerMensaje(ex), "Error Cripto", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     finally
                     {
@@ -205,7 +205,7 @@ namespace AlmacenDesktop.Forms
                     catch (Exception ex)
                     {
                         AudioHelper.PlayError();
-                        MessageBox.Show("Fallo al integrar certificado con clave privada: " + ex.Message, "Error Integración", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Fallo al integrar certificado con clave privada: " + ExceptionHelper.ObtenerMensaje(ex), "Error Integración", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     finally
                     {

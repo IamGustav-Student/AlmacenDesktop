@@ -63,7 +63,7 @@ namespace AlmacenDesktop.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al cargar usuarios: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error al cargar usuarios: " + ExceptionHelper.ObtenerMensaje(ex), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -212,7 +212,7 @@ namespace AlmacenDesktop.Forms
             catch (Exception ex)
             {
                 AudioHelper.PlayError();
-                MessageBox.Show("Error al eliminar: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error al eliminar: " + ExceptionHelper.ObtenerMensaje(ex), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -272,7 +272,7 @@ namespace AlmacenDesktop.Forms
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine("Error de Selección: " + ex.Message);
+                    System.Diagnostics.Debug.WriteLine("Error de Selección: " + ExceptionHelper.ObtenerMensaje(ex));
                 }
             }
         }

@@ -129,7 +129,7 @@ namespace AlmacenDesktop.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error cargando productos: " + ex.Message);
+                MessageBox.Show("Error cargando productos: " + ExceptionHelper.ObtenerMensaje(ex));
             }
         }
 
@@ -251,7 +251,7 @@ namespace AlmacenDesktop.Forms
             catch (Exception ex)
             {
                 AudioHelper.PlayError();
-                MessageBox.Show(ex.Message, "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(ExceptionHelper.ObtenerMensaje(ex), "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -308,7 +308,7 @@ namespace AlmacenDesktop.Forms
                 catch (Exception ex)
                 {
                     AudioHelper.PlayError();
-                    MessageBox.Show("Error al eliminar: " + ex.Message);
+                    MessageBox.Show("Error al eliminar: " + ExceptionHelper.ObtenerMensaje(ex));
                 }
             }
         }

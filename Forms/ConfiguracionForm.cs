@@ -51,7 +51,7 @@ namespace AlmacenDesktop.Forms
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Error al listar impresoras: " + ex.Message);
+                System.Diagnostics.Debug.WriteLine("Error al listar impresoras: " + ExceptionHelper.ObtenerMensaje(ex));
             }
 
             if (cboImpresoras.Items.Count == 0) cboImpresoras.Items.Add("Microsoft Print to PDF");
@@ -82,7 +82,7 @@ namespace AlmacenDesktop.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al cargar datos: " + ex.Message);
+                MessageBox.Show("Error al cargar datos: " + ExceptionHelper.ObtenerMensaje(ex));
             }
         }
 
@@ -118,7 +118,7 @@ namespace AlmacenDesktop.Forms
             catch (Exception ex)
             {
                 AudioHelper.PlayError();
-                MessageBox.Show("Error al guardar: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error al guardar: " + ExceptionHelper.ObtenerMensaje(ex), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -138,7 +138,7 @@ namespace AlmacenDesktop.Forms
                     catch (Exception ex)
                     {
                         AudioHelper.PlayError();
-                        MessageBox.Show(ex.Message, "Error Backup", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(ExceptionHelper.ObtenerMensaje(ex), "Error Backup", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }

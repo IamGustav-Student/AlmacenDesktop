@@ -91,7 +91,7 @@ namespace AlmacenDesktop.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al verificar estado: " + ex.Message);
+                MessageBox.Show("Error al verificar estado: " + ExceptionHelper.ObtenerMensaje(ex));
             }
         }
 
@@ -157,7 +157,7 @@ namespace AlmacenDesktop.Forms
             catch (Exception ex)
             {
                 AudioHelper.PlayError();
-                MessageBox.Show("Error al abrir: " + ex.Message);
+                MessageBox.Show("Error al abrir: " + ExceptionHelper.ObtenerMensaje(ex));
             }
         }
 
@@ -204,7 +204,7 @@ namespace AlmacenDesktop.Forms
                     }
                     catch (Exception exBackup)
                     {
-                        MessageBox.Show("Caja cerrada, pero falló el backup: " + exBackup.Message);
+                        MessageBox.Show("Caja cerrada, pero falló el backup: " + ExceptionHelper.ObtenerMensaje(exBackup));
                     }
 
                     // 2. IMPRESIÓN TICKET Z
@@ -232,7 +232,7 @@ namespace AlmacenDesktop.Forms
             catch (Exception ex)
             {
                 AudioHelper.PlayError();
-                MessageBox.Show("Error crítico al cerrar: " + ex.Message);
+                MessageBox.Show("Error crítico al cerrar: " + ExceptionHelper.ObtenerMensaje(ex));
             }
         }
 

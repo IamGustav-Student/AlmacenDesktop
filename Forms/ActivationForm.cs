@@ -56,7 +56,7 @@ namespace AlmacenDesktop.Forms
             catch (Exception ex)
             {
                 AudioHelper.PlayError();
-                MessageBox.Show($"Ocurrió un error inesperado al conectar al servidor: {ex.Message}", "Error de Conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Ocurrió un error inesperado al conectar al servidor: {ExceptionHelper.ObtenerMensaje(ex)}", "Error de Conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -79,7 +79,7 @@ namespace AlmacenDesktop.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show("No se pudo abrir el navegador: " + ex.Message);
+                MessageBox.Show("No se pudo abrir el navegador: " + ExceptionHelper.ObtenerMensaje(ex));
             }
         }
 

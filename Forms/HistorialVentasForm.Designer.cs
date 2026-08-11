@@ -12,6 +12,7 @@
 
         private void InitializeComponent()
         {
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             panelFiltros = new Panel();
             btnBuscar = new Button();
             dtpHasta = new DateTimePicker();

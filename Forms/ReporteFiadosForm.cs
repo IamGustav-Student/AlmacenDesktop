@@ -1,5 +1,6 @@
 ﻿using AlmacenDesktop.Data;
 using AlmacenDesktop.Modelos; // Usamos el modelo unificado
+using AlmacenDesktop.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -177,7 +178,7 @@ namespace AlmacenDesktop.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al guardar: " + ex.Message);
+                MessageBox.Show("Error al guardar: " + ExceptionHelper.ObtenerMensaje(ex));
             }
         }
     }

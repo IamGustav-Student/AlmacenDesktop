@@ -40,7 +40,7 @@ namespace AlmacenDesktop.Forms
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Error: " + ex.Message);
+                        MessageBox.Show("Error: " + ExceptionHelper.ObtenerMensaje(ex));
                     }
                 }
             }
@@ -80,7 +80,7 @@ namespace AlmacenDesktop.Forms
             catch (Exception ex)
             {
                 AudioHelper.PlayError();
-                MessageBox.Show("Error crítico en importación: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error crítico en importación: " + ExceptionHelper.ObtenerMensaje(ex), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {

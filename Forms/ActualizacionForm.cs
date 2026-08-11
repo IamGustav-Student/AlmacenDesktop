@@ -1,4 +1,5 @@
 using AlmacenDesktop.Services;
+using AlmacenDesktop.Helpers;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -56,7 +57,7 @@ namespace AlmacenDesktop.Forms
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"No se pudo completar la actualización:\n{ex.Message}\n\nPodés reintentar más tarde.",
+                    $"No se pudo completar la actualización:\n{ExceptionHelper.ObtenerMensaje(ex)}\n\nPodés reintentar más tarde.",
                     "Error de actualización", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 btnActualizar.Enabled = true;
                 btnMasTarde.Enabled = true;

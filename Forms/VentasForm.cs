@@ -352,7 +352,7 @@ namespace AlmacenDesktop.Forms
                     catch (Exception exAfip)
                     {
                         AudioHelper.PlayError();
-                        MessageBox.Show($"Error de conexión AFIP. Se guardó como X.\n{exAfip.Message}", "Offline", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        MessageBox.Show($"Error de conexión AFIP. Se guardó como X.\n{ExceptionHelper.ObtenerMensaje(exAfip)}", "Offline", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
                 }
                 else
@@ -370,7 +370,7 @@ namespace AlmacenDesktop.Forms
             catch (Exception ex)
             {
                 AudioHelper.PlayError();
-                MessageBox.Show($"Error al finalizar venta: {ex.Message}", "Error Crítico", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error al finalizar venta: {ExceptionHelper.ObtenerMensaje(ex)}", "Error Crítico", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -416,7 +416,7 @@ namespace AlmacenDesktop.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error impresión: " + ex.Message);
+                MessageBox.Show("Error impresión: " + ExceptionHelper.ObtenerMensaje(ex));
             }
         }
 

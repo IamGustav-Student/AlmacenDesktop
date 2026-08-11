@@ -67,7 +67,7 @@ namespace AlmacenDesktop.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al leer configuración: " + ex.Message);
+                MessageBox.Show("Error al leer configuración: " + ExceptionHelper.ObtenerMensaje(ex));
             }
         }
 
@@ -133,7 +133,7 @@ namespace AlmacenDesktop.Forms
             catch (Exception ex)
             {
                 AudioHelper.PlayError();
-                MessageBox.Show("Error al guardar: " + ex.Message, "Error BD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error al guardar: " + ExceptionHelper.ObtenerMensaje(ex), "Error BD", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -159,7 +159,7 @@ namespace AlmacenDesktop.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show("La contraseña es incorrecta para este certificado.\n" + ex.Message, "Error Clave", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("La contraseña es incorrecta para este certificado.\n" + ExceptionHelper.ObtenerMensaje(ex), "Error Clave", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -197,7 +197,7 @@ namespace AlmacenDesktop.Forms
                 AudioHelper.PlayError();
                 lblEstado.Text = "Fallo Conexión";
                 lblEstado.ForeColor = Color.Red;
-                MessageBox.Show("Error conectando a AFIP:\n" + ex.Message, "Fallo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error conectando a AFIP:\n" + ExceptionHelper.ObtenerMensaje(ex), "Fallo", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {

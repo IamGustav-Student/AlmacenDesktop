@@ -1,5 +1,6 @@
 ﻿using AlmacenDesktop.Data;
 using AlmacenDesktop.Modelos;
+using AlmacenDesktop.Helpers;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -57,7 +58,7 @@ namespace AlmacenDesktop.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error: {ex.Message}");
+                MessageBox.Show($"Error: {ExceptionHelper.ObtenerMensaje(ex)}");
             }
         }
 
@@ -98,6 +99,7 @@ namespace AlmacenDesktop.Forms
             this.SuspendLayout();
 
             // Configuración UI
+            this.AutoScaleMode = AutoScaleMode.None;
             this.Text = "Registrar Movimiento";
             this.Size = new Size(350, 350);
             this.StartPosition = FormStartPosition.CenterParent;

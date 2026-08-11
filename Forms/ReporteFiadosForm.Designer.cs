@@ -12,6 +12,7 @@
 
         private void InitializeComponent()
         {
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.panelIzq = new System.Windows.Forms.Panel();
             this.btnRegistrarPago = new System.Windows.Forms.Button();
             this.lblSaldo = new System.Windows.Forms.Label();

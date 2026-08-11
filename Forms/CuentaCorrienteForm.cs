@@ -175,7 +175,7 @@ namespace AlmacenDesktop.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show("No se pudo cargar el detalle: " + ex.Message);
+                MessageBox.Show("No se pudo cargar el detalle: " + ExceptionHelper.ObtenerMensaje(ex));
             }
         }
 
@@ -230,7 +230,7 @@ namespace AlmacenDesktop.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error: {ex.Message}");
+                MessageBox.Show($"Error: {ExceptionHelper.ObtenerMensaje(ex)}");
             }
         }
 

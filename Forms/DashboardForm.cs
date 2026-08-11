@@ -196,7 +196,7 @@ namespace AlmacenDesktop.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error cargando métricas: " + ex.Message);
+                MessageBox.Show("Error cargando métricas: " + ExceptionHelper.ObtenerMensaje(ex));
             }
             finally
             {

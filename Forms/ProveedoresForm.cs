@@ -173,6 +173,7 @@ namespace AlmacenDesktop.Forms
 
         private void InitializeComponent()
         {
+            this.AutoScaleMode = AutoScaleMode.None;
             this.Size = new Size(800, 500);
             this.Text = "Gestión de Proveedores";
             this.StartPosition = FormStartPosition.CenterScreen;

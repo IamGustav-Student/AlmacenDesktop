@@ -77,6 +77,7 @@ namespace AlmacenDesktop.Forms
             this.dgvCajas = new DataGridView();
             this.btnReimprimir = new Button();
 
+            this.AutoScaleMode = AutoScaleMode.None;
             this.ClientSize = new Size(800, 500);
             this.Text = "Historial de Cierres de Caja";
             this.StartPosition = FormStartPosition.CenterScreen;
