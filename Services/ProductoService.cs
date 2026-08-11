@@ -34,14 +34,19 @@ namespace AlmacenDesktop.Services
 
         public List<Producto> Buscar(string termino)
         {
+            // EF Core traduce string.Contains() a instr() en SQLite, que es sensible a
+            // mayúsculas/minúsculas (a diferencia de LIKE) — sin normalizar, buscar
+            // "coca" no encontraba "Coca Cola". Se normalizan ambos lados a minúscula.
+            string terminoLower = termino.ToLower();
+
             using (var context = new AlmacenDbContext())
             {
                 return context.Productos
                     .Include(p => p.Proveedor)
                     .Where(p => p.Activo &&
-                               (p.Nombre.Contains(termino) ||
-                                p.CodigoBarras.Contains(termino) ||
-                                p.Proveedor.Nombre.Contains(termino)))
+                               (p.Nombre.ToLower().Contains(terminoLower) ||
+                                p.CodigoBarras.ToLower().Contains(terminoLower) ||
+                                p.Proveedor.Nombre.ToLower().Contains(terminoLower)))
                     .OrderBy(p => p.Nombre)
                     .ToList();
             }

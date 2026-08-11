@@ -38,9 +38,20 @@ namespace AlmacenDesktop.Forms
         private void CargarImpresoras()
         {
             cboImpresoras.Items.Clear();
-            foreach (string printer in PrinterSettings.InstalledPrinters)
+            try
             {
-                cboImpresoras.Items.Add(printer);
+                // PrinterSettings.InstalledPrinters depende del servicio de cola de
+                // impresión de Windows (Spooler) vía RPC — si ese servicio está
+                // detenido o roto en esta PC, tira "El servidor RPC no está
+                // disponible" y no debe tumbar toda la pantalla de Configuración.
+                foreach (string printer in PrinterSettings.InstalledPrinters)
+                {
+                    cboImpresoras.Items.Add(printer);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error al listar impresoras: " + ex.Message);
             }
 
             if (cboImpresoras.Items.Count == 0) cboImpresoras.Items.Add("Microsoft Print to PDF");
