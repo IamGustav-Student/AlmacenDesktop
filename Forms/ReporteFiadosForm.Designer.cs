@@ -40,12 +40,14 @@
             this.panelIzq.Size = new System.Drawing.Size(300, 500);
             this.panelIzq.TabIndex = 0;
 
-            // Selector Cliente
+            // Selector Cliente (búsqueda en vivo por nombre, letra por letra)
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(20, 30);
-            this.label1.Text = "Seleccione Cliente:";
+            this.label1.Text = "🔍 Buscar Cliente:";
 
-            this.cboClientes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboClientes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDown;
+            this.cboClientes.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.cboClientes.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.cboClientes.FormattingEnabled = true;
             this.cboClientes.Location = new System.Drawing.Point(20, 50);
             this.cboClientes.Name = "cboClientes";

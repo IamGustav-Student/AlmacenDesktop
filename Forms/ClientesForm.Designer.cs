@@ -12,7 +12,9 @@ namespace AlmacenDesktop.Forms
 
         private void InitializeComponent()
         {
+            panelGrid = new Panel();
             dgvClientes = new DataGridView();
+            txtBuscar = new TextBox();
             panelFormulario = new Panel();
             btnLimpiar = new Button();
             btnVerCtaCte = new Button();
@@ -32,26 +34,48 @@ namespace AlmacenDesktop.Forms
             label1 = new Label();
             lblTitulo = new Label();
             ((System.ComponentModel.ISupportInitialize)dgvClientes).BeginInit();
+            panelGrid.SuspendLayout();
             panelFormulario.SuspendLayout();
             SuspendLayout();
-            // 
+            //
+            // panelGrid
+            //
+            panelGrid.Controls.Add(dgvClientes);
+            panelGrid.Controls.Add(txtBuscar);
+            panelGrid.Dock = DockStyle.Right;
+            panelGrid.Location = new Point(320, 0);
+            panelGrid.Name = "panelGrid";
+            panelGrid.Size = new Size(580, 500);
+            panelGrid.TabIndex = 1;
+            //
+            // txtBuscar
+            //
+            txtBuscar.Anchor = ((AnchorStyles)((AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right)));
+            txtBuscar.Font = new Font("Segoe UI", 10F);
+            txtBuscar.Location = new Point(0, 0);
+            txtBuscar.Name = "txtBuscar";
+            txtBuscar.PlaceholderText = "🔍 Buscar por nombre, apellido o DNI...";
+            txtBuscar.Size = new Size(580, 25);
+            txtBuscar.TabIndex = 0;
+            txtBuscar.TextChanged += txtBuscar_TextChanged;
+            //
             // dgvClientes
-            // 
+            //
+            dgvClientes.Anchor = ((AnchorStyles)((((AnchorStyles.Top | AnchorStyles.Bottom) | AnchorStyles.Left) | AnchorStyles.Right)));
             dgvClientes.AllowUserToAddRows = false;
             dgvClientes.AllowUserToDeleteRows = false;
             dgvClientes.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvClientes.BackgroundColor = Color.White;
             dgvClientes.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvClientes.Dock = DockStyle.Right;
-            dgvClientes.Location = new Point(320, 0);
+            dgvClientes.Location = new Point(0, 30);
             dgvClientes.MultiSelect = false;
             dgvClientes.Name = "dgvClientes";
             dgvClientes.ReadOnly = true;
             dgvClientes.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvClientes.Size = new Size(580, 500);
+            dgvClientes.Size = new Size(580, 470);
             dgvClientes.TabIndex = 1;
             dgvClientes.SelectionChanged += dgvClientes_SelectionChanged;
-            // 
+            //
             // panelFormulario
             // 
             panelFormulario.BackColor = Color.WhiteSmoke;
@@ -236,18 +260,22 @@ namespace AlmacenDesktop.Forms
             // ClientesForm
             // 
             ClientSize = new Size(900, 500);
-            Controls.Add(dgvClientes);
+            Controls.Add(panelGrid);
             Controls.Add(panelFormulario);
             Name = "ClientesForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Administración de Clientes";
             Load += ClientesForm_Load;
             ((System.ComponentModel.ISupportInitialize)dgvClientes).EndInit();
+            panelGrid.ResumeLayout(false);
+            panelGrid.PerformLayout();
             panelFormulario.ResumeLayout(false);
             panelFormulario.PerformLayout();
             ResumeLayout(false);
         }
 
+        private System.Windows.Forms.Panel panelGrid;
+        private System.Windows.Forms.TextBox txtBuscar;
         private System.Windows.Forms.DataGridView dgvClientes;
         private System.Windows.Forms.Panel panelFormulario;
         private System.Windows.Forms.Label lblTitulo;

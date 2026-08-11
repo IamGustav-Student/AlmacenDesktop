@@ -1,6 +1,7 @@
 using AlmacenDesktop.Modelos;
 using AlmacenDesktop.Services; // Para BackupService si lo llamas manualmente
 using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing;
 
@@ -50,6 +51,29 @@ namespace AlmacenDesktop.Forms
 
                 grpGuia.Controls.Add(lblInstrucciones);
                 this.Controls.Add(grpGuia);
+            }
+
+            // Chequeo de actualizaciones en segundo plano — no bloquea la apertura del menú.
+            _ = ChequearActualizacionesAsync();
+        }
+
+        private async Task ChequearActualizacionesAsync()
+        {
+            try
+            {
+                var updateService = new UpdateService();
+                var info = await updateService.BuscarActualizacionAsync();
+                if (info != null && !this.IsDisposed)
+                {
+                    using (var dlg = new ActualizacionForm(info))
+                    {
+                        dlg.ShowDialog(this);
+                    }
+                }
+            }
+            catch
+            {
+                // Falla silenciosa — sin conexión, GitHub caído, etc. No molesta al usuario.
             }
         }
 

@@ -37,6 +37,7 @@ namespace AlmacenDesktop.Forms
             // No interferir si el usuario está escribiendo en campos manuales
             if (this.ActiveControl == numCantidad ||
                 this.ActiveControl == numCosto ||
+                this.ActiveControl == cboProductos ||
                 cboProveedores.DroppedDown ||
                 cboProductos.DroppedDown)
             {
@@ -369,9 +370,16 @@ namespace AlmacenDesktop.Forms
             lblProv = new Label { Text = "Proveedor:", Location = new Point(20, 75), AutoSize = true };
             cboProveedores = new ComboBox { Location = new Point(20, 95), Width = 300, DropDownStyle = ComboBoxStyle.DropDownList };
 
-            // ── PRODUCTO ─────────────────────────────────────────────────────────
-            lblProd = new Label { Text = "Producto:", Location = new Point(20, 135), AutoSize = true };
-            cboProductos = new ComboBox { Location = new Point(20, 155), Width = 300, DropDownStyle = ComboBoxStyle.DropDownList };
+            // ── PRODUCTO (búsqueda en vivo por nombre, letra por letra) ───────────
+            lblProd = new Label { Text = "🔍 Producto:", Location = new Point(20, 135), AutoSize = true };
+            cboProductos = new ComboBox
+            {
+                Location = new Point(20, 155),
+                Width = 300,
+                DropDownStyle = ComboBoxStyle.DropDown,
+                AutoCompleteMode = AutoCompleteMode.SuggestAppend,
+                AutoCompleteSource = AutoCompleteSource.ListItems
+            };
 
             // ── CANTIDAD / COSTO / BOTÓN ─────────────────────────────────────────
             lblCant = new Label { Text = "Cantidad:", Location = new Point(340, 135), AutoSize = true };

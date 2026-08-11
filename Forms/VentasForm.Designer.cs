@@ -20,6 +20,7 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.lblProducto = new System.Windows.Forms.Label();
             this.txtEscanear = new System.Windows.Forms.TextBox();
+            this.lblBuscarProducto = new System.Windows.Forms.Label();
             this.cboProductos = new System.Windows.Forms.ComboBox();
             this.numCantidad = new System.Windows.Forms.NumericUpDown();
             this.btnAgregar = new System.Windows.Forms.Button();
@@ -71,10 +72,22 @@
             this.txtEscanear.TabIndex = 0;
             this.txtEscanear.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtEscanear_KeyPress);
 
-            // 
-            // cboProductos (Oculto visualmente o secundario, se mantiene por compatibilidad)
-            // 
-            this.cboProductos.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            //
+            // lblBuscarProducto
+            //
+            this.lblBuscarProducto.AutoSize = true;
+            this.lblBuscarProducto.Location = new System.Drawing.Point(340, 20);
+            this.lblBuscarProducto.Name = "lblBuscarProducto";
+            this.lblBuscarProducto.Size = new System.Drawing.Size(100, 15);
+            this.lblBuscarProducto.TabIndex = 9;
+            this.lblBuscarProducto.Text = "🔍 Buscar producto:";
+
+            //
+            // cboProductos (búsqueda en vivo por nombre, letra por letra)
+            //
+            this.cboProductos.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDown;
+            this.cboProductos.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.cboProductos.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.cboProductos.FormattingEnabled = true;
             this.cboProductos.Location = new System.Drawing.Point(340, 44);
             this.cboProductos.Name = "cboProductos";
@@ -124,9 +137,11 @@
             this.lblCliente.Name = "lblCliente";
             this.lblCliente.Text = "Cliente (F4 para Fiado):";
 
-            // Cbo Cliente
+            // Cbo Cliente (búsqueda en vivo por nombre, letra por letra)
             this.cboClientes.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.cboClientes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboClientes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDown;
+            this.cboClientes.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.cboClientes.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.cboClientes.FormattingEnabled = true;
             this.cboClientes.Location = new System.Drawing.Point(710, 40);
             this.cboClientes.Name = "cboClientes";
@@ -281,6 +296,7 @@
             this.Controls.Add(this.btnAgregar);
             this.Controls.Add(this.numCantidad);
             this.Controls.Add(this.cboProductos);
+            this.Controls.Add(this.lblBuscarProducto);
             this.Controls.Add(this.txtEscanear);
             this.Controls.Add(this.lblProducto);
             this.Name = "VentasForm";
@@ -300,6 +316,7 @@
 
         private System.Windows.Forms.Label lblProducto;
         private System.Windows.Forms.TextBox txtEscanear;
+        private System.Windows.Forms.Label lblBuscarProducto;
         private System.Windows.Forms.ComboBox cboProductos;
         private System.Windows.Forms.NumericUpDown numCantidad;
         private System.Windows.Forms.Button btnAgregar;

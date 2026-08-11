@@ -45,7 +45,9 @@ namespace AlmacenDesktop.Forms
             // Si el foco está en campos de escritura manual, no interferir
             if (this.ActiveControl == txtPagaCon ||
                 this.ActiveControl == cboClientes ||
-                cboClientes.DroppedDown)
+                this.ActiveControl == cboProductos ||
+                cboClientes.DroppedDown ||
+                cboProductos.DroppedDown)
             {
                 return;
             }

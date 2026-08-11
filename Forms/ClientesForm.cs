@@ -2,6 +2,7 @@ using AlmacenDesktop.Data;
 using AlmacenDesktop.Helpers;
 using AlmacenDesktop.Modelos;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -10,6 +11,7 @@ namespace AlmacenDesktop.Forms
     public partial class ClientesForm : Form
     {
         private int _clienteIdSeleccionado = 0;
+        private List<Cliente> _clientesCache = new List<Cliente>();
 
         public ClientesForm()
         {
@@ -30,14 +32,37 @@ namespace AlmacenDesktop.Forms
             using (var context = new AlmacenDbContext())
             {
                 // No mostrar al consumidor final por defecto para no editarlo por error
-                var lista = context.Clientes
+                _clientesCache = context.Clientes
                                    .Where(c => c.DniCuit != Constantes.CLIENTE_DEF_DNI)
+                                   .OrderBy(c => c.Apellido).ThenBy(c => c.Nombre)
                                    .ToList();
-                dgvClientes.DataSource = null;
-                dgvClientes.DataSource = lista;
-
-                if (dgvClientes.Columns["Id"] != null) dgvClientes.Columns["Id"].Visible = false;
             }
+            AplicarFiltro(txtBuscar.Text);
+        }
+
+        private void AplicarFiltro(string termino)
+        {
+            termino = (termino ?? "").Trim();
+
+            IEnumerable<Cliente> lista = _clientesCache;
+            if (!string.IsNullOrEmpty(termino))
+            {
+                lista = _clientesCache.Where(c =>
+                    (c.Nombre?.Contains(termino, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (c.Apellido?.Contains(termino, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (c.DniCuit?.Contains(termino, StringComparison.OrdinalIgnoreCase) ?? false));
+            }
+
+            dgvClientes.DataSource = null;
+            dgvClientes.DataSource = lista.ToList();
+
+            if (dgvClientes.Columns["Id"] != null) dgvClientes.Columns["Id"].Visible = false;
+        }
+
+        private void txtBuscar_TextChanged(object sender, EventArgs e)
+        {
+            // Búsqueda en tiempo real, letra por letra
+            AplicarFiltro(txtBuscar.Text);
         }
 
         private void btnGuardar_Click(object sender, EventArgs e)

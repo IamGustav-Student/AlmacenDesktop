@@ -50,12 +50,14 @@
             // 
             this.lblSelCliente.AutoSize = true;
             this.lblSelCliente.Location = new System.Drawing.Point(25, 70);
-            this.lblSelCliente.Text = "Seleccionar Cliente:";
+            this.lblSelCliente.Text = "🔍 Buscar Cliente:";
 
-            // 
-            // cboClientes
-            // 
-            this.cboClientes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            //
+            // cboClientes (búsqueda en vivo por nombre, letra por letra)
+            //
+            this.cboClientes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDown;
+            this.cboClientes.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.cboClientes.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.cboClientes.Font = new System.Drawing.Font("Segoe UI", 11F);
             this.cboClientes.FormattingEnabled = true;
             this.cboClientes.Location = new System.Drawing.Point(25, 90);
