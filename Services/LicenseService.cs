@@ -20,14 +20,15 @@ namespace AlmacenDesktop.Services
     public class LicenseService
     {
         private static readonly HttpClient HttpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(8) };
-        private static readonly string SharedHmacSecret = "hexastrategy_vendemax_secret_key_default";
+        // Debe coincidir con VENDEMAX_DESKTOP_VALIDATE_SECRET en ops-dashboard.
+        private static readonly string SharedHmacSecret = "65c2093009ef55bda192bab51373e6af6a8ce6f8117594270ed962d30990f82e";
 
         /// <summary>
         /// Realiza la verificación de licencia online contra el Servidor de Licencias HEXASTRATEGY.
         /// </summary>
         public async Task<(bool valido, string mensaje)> ValidarOnlineAsync(string email, string clave)
         {
-            string url = $"{Constantes.API_LICENCIAS_URL}/api/licencia/validar";
+            string url = $"{Constantes.API_LICENCIAS_URL}/licencias/validar";
             string fingerprint = HardwareHelper.ObtenerMachineFingerprint();
 
             var requestBody = new

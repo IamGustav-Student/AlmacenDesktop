@@ -366,3 +366,7 @@ FodyWeavers.xsd
 # Portable builds and zip packages
 publish_portable/
 *.zip
+
+# Secrets — nunca commitear
+.github-token.env
+*.env
