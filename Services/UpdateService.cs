@@ -140,25 +140,49 @@ namespace AlmacenDesktop.Services
         {
             int pid = Process.GetCurrentProcess().Id;
             string batPath = Path.Combine(Path.GetTempPath(), $"vdmx_update_{pid}.bat");
+            string workDir = Path.GetDirectoryName(currentExePath) ?? Path.GetTempPath();
 
-            // Espera a que este proceso termine (por PID), reemplaza el .exe, lo vuelve a
-            // abrir, y se autodestruye. move /Y reintenta si el archivo todavía está
-            // bloqueado justo al salir (antivirus, liberación tardía del handle de Windows).
+            // Espera a que este proceso termine (por PID) y reemplaza el .exe. Con
+            // reintentos ACOTADOS (no infinitos) porque el archivo puede quedar
+            // bloqueado un rato por el antivirus escaneando el ejecutable recién
+            // bajado — sin un límite, el script podía quedar reintentando para
+            // siempre en silencio y la app nunca se volvía a abrir. Pase lo que
+            // pase con el reemplazo, al final SIEMPRE se relanza algo: la versión
+            // nueva si se pudo reemplazar, o la vieja si no, para que el usuario
+            // nunca se quede con la app cerrada sin explicación.
             string script =
                 "@echo off\r\n" +
+                "setlocal enabledelayedexpansion\r\n" +
+                $"cd /d \"{workDir}\"\r\n" +
+                "set intentos=0\r\n" +
                 ":waitproc\r\n" +
+                "set /a intentos+=1\r\n" +
+                "if !intentos! GTR 30 goto intentar_reemplazo\r\n" +
                 $"tasklist /FI \"PID eq {pid}\" 2>NUL | find \"{pid}\" >NUL\r\n" +
                 "if not errorlevel 1 (\r\n" +
-                "    timeout /t 1 /nobreak >NUL\r\n" +
+                // "timeout" necesita una consola real y falla en un proceso oculto sin
+                // ventana (CreateNoWindow) — "ping" da una espera de ~1s sin ese problema.
+                "    ping -n 2 127.0.0.1 >NUL\r\n" +
                 "    goto waitproc\r\n" +
                 ")\r\n" +
+                ":intentar_reemplazo\r\n" +
+                "set intentos=0\r\n" +
                 ":retrymove\r\n" +
+                "set /a intentos+=1\r\n" +
                 $"move /Y \"{newExePath}\" \"{currentExePath}\" >NUL 2>&1\r\n" +
-                "if errorlevel 1 (\r\n" +
-                "    timeout /t 1 /nobreak >NUL\r\n" +
+                // No confiar en errorlevel de "move": en la práctica puede devolver 0
+                // aunque haya fallado ("Acceso denegado"). Chequeamos el estado real
+                // del archivo — si el origen ya no existe, el move sí funcionó.
+                $"if not exist \"{newExePath}\" goto relanzar\r\n" +
+                "if !intentos! LSS 25 (\r\n" +
+                // "timeout" necesita una consola real y falla en un proceso oculto sin
+                // ventana (CreateNoWindow) — "ping" da una espera de ~1s sin ese problema.
+                "    ping -n 2 127.0.0.1 >NUL\r\n" +
                 "    goto retrymove\r\n" +
                 ")\r\n" +
+                ":relanzar\r\n" +
                 $"start \"\" \"{currentExePath}\"\r\n" +
+                $"del \"{newExePath}\" >NUL 2>&1\r\n" +
                 "del \"%~f0\"\r\n";
 
             File.WriteAllText(batPath, script);
