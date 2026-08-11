@@ -20,5 +20,10 @@ namespace AlmacenDesktop.Helpers
 
         // Actualizador automático — consulta el último release público de GitHub.
         public const string GITHUB_RELEASES_API = "https://api.github.com/repos/IamGustav-Student/AlmacenDesktop/releases/latest";
+
+        // Catálogo compartido de productos entre instalaciones (solo nombre + código
+        // de barras — nunca costo/precio/stock/proveedor). Debe coincidir con
+        // CATALOG_UPLOAD_SECRET en ops-dashboard.
+        public const string CATALOG_UPLOAD_SECRET = "69b3033d81be49e820703626f557d7c77a0af41e2e909417";
     }
 }

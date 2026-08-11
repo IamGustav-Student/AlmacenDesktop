@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace AlmacenDesktop.Forms
@@ -13,6 +14,7 @@ namespace AlmacenDesktop.Forms
     public partial class ProductosForm : Form
     {
         private ProductoService _productoService;
+        private CatalogoCompartidoService _catalogoService = new CatalogoCompartidoService();
         private Producto _productoSeleccionado;
         private bool _modoEdicion = false;
 
@@ -174,9 +176,23 @@ namespace AlmacenDesktop.Forms
                         {
                             // Producto nuevo, enfocar nombre para cargarlo rápido
                             txtNombre.Focus();
+                            _ = SugerirNombreDesdeCatalogoAsync(barcode);
                         }
                     }
                 }
+            }
+        }
+
+        // Si el código de barras ya lo cargó otra instalación de Vendemax Desktop,
+        // sugiere el nombre — sin trabar la carga si no hay internet o el usuario
+        // ya empezó a escribir su propio nombre mientras tanto.
+        private async Task SugerirNombreDesdeCatalogoAsync(string codigoBarras)
+        {
+            var nombre = await _catalogoService.BuscarPorCodigoAsync(codigoBarras);
+            if (!string.IsNullOrEmpty(nombre) && !this.IsDisposed && string.IsNullOrWhiteSpace(txtNombre.Text))
+            {
+                txtNombre.Text = nombre;
+                txtNombre.SelectAll();
             }
         }
 
@@ -216,10 +232,18 @@ namespace AlmacenDesktop.Forms
                 producto.ProveedorId = (int)cboProveedor.SelectedValue;
                 producto.Activo = true;
 
+                bool esNuevo = !_modoEdicion;
                 _productoService.Guardar(producto);
 
                 AudioHelper.PlayOk();
                 MessageBox.Show("Producto guardado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                // Solo productos nuevos suman al catálogo compartido — una edición
+                // (ej. corregir precio) no debería resubir el nombre.
+                if (esNuevo && !string.IsNullOrWhiteSpace(producto.CodigoBarras))
+                {
+                    _ = _catalogoService.SubirAsync(new[] { (producto.CodigoBarras, producto.Nombre) });
+                }
 
                 LimpiarFormulario();
                 CargarProductos();
