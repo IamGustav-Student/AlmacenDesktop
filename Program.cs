@@ -33,6 +33,21 @@ namespace AlmacenDesktop
                 ConfigurarServicios();
                 InicializarBaseDeDatos();
 
+                // Sincronización silenciosa del catálogo compartido de productos —
+                // en cada arranque, sin importar el tipo de licencia (incluida la demo).
+                System.Threading.Tasks.Task.Run(async () =>
+                {
+                    try
+                    {
+                        var catalogoService = new CatalogoCompartidoService();
+                        await catalogoService.SincronizarCatalogoLocalAsync();
+                    }
+                    catch
+                    {
+                        // Falla silenciosa — sin conexión, servidor caído, etc.
+                    }
+                });
+
                 // 1. CHEQUEO DE LICENCIA Y SUSCRIPCIÃ“N (HEXASTRATEGY)
                 var licencia = LicenseHelper.LeerLicenciaLocal();
                 if (licencia == null)
