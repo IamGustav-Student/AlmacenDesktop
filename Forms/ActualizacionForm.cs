@@ -15,7 +15,22 @@ namespace AlmacenDesktop.Forms
             _info = info;
             InitializeComponent();
             lblTitulo.Text = $"🚀 Nueva versión disponible: {_info.VersionTag}";
-            txtNotas.Text = string.IsNullOrWhiteSpace(_info.Notes) ? "(Sin notas de la versión)" : _info.Notes;
+            txtNotas.Text = string.IsNullOrWhiteSpace(_info.Notes) ? "(Sin notas de la versión)" : FormatearNotas(_info.Notes);
+            txtNotas.SelectionStart = 0;
+            txtNotas.SelectionLength = 0;
+        }
+
+        // El body del release de GitHub viene en Markdown con saltos de línea "\n" —
+        // el TextBox nativo de Windows necesita "\r\n" para cortar renglones, si no
+        // el texto se ve todo corrido y sin separaciones. De paso saca la sintaxis
+        // Markdown básica (#, **) porque esto es una caja de texto plana, no un
+        // renderizador de Markdown.
+        private static string FormatearNotas(string notas)
+        {
+            string texto = notas.Replace("\r\n", "\n").Replace("\n", "\r\n");
+            texto = System.Text.RegularExpressions.Regex.Replace(texto, @"^#{1,6}\s*", "", System.Text.RegularExpressions.RegexOptions.Multiline);
+            texto = texto.Replace("**", "");
+            return texto;
         }
 
         private async void btnActualizar_Click(object sender, EventArgs e)
@@ -111,6 +126,7 @@ namespace AlmacenDesktop.Forms
                 ScrollBars = ScrollBars.Vertical,
                 BackColor = Color.WhiteSmoke,
                 Font = new Font("Segoe UI", 9.5F),
+                TabStop = false,
             };
 
             lblEstado = new Label
@@ -154,6 +170,9 @@ namespace AlmacenDesktop.Forms
             {
                 lblTitulo, lblSubtitulo, txtNotas, lblEstado, progressBar, btnMasTarde, btnActualizar,
             });
+
+            this.AcceptButton = btnActualizar;
+            this.ActiveControl = btnMasTarde;
         }
     }
 }
