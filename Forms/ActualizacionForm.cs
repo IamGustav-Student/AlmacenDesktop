@@ -92,7 +92,14 @@ namespace AlmacenDesktop.Forms
 
         private void InitializeComponent()
         {
-            this.Size = new Size(480, 400);
+            // AutoScaleMode.None a propósito: con Font (o sin setear nada) el escalado
+            // por DPI/tamaño de texto de Windows corría todas las posiciones en Y y
+            // terminaba empujando los botones fuera del área visible del diálogo —
+            // reportado con una foto real de pantalla donde "Actualizar ahora" quedaba
+            // cortado abajo sin scroll para verlo. Con None, los píxeles que se piden
+            // acá son los píxeles que se dibujan, sin sorpresas.
+            this.AutoScaleMode = AutoScaleMode.None;
+            this.Size = new Size(500, 480);
             this.Text = "Actualización disponible";
             this.StartPosition = FormStartPosition.CenterParent;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -103,7 +110,7 @@ namespace AlmacenDesktop.Forms
             {
                 Text = "🚀 Nueva versión disponible",
                 Location = new Point(20, 20),
-                Size = new Size(440, 30),
+                Size = new Size(460, 30),
                 Font = new Font("Segoe UI", 13, FontStyle.Bold),
                 ForeColor = Color.FromArgb(124, 58, 237),
             };
@@ -112,15 +119,15 @@ namespace AlmacenDesktop.Forms
             {
                 Text = "Se recomienda actualizar para tener las últimas mejoras. Tus ventas, productos y clientes no se ven afectados.",
                 Location = new Point(20, 55),
-                Size = new Size(440, 40),
+                Size = new Size(460, 45),
                 Font = new Font("Segoe UI", 9),
                 ForeColor = Color.DimGray,
             };
 
             txtNotas = new TextBox
             {
-                Location = new Point(20, 100),
-                Size = new Size(440, 180),
+                Location = new Point(20, 105),
+                Size = new Size(460, 190),
                 Multiline = true,
                 ReadOnly = true,
                 ScrollBars = ScrollBars.Vertical,
@@ -131,8 +138,8 @@ namespace AlmacenDesktop.Forms
 
             lblEstado = new Label
             {
-                Location = new Point(20, 290),
-                Size = new Size(440, 20),
+                Location = new Point(20, 305),
+                Size = new Size(460, 20),
                 Font = new Font("Segoe UI", 9, FontStyle.Bold),
                 ForeColor = Color.SteelBlue,
                 Visible = false,
@@ -140,26 +147,28 @@ namespace AlmacenDesktop.Forms
 
             progressBar = new ProgressBar
             {
-                Location = new Point(20, 312),
-                Size = new Size(440, 20),
+                Location = new Point(20, 328),
+                Size = new Size(460, 20),
                 Minimum = 0,
                 Maximum = 100,
                 Visible = false,
             };
 
+            // Margen generoso debajo de los botones (form termina en 480, botones
+            // terminan en 433) a propósito, para que sobren ~45px pase lo que pase.
             btnMasTarde = new Button
             {
                 Text = "Más tarde",
-                Location = new Point(240, 345),
-                Size = new Size(100, 35),
+                Location = new Point(255, 395),
+                Size = new Size(105, 38),
             };
             btnMasTarde.Click += btnMasTarde_Click;
 
             btnActualizar = new Button
             {
                 Text = "Actualizar ahora",
-                Location = new Point(350, 345),
-                Size = new Size(110, 35),
+                Location = new Point(370, 395),
+                Size = new Size(115, 38),
                 BackColor = Color.FromArgb(20, 184, 166),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
