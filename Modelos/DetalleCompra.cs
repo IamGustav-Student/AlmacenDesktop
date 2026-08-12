@@ -13,8 +13,8 @@ namespace AlmacenDesktop.Modelos
         public int ProductoId { get; set; }
         public virtual Producto Producto { get; set; }
 
-        [Range(1, int.MaxValue, ErrorMessage = "La cantidad comprada debe ser al menos 1.")]
-        public int Cantidad { get; set; }
+        [Range(0.001, 999999, ErrorMessage = "La cantidad comprada debe ser mayor a 0.")]
+        public decimal Cantidad { get; set; }
 
         [Range(0, 99999999)]
         [Column(TypeName = "decimal(18, 2)")]

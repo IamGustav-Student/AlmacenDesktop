@@ -43,8 +43,9 @@ namespace AlmacenDesktop.Forms
                 active == numPrecio || 
                 active == numStock || 
                 active == numStockMinimo || 
-                active == numImpuesto || 
-                active == cboProveedor)
+                active == numImpuesto ||
+                active == cboProveedor ||
+                active == cboUnidadMedida)
             {
                 return;
             }
@@ -53,12 +54,13 @@ namespace AlmacenDesktop.Forms
             if (active != null && active.Parent != null)
             {
                 Control parent = active.Parent;
-                if (parent == numCosto || 
-                    parent == numPrecio || 
-                    parent == numStock || 
-                    parent == numStockMinimo || 
-                    parent == numImpuesto || 
-                    parent == cboProveedor)
+                if (parent == numCosto ||
+                    parent == numPrecio ||
+                    parent == numStock ||
+                    parent == numStockMinimo ||
+                    parent == numImpuesto ||
+                    parent == cboProveedor ||
+                    parent == cboUnidadMedida)
                 {
                     return;
                 }
@@ -84,6 +86,7 @@ namespace AlmacenDesktop.Forms
         private void ProductosForm_Load(object sender, EventArgs e)
         {
             ConfigurarGrilla();
+            CargarUnidadesMedida();
             CargarProveedores();
             CargarProductos();
             LimpiarFormulario();
@@ -98,6 +101,60 @@ namespace AlmacenDesktop.Forms
             dgvProductos.RowHeadersVisible = false;
             dgvProductos.AllowUserToAddRows = false;
             dgvProductos.SelectionChanged += dgvProductos_SelectionChanged;
+            dgvProductos.CellFormatting += dgvProductos_CellFormatting;
+        }
+
+        // Cantidad y unidad se muestran distinto según el producto sea por pieza
+        // entera (colStock = "3") o suelto/fraccionable (colStock = "0.75", colUnidad = "kg").
+        private void dgvProductos_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (!(dgvProductos.Rows[e.RowIndex].DataBoundItem is Producto prod)) return;
+
+            if (dgvProductos.Columns[e.ColumnIndex] == colStock)
+            {
+                e.Value = UnidadMedidaHelper.FormatearCantidad(prod.Stock, prod.UnidadMedida);
+                e.FormattingApplied = true;
+            }
+            else if (dgvProductos.Columns[e.ColumnIndex] == colUnidad)
+            {
+                e.Value = UnidadMedidaHelper.Abreviatura(prod.UnidadMedida);
+                e.FormattingApplied = true;
+            }
+        }
+
+        private void CargarUnidadesMedida()
+        {
+            var opciones = new List<object>
+            {
+                new { Valor = Modelos.UnidadMedida.Unidad, Texto = "Unidad (entero)" },
+                new { Valor = Modelos.UnidadMedida.Kilogramo, Texto = "Kilogramo (kg)" },
+                new { Valor = Modelos.UnidadMedida.Gramo, Texto = "Gramo (g)" },
+                new { Valor = Modelos.UnidadMedida.Litro, Texto = "Litro (L)" },
+                new { Valor = Modelos.UnidadMedida.Metro, Texto = "Metro (m)" },
+                new { Valor = Modelos.UnidadMedida.Docena, Texto = "Docena (doc)" },
+            };
+            cboUnidadMedida.DataSource = opciones;
+            cboUnidadMedida.DisplayMember = "Texto";
+            cboUnidadMedida.ValueMember = "Valor";
+        }
+
+        // Productos "por unidad" cargan/venden en enteros; el resto (kg, g, L, m, doc)
+        // habilita decimales para productos sueltos como leña o huevos.
+        private void ConfigurarNumericosPorUnidad(Modelos.UnidadMedida unidad)
+        {
+            bool fraccionable = UnidadMedidaHelper.EsFraccionable(unidad);
+            numStock.DecimalPlaces = fraccionable ? 3 : 0;
+            numStock.Increment = fraccionable ? 0.100m : 1m;
+            numStockMinimo.DecimalPlaces = fraccionable ? 3 : 0;
+            numStockMinimo.Increment = fraccionable ? 0.100m : 1m;
+        }
+
+        private void cboUnidadMedida_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cboUnidadMedida.SelectedValue is Modelos.UnidadMedida unidad)
+            {
+                ConfigurarNumericosPorUnidad(unidad);
+            }
         }
 
         private void CargarProveedores()
@@ -159,6 +216,7 @@ namespace AlmacenDesktop.Forms
                             txtDescripcion.Text = existente.Descripcion;
                             numCosto.Value = existente.Costo;
                             numPrecio.Value = existente.Precio;
+                            cboUnidadMedida.SelectedValue = existente.UnidadMedida;
                             numStock.Value = existente.Stock;
                             numStockMinimo.Value = existente.StockMinimo;
                             numImpuesto.Value = existente.Impuesto;
@@ -226,8 +284,9 @@ namespace AlmacenDesktop.Forms
                 producto.Descripcion = txtDescripcion.Text.Trim();
                 producto.Costo = numCosto.Value;
                 producto.Precio = numPrecio.Value;
-                producto.Stock = (int)numStock.Value;
-                producto.StockMinimo = (int)numStockMinimo.Value;
+                producto.UnidadMedida = (Modelos.UnidadMedida)cboUnidadMedida.SelectedValue;
+                producto.Stock = numStock.Value;
+                producto.StockMinimo = numStockMinimo.Value;
                 producto.Impuesto = numImpuesto.Value; // Opcional
                 producto.ProveedorId = (int)cboProveedor.SelectedValue;
                 producto.Activo = true;
@@ -274,6 +333,7 @@ namespace AlmacenDesktop.Forms
                 txtDescripcion.Text = _productoSeleccionado.Descripcion;
                 numCosto.Value = _productoSeleccionado.Costo;
                 numPrecio.Value = _productoSeleccionado.Precio;
+                cboUnidadMedida.SelectedValue = _productoSeleccionado.UnidadMedida;
                 numStock.Value = _productoSeleccionado.Stock;
                 numStockMinimo.Value = _productoSeleccionado.StockMinimo;
                 numImpuesto.Value = _productoSeleccionado.Impuesto;
@@ -285,7 +345,7 @@ namespace AlmacenDesktop.Forms
                 btnGuardar.Text = "Actualizar (F5)";
 
                 // Deshabilitar código de barras en edición si es clave crítica (opcional)
-                // txtCodigo.Enabled = false; 
+                // txtCodigo.Enabled = false;
             }
         }
 
@@ -325,6 +385,7 @@ namespace AlmacenDesktop.Forms
             txtDescripcion.Clear();
             numCosto.Value = 0;
             numPrecio.Value = 0;
+            cboUnidadMedida.SelectedIndex = 0; // Unidad — dispara ConfigurarNumericosPorUnidad
             numStock.Value = 0;
             numStockMinimo.Value = 5; // Valor por defecto sensato
             numImpuesto.Value = 0;
@@ -402,10 +463,11 @@ namespace AlmacenDesktop.Forms
                         txtDescripcion.Text = _productoSeleccionado.Descripcion;
                         numCosto.Value = _productoSeleccionado.Costo;
                         numPrecio.Value = _productoSeleccionado.Precio;
+                        cboUnidadMedida.SelectedValue = _productoSeleccionado.UnidadMedida;
                         numStock.Value = _productoSeleccionado.Stock;
                         numStockMinimo.Value = _productoSeleccionado.StockMinimo;
                         numImpuesto.Value = _productoSeleccionado.Impuesto;
-                        
+
                         if (cboProveedor.Items.Count > 0 && _productoSeleccionado.ProveedorId > 0)
                         {
                             cboProveedor.SelectedValue = _productoSeleccionado.ProveedorId;

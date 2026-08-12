@@ -30,6 +30,20 @@ namespace AlmacenDesktop.Forms
             cboProveedores.SelectedIndexChanged += cboProveedores_SelectedIndexChanged;
             cboProductos.SelectedIndexChanged += cboProductos_SelectedIndexChanged;
             txtEscanear.KeyPress += new KeyPressEventHandler(txtEscanear_KeyPress);
+
+            cboProductos.SelectedIndexChanged += ConfigurarCantidadPorUnidad;
+        }
+
+        // Productos fraccionables (kg, g, L, m, doc) habilitan decimales en Cantidad
+        // para ingresar mercadería suelta, ej. un pedido de 50.5 kg de leña.
+        private void ConfigurarCantidadPorUnidad(object sender, EventArgs e)
+        {
+            var prod = cboProductos.SelectedItem as Producto;
+            bool fraccionable = prod != null && UnidadMedidaHelper.EsFraccionable(prod.UnidadMedida);
+            numCantidad.DecimalPlaces = fraccionable ? 3 : 0;
+            numCantidad.Increment = fraccionable ? 0.100m : 1m;
+            numCantidad.Minimum = fraccionable ? 0.001m : 1m;
+            if (numCantidad.Value < numCantidad.Minimum) numCantidad.Value = numCantidad.Minimum;
         }
 
         // ── CAPTURA INTELIGENTE GLOBAL (cualquier tecla → escáner) ─────────────
@@ -178,7 +192,7 @@ namespace AlmacenDesktop.Forms
             var producto = (Producto)cboProductos.SelectedItem;
             if (producto == null) return;
 
-            int cantidad = (int)numCantidad.Value;
+            decimal cantidad = numCantidad.Value;
             decimal costo = numCosto.Value;
 
             if (costo <= 0) { MessageBox.Show("Ingrese el costo unitario."); return; }
@@ -202,7 +216,7 @@ namespace AlmacenDesktop.Forms
             dgvDetalle.DataSource = _carritoCompra.Select(x => new
             {
                 Producto = x.Producto.Nombre,
-                Cantidad = x.Cantidad,
+                Cantidad = UnidadMedidaHelper.FormatearCantidadConUnidad(x.Cantidad, x.Producto.UnidadMedida),
                 CostoUnitario = x.CostoUnitario,
                 Subtotal = x.Subtotal
             }).ToList();

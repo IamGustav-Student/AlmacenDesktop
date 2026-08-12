@@ -1,4 +1,5 @@
 ﻿using AlmacenDesktop.Data;
+using AlmacenDesktop.Helpers;
 using AlmacenDesktop.Modelos;
 using ESCPOS_NET;
 using ESCPOS_NET.Emitters;
@@ -186,7 +187,8 @@ namespace AlmacenDesktop.Services
                     string nombre = item.Producto.Nombre;
                     if (nombre.Length > 15) nombre = nombre.Substring(0, 15);
 
-                    g.DrawString($"{item.Cantidad}", fontRegular, Brushes.Black, leftMargin, y);
+                    string cantTexto = UnidadMedidaHelper.FormatearCantidad(item.Cantidad, item.Producto.UnidadMedida);
+                    g.DrawString(cantTexto, fontRegular, Brushes.Black, leftMargin, y);
                     g.DrawString($"{nombre}", fontRegular, Brushes.Black, leftMargin + 25, y);
                     g.DrawString($"$ {item.Subtotal:N2}", fontRegular, Brushes.Black, new RectangleF(leftMargin, y, anchoTicket, 20), derecha);
                     y += 15;
@@ -237,7 +239,10 @@ namespace AlmacenDesktop.Services
 
             foreach (var item in detalles)
             {
-                string cant = item.Cantidad.ToString().PadRight(3);
+                string cantTexto = item.Producto != null
+                    ? UnidadMedidaHelper.FormatearCantidad(item.Cantidad, item.Producto.UnidadMedida)
+                    : item.Cantidad.ToString("0.###");
+                string cant = cantTexto.Length > 4 ? cantTexto.Substring(0, 4) : cantTexto.PadRight(4);
                 string nombreProd = item.Producto?.Nombre ?? "Art";
                 string desc = nombreProd.Length > 15 ? nombreProd.Substring(0, 15) : nombreProd.PadRight(15);
                 string total = item.Subtotal.ToString("N2").PadLeft(10);

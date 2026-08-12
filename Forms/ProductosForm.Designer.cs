@@ -42,6 +42,8 @@ namespace AlmacenDesktop.Forms
             this.numStockMinimo = new System.Windows.Forms.NumericUpDown();
             this.lblImpuesto = new System.Windows.Forms.Label();
             this.numImpuesto = new System.Windows.Forms.NumericUpDown();
+            this.lblUnidadMedida = new System.Windows.Forms.Label();
+            this.cboUnidadMedida = new System.Windows.Forms.ComboBox();
 
             // Panel Principal
             this.panelMain = new System.Windows.Forms.Panel();
@@ -63,6 +65,7 @@ namespace AlmacenDesktop.Forms
             this.colNombre = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colPrecio = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colStock = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colUnidad = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colProveedor = new System.Windows.Forms.DataGridViewTextBoxColumn();
 
             this.panelEditor.SuspendLayout();
@@ -91,6 +94,7 @@ namespace AlmacenDesktop.Forms
             this.panelEditor.Controls.Add(this.numPrecio); this.panelEditor.Controls.Add(this.lblPrecio);
             this.panelEditor.Controls.Add(this.numStock); this.panelEditor.Controls.Add(this.lblStock);
             this.panelEditor.Controls.Add(this.numStockMinimo); this.panelEditor.Controls.Add(this.lblStockMinimo);
+            this.panelEditor.Controls.Add(this.cboUnidadMedida); this.panelEditor.Controls.Add(this.lblUnidadMedida);
             this.panelEditor.Controls.Add(this.numImpuesto); this.panelEditor.Controls.Add(this.lblImpuesto);
 
             this.panelEditor.Controls.Add(this.btnGuardar);
@@ -135,13 +139,19 @@ namespace AlmacenDesktop.Forms
             this.numPrecio.DecimalPlaces = 2; this.numPrecio.Maximum = 99999999;
 
             y += 50;
+            this.lblUnidadMedida.Text = "Se vende por:"; this.lblUnidadMedida.Location = new System.Drawing.Point(15, y);
+            this.cboUnidadMedida.Location = new System.Drawing.Point(15, y + 20); this.cboUnidadMedida.Width = 260;
+            this.cboUnidadMedida.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboUnidadMedida.SelectedIndexChanged += new System.EventHandler(this.cboUnidadMedida_SelectedIndexChanged);
+
+            y += 50;
             this.lblStock.Text = "Stock Actual:"; this.lblStock.Location = new System.Drawing.Point(15, y);
             this.numStock.Location = new System.Drawing.Point(15, y + 20); this.numStock.Width = 120;
-            this.numStock.Maximum = 10000;
+            this.numStock.Maximum = 999999;
 
             this.lblStockMinimo.Text = "Stock Mínimo:"; this.lblStockMinimo.Location = new System.Drawing.Point(155, y);
             this.numStockMinimo.Location = new System.Drawing.Point(155, y + 20); this.numStockMinimo.Width = 120;
-            this.numStockMinimo.Maximum = 1000;
+            this.numStockMinimo.Maximum = 999999;
 
             y += 50;
             this.lblImpuesto.Text = "Impuesto (%):"; this.lblImpuesto.Location = new System.Drawing.Point(15, y);
@@ -152,7 +162,7 @@ namespace AlmacenDesktop.Forms
             this.btnGuardar.BackColor = System.Drawing.Color.ForestGreen;
             this.btnGuardar.ForeColor = System.Drawing.Color.White;
             this.btnGuardar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnGuardar.Location = new System.Drawing.Point(15, 450);
+            this.btnGuardar.Location = new System.Drawing.Point(15, 500);
             this.btnGuardar.Size = new System.Drawing.Size(260, 40);
             this.btnGuardar.Click += new System.EventHandler(this.btnGuardar_Click);
 
@@ -160,7 +170,7 @@ namespace AlmacenDesktop.Forms
             this.btnLimpiar.BackColor = System.Drawing.Color.Gray;
             this.btnLimpiar.ForeColor = System.Drawing.Color.White;
             this.btnLimpiar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnLimpiar.Location = new System.Drawing.Point(15, 500);
+            this.btnLimpiar.Location = new System.Drawing.Point(15, 550);
             this.btnLimpiar.Size = new System.Drawing.Size(260, 30);
             this.btnLimpiar.Click += new System.EventHandler(this.btnLimpiar_Click);
 
@@ -252,6 +262,11 @@ namespace AlmacenDesktop.Forms
             this.colStock.HeaderText = "Stock";
             this.colStock.FillWeight = 60;
 
+            // Texto se completa en tiempo de ejecución (CellFormatting) con la abreviatura de UnidadMedida
+            this.colUnidad.HeaderText = "Unidad";
+            this.colUnidad.FillWeight = 50;
+            this.colUnidad.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+
             // Nota: Para mostrar "Proveedor.Nombre", se requiere un pequeño truco en el CellFormatting
             // o Binding avanzado. Por ahora usamos DataPropertyName simple, si falla se verá vacío.
             this.colProveedor.DataPropertyName = "ProveedorId";
@@ -259,13 +274,13 @@ namespace AlmacenDesktop.Forms
             this.colProveedor.Visible = false; // Ocultamos por simplicidad, o lo mostramos si es útil
 
             this.dgvProductos.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-                this.colId, this.colCodigo, this.colNombre, this.colPrecio, this.colStock, this.colProveedor
+                this.colId, this.colCodigo, this.colNombre, this.colPrecio, this.colStock, this.colUnidad, this.colProveedor
             });
 
             // ---------------------------------------------------------
             // FORM
             // ---------------------------------------------------------
-            this.ClientSize = new System.Drawing.Size(1084, 561);
+            this.ClientSize = new System.Drawing.Size(1084, 611);
             this.Controls.Add(this.panelMain);
             this.Controls.Add(this.panelEditor);
             this.Name = "ProductosForm";
@@ -302,6 +317,7 @@ namespace AlmacenDesktop.Forms
         private System.Windows.Forms.NumericUpDown numStock;
         private System.Windows.Forms.NumericUpDown numStockMinimo;
         private System.Windows.Forms.NumericUpDown numImpuesto;
+        private System.Windows.Forms.ComboBox cboUnidadMedida;
 
         // Labels
         private System.Windows.Forms.Label lblCodigo;
@@ -313,6 +329,7 @@ namespace AlmacenDesktop.Forms
         private System.Windows.Forms.Label lblStock;
         private System.Windows.Forms.Label lblStockMinimo;
         private System.Windows.Forms.Label lblImpuesto;
+        private System.Windows.Forms.Label lblUnidadMedida;
 
         private System.Windows.Forms.Panel panelMain;
         private System.Windows.Forms.Label lblTitulo;
@@ -329,6 +346,7 @@ namespace AlmacenDesktop.Forms
         private System.Windows.Forms.DataGridViewTextBoxColumn colNombre;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPrecio;
         private System.Windows.Forms.DataGridViewTextBoxColumn colStock;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colUnidad;
         private System.Windows.Forms.DataGridViewTextBoxColumn colProveedor;
     }
 }

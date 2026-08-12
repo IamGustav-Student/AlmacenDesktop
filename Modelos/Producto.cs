@@ -27,14 +27,19 @@ namespace AlmacenDesktop.Modelos
         [Column(TypeName = "decimal(18, 2)")]
         public decimal Precio { get; set; }
 
-        [Range(0, int.MaxValue, ErrorMessage = "El stock no puede ser negativo.")]
-        public int Stock { get; set; }
+        [Range(0, 9999999, ErrorMessage = "El stock no puede ser negativo.")]
+        public decimal Stock { get; set; }
 
-        [Range(0, int.MaxValue, ErrorMessage = "El stock mínimo debe ser positivo.")]
-        public int StockMinimo { get; set; }
+        [Range(0, 9999999, ErrorMessage = "El stock mínimo debe ser positivo.")]
+        public decimal StockMinimo { get; set; }
 
         [Range(0, 100, ErrorMessage = "El impuesto debe ser un porcentaje entre 0 y 100.")]
         public decimal Impuesto { get; set; }
+
+        // Unidad en la que se carga/vende el producto. Unidad = pieza entera (default,
+        // compatibilidad con todo lo cargado antes de esta funcionalidad); el resto
+        // habilita cantidades con decimales para productos sueltos (leña, huevos, fiambre, etc.).
+        public UnidadMedida UnidadMedida { get; set; } = UnidadMedida.Unidad;
 
         // --- PROPIEDAD FALTANTE AGREGADA ---
         // Permite el "Borrado Lógico": Desactivar en lugar de borrar.
@@ -52,13 +57,13 @@ namespace AlmacenDesktop.Modelos
             return Precio >= Costo;
         }
 
-        public void AumentarStock(int cantidad)
+        public void AumentarStock(decimal cantidad)
         {
             if (cantidad < 0) throw new ArgumentException("La cantidad a aumentar debe ser positiva.");
             Stock += cantidad;
         }
 
-        public void ReducirStock(int cantidad)
+        public void ReducirStock(decimal cantidad)
         {
             if (cantidad < 0) throw new ArgumentException("La cantidad a reducir debe ser positiva.");
             if (Stock - cantidad < 0) throw new InvalidOperationException("No hay suficiente stock para realizar esta operación.");

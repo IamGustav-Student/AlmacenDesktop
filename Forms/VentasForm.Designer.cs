@@ -99,8 +99,9 @@
             // 
             this.numCantidad.Location = new System.Drawing.Point(550, 44);
             this.numCantidad.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            this.numCantidad.Maximum = new decimal(new int[] { 9999, 0, 0, 0 });
             this.numCantidad.Name = "numCantidad";
-            this.numCantidad.Size = new System.Drawing.Size(50, 23);
+            this.numCantidad.Size = new System.Drawing.Size(60, 23);
             this.numCantidad.TabIndex = 11;
             this.numCantidad.Value = new decimal(new int[] { 1, 0, 0, 0 });
 

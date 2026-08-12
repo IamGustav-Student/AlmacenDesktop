@@ -83,6 +83,7 @@ namespace AlmacenDesktop.Services
                         productoExistente.Stock = producto.Stock;
                         productoExistente.StockMinimo = producto.StockMinimo;
                         productoExistente.Impuesto = producto.Impuesto;
+                        productoExistente.UnidadMedida = producto.UnidadMedida;
                         productoExistente.ProveedorId = producto.ProveedorId;
                         productoExistente.Activo = true; // Reactivación
 
@@ -124,6 +125,7 @@ namespace AlmacenDesktop.Services
                     dbProducto.Stock = producto.Stock;
                     dbProducto.StockMinimo = producto.StockMinimo;
                     dbProducto.Impuesto = producto.Impuesto;
+                    dbProducto.UnidadMedida = producto.UnidadMedida;
                     dbProducto.ProveedorId = producto.ProveedorId;
                     dbProducto.Activo = producto.Activo;
 
@@ -145,7 +147,7 @@ namespace AlmacenDesktop.Services
             }
         }
 
-        public bool ValidarStockSuficiente(int productoId, int cantidadRequerida)
+        public bool ValidarStockSuficiente(int productoId, decimal cantidadRequerida)
         {
             using (var context = new AlmacenDbContext())
             {

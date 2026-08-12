@@ -37,6 +37,7 @@ namespace AlmacenDesktop.Forms
             this.KeyPreview = true;
             this.KeyDown += VentasForm_KeyDown;
             this.KeyPress += VentasForm_GlobalKeyPress;
+            this.cboProductos.SelectedIndexChanged += cboProductos_SelectedIndexChanged;
         }
 
         // Detecta input de teclado (scanner) sin importar dónde esté el foco
@@ -160,16 +161,28 @@ namespace AlmacenDesktop.Forms
         private void btnAgregar_Click(object sender, EventArgs e)
         {
             var prod = (Producto)cboProductos.SelectedItem;
-            if (prod != null) AgregarAlCarrito(prod, (int)numCantidad.Value);
+            if (prod != null) AgregarAlCarrito(prod, numCantidad.Value);
         }
 
-        private void AgregarAlCarrito(Producto prod, int cantidad)
+        // Productos por unidad (Unidad) piden cantidad entera; los fraccionables
+        // (kg, g, L, m, doc) habilitan decimales para vender sueltos como leña o huevos por peso.
+        private void cboProductos_SelectedIndexChanged(object sender, EventArgs e)
         {
-            int cantidadEnCarrito = _carrito.Where(x => x.ProductoId == prod.Id).Sum(x => x.Cantidad);
+            var prod = cboProductos.SelectedItem as Producto;
+            bool fraccionable = prod != null && UnidadMedidaHelper.EsFraccionable(prod.UnidadMedida);
+            numCantidad.DecimalPlaces = fraccionable ? 3 : 0;
+            numCantidad.Increment = fraccionable ? 0.100m : 1m;
+            numCantidad.Minimum = fraccionable ? 0.001m : 1m;
+            if (numCantidad.Value < numCantidad.Minimum) numCantidad.Value = numCantidad.Minimum;
+        }
+
+        private void AgregarAlCarrito(Producto prod, decimal cantidad)
+        {
+            decimal cantidadEnCarrito = _carrito.Where(x => x.ProductoId == prod.Id).Sum(x => x.Cantidad);
             if (prod.Stock < (cantidadEnCarrito + cantidad))
             {
                 AudioHelper.PlayError();
-                MessageBox.Show($"Stock insuficiente. Disponible: {prod.Stock}.", "Stock", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"Stock insuficiente. Disponible: {UnidadMedidaHelper.FormatearCantidadConUnidad(prod.Stock, prod.UnidadMedida)}.", "Stock", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -204,7 +217,7 @@ namespace AlmacenDesktop.Forms
             dgvCarrito.DataSource = _carrito.Select(x => new
             {
                 Producto = x.Producto.Nombre,
-                Cant = x.Cantidad,
+                Cant = UnidadMedidaHelper.FormatearCantidadConUnidad(x.Cantidad, x.Producto.UnidadMedida),
                 Precio = x.PrecioUnitario,
                 Subtotal = x.SubtotalCalculado
             }).ToList();

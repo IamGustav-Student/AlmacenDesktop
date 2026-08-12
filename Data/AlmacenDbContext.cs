@@ -62,12 +62,17 @@ namespace AlmacenDesktop.Data
             // CONFIGURACIÓN DE PRECISIÓN DECIMAL (Moneda)
             modelBuilder.Entity<Producto>().Property(p => p.Costo).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Producto>().Property(p => p.Precio).HasColumnType("decimal(18,2)");
+            // Precisión de 3 decimales: alcanza para kilos/gramos/metros de productos sueltos (leña, huevos, fiambre, etc.)
+            modelBuilder.Entity<Producto>().Property(p => p.Stock).HasColumnType("decimal(18,3)");
+            modelBuilder.Entity<Producto>().Property(p => p.StockMinimo).HasColumnType("decimal(18,3)");
 
             modelBuilder.Entity<Venta>().Property(v => v.Total).HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<DetalleVenta>().Property(d => d.Cantidad).HasColumnType("decimal(18,3)");
             modelBuilder.Entity<DetalleVenta>().Property(d => d.PrecioUnitario).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<DetalleVenta>().Property(d => d.Subtotal).HasColumnType("decimal(18,2)");
 
             modelBuilder.Entity<Compra>().Property(c => c.Total).HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<DetalleCompra>().Property(d => d.Cantidad).HasColumnType("decimal(18,3)");
             modelBuilder.Entity<DetalleCompra>().Property(d => d.CostoUnitario).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<DetalleCompra>().Property(d => d.Subtotal).HasColumnType("decimal(18,2)");
 
