@@ -83,8 +83,12 @@ El token de GitHub usado para releases está en `.github-token.env` (gitignoread
 | v1.0.5 | Botones del diálogo de actualización cortados — primer caso de bug de `AutoScaleMode` |
 | v1.0.6 | Configuración se rompía si el Spooler de Windows estaba caído + búsqueda de productos sensible a mayúsculas |
 | v1.0.7 | Barrida completa: mensajes de error genéricos → `ExceptionHelper` en toda la app; `AutoScaleMode` en los 9 formularios que faltaban; solapamiento real de título/botón en Clientes |
-| v1.1.0 | Productos sueltos por peso / unidad fraccionable (`UnidadMedida`, cantidades decimales) |
+| v1.1.0 | Productos sueltos por peso / unidad fraccionable (`UnidadMedida`, cantidades decimales) + backup automático verifica integridad y loguea fallos |
 | v1.1.1 | Menú que expone las 7 pantallas ocultas + pantalla de inicio con evolución de 12 meses + fix de gráficos rotos y de ORDER BY decimal |
+| v1.1.2 | Descuento de stock incorrecto en productos fraccionables: import de Excel leía el stock con `int.TryParse` (fallaba silencioso con decimales) + `VentasForm` validaba contra una lista de stock que no se refrescaba entre ventas |
+| v1.1.3 | `Pago.Observaciones` sin default rompía el cobro de cuenta corriente (columna NOT NULL) + rename "Fiado" → "Cuenta Corriente" en toda la UI |
+| v1.1.4 | Escape/Limpiar en Clientes y Proveedores no dejaba la pantalla en blanco (rebind del grid autoseleccionaba la primera fila) |
+| v1.1.5 | Restaurar un backup desde Configuración, sin tocar archivos a mano — reusa el patrón de reemplazo-y-relanzado del auto-actualizador |
 
 ## Roadmap en curso — evolución como software de almacén (desde 2026-08-12)
 
@@ -101,11 +105,13 @@ Plan completo (con justificación técnica y análisis de riesgos) en el archivo
 | 1 | v1.1.1 | Menú data-driven que expone los 7 módulos ocultos | ✅ hecho |
 | 3 | v1.1.1 | Pantalla de inicio con evolución mes a mes (12 meses) | ✅ hecho |
 | — | v1.1.1 | Fix: gráficos rotos (SqlClient) + ORDER BY decimal en SQLite | ✅ hecho |
-| 2 | v1.1.2 | `Helpers/Theme.cs` — paleta y tipografía centralizadas | ⏳ pendiente |
-| 4 | v1.1.3 | `Forms/BaseForm.cs` + atajos de teclado unificados | ⏳ pendiente |
-| 5 | v1.1.4+ | Roll-out del tema por tráfico (Ventas → Productos → Clientes → resto) | ⏳ pendiente |
+| 2 | — | `Helpers/Theme.cs` — paleta y tipografía centralizadas | ⏳ pendiente |
+| 4 | — | `Forms/BaseForm.cs` + atajos de teclado unificados | ⏳ pendiente |
+| 5 | — | Roll-out del tema por tráfico (Ventas → Productos → Clientes → resto) | ⏳ pendiente |
 | 6 | — | Balanza: lectura de código de barras con peso embebido | ⏳ pendiente |
 | 7 | — | Precio mayorista / por cantidad | ⏳ pendiente |
+
+> Las versiones v1.1.2 a v1.1.5 **no** corresponden a las fases de esta tabla — se usaron para una tanda de bugs reales encontrados al usar la app después de v1.1.0/v1.1.1 (ver sección siguiente). Las fases 2/4/5 de este roadmap siguen sin numerar hasta que se retomen.
 
 ### Fase 1 — qué se hizo exactamente (v1.1.1)
 
@@ -162,6 +168,27 @@ El repo tiene **dos criterios de escalado conviviendo, y eso está bien**:
 - No existe ninguna infraestructura de UI compartida: cero clase base, cero clase de tema, cero UserControl. Conviven 3 paletas, 52 `Color.FromArgb` hardcodeados, 130+ colores con nombre y 14 tamaños de fuente.
 - "Space Grotesk" y "JetBrains Mono" (usadas en `ActivationForm`/`LockForm`) **no vienen instaladas en Windows** — esas pantallas ya renderizan con el fallback de GDI+, el branding tipográfico nunca funcionó.
 - `ProductosForm` tiene `ClientSize = 1084x611` y se corta en notebooks de 1366x768. Su `panelEditor` solo tiene ~40px libres entre el último campo y los botones, así que sumar campos ahí requiere `AutoScroll = true`.
+
+## Tanda de bugs post-v1.1.0/v1.1.1 (v1.1.2–v1.1.5)
+
+Todos surgieron de usar de verdad las funcionalidades que trajeron v1.1.0 (productos fraccionables) y v1.1.1 (pantallas antes inalcanzables) — mismo patrón que los dos bugs de Dashboard: código que nunca se había ejercitado.
+
+**v1.1.2 — descuento de stock roto en productos fraccionables:**
+- `Services/ExcelService.cs` leía la columna Stock con `int.TryParse`, que devuelve `false` en silencio ante un valor decimal (`"12,5"`) y deja el stock en 0 sin avisar. Fix: usar el mismo `LeerDecimal` que ya usaban Precio/Costo.
+- `Forms/VentasForm.cs` cargaba la lista de productos (con su `Stock`) una sola vez en `VentasForm_Load` y nunca la refrescaba. Vender el mismo producto fraccionable dos veces en la misma sesión validaba "stock suficiente" contra un número desactualizado.
+
+**v1.1.3 — cobro de cuenta corriente rompía + rename Fiado → Cuenta Corriente:**
+`Modelos/Pago.cs` tiene `Observaciones` sin valor por defecto, y ni `CuentaCorrienteForm` ni `ReporteFiadosForm` lo completaban al registrar un pago — pero la columna en SQLite es `NOT NULL`. Cualquier intento real de cobrar tiraba `SQLite Error 19: NOT NULL constraint failed: Pagos.Observaciones`, un bug de "nunca se probó con datos reales" (los reportes se veían bien, pero nadie había cobrado nada). Fix: `Observaciones = ""` por defecto en el modelo. De paso se renombró "Fiado" a "Cuenta Corriente" en toda la UI (menú, VentasForm, mensajes) con una migración de datos para no perder el `MetodoPago` ya guardado en ventas viejas.
+
+**v1.1.4 — Escape/Limpiar dejaba Clientes y Proveedores con el registro anterior pegado:**
+`Limpiar()` limpiaba los campos y **después** llamaba a `CargarDatos()`, que rebindea el `DataSource` del grid. WinForms autoselecciona la primera fila al rebindear un `DataGridView`, lo que dispara `SelectionChanged` de nuevo y repuebla los campos con ese registro — el usuario apretaba Escape para cargar uno nuevo y la pantalla nunca quedaba realmente en blanco. Fix: desconectar el handler de `SelectionChanged` mientras se recarga/limpia la selección, limpiar los campos al final. **Gotcha general de WinForms para tener en cuenta en cualquier grid con selección + un botón "Nuevo/Limpiar":** rebind de `DataSource` ⇒ autoselección de fila 0 ⇒ reentrada del handler de selección, si no se desconecta a tiempo.
+
+**v1.1.5 — restaurar un backup (feature nueva, no bug):**
+Hasta acá la app solo podía *crear* backups; cargar uno de vuelta era 100% manual (cerrar la app, buscar el `.db`, renombrarlo a mano) — inviable para el usuario final sin conocimientos técnicos que pidió esto. Se agregó un botón "Restaurar un Backup" en Configuración: elige el archivo con un diálogo normal, se guarda una copia de la base actual por las dudas, y la app se cierra y reabre sola ya restaurada. El reemplazo real corre en un script auxiliar que **reutiliza el mismo patrón ya probado del auto-actualizador** (`Services/UpdateService.cs`): espera a que el proceso cierre y reintenta el reemplazo con un límite acotado de reintentos (no infinito), garantizando que la app siempre vuelva a abrirse al final aunque el archivo tarde en soltarse. Verificado con un harness aislado que simula un PID real y un lock de archivo real, sin correr la GUI completa — mismo método ya usado para verificar el fix del actualizador en v1.0.4.
+
+## Licencia demo multi-dispositivo (ops-dashboard)
+
+Para mostrar el sistema a prospectos sin pisar la licencia de un cliente real: `DesktopLicense` en `ops-dashboard` tiene un campo `esDemo` (default `false`). Si `esDemo = true`, `licencias/validar/route.ts` **no** rechaza por `machineFingerprint` distinto — se puede activar en varias PCs a la vez. Las licencias normales de clientes pagos siguen atadas a un solo equipo, sin cambios. Se marca/desmarca desde el panel admin (`/licencias-desktop/:id`, botón "Marcar como demo"). Pusheado a `master` de `ops-dashboard` — **falta correr la migración de Prisma** (`prisma migrate dev` o `db push`) contra la base real si todavía no se hizo, si no el panel y `licencias/validar` van a tirar error por la columna faltante.
 
 ## Ecosistema — repos relacionados
 
