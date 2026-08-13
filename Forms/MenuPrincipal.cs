@@ -2,12 +2,15 @@ using AlmacenDesktop.Data;
 using AlmacenDesktop.Helpers;
 using AlmacenDesktop.Modelos;
 using AlmacenDesktop.Services;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace AlmacenDesktop.Forms
 {
@@ -46,10 +49,172 @@ namespace AlmacenDesktop.Forms
             lblBienvenida.Text = $"Hola, {_usuarioActual.Nombre} ({_usuarioActual.Rol})";
 
             ConstruirMenu();
-            MostrarGuiaSiCorresponde();
 
-            // Chequeo de actualizaciones en segundo plano — no bloquea la apertura del menú.
+            // En una instalación recién estrenada no hay historial que graficar, así
+            // que ese espacio lo aprovecha la guía de inicio. Son excluyentes a
+            // propósito: evita además que la carga async del gráfico le pise el panel.
+            if (!MostrarGuiaSiCorresponde())
+            {
+                _ = CargarEvolucionAsync();
+            }
+
             _ = ChequearActualizacionesAsync();
+        }
+
+        // --- PANTALLA DE INICIO: EVOLUCIÓN MES A MES ---
+
+        private const int MesesHistorial = 12;
+
+        private sealed class VentaMes
+        {
+            public DateTime Mes { get; set; }
+            public decimal Total { get; set; }
+            public decimal Ganancia { get; set; }
+        }
+
+        private async Task CargarEvolucionAsync()
+        {
+            MostrarMensajeGrafico("Cargando evolución del negocio…");
+            try
+            {
+                var datos = await Task.Run(() => ObtenerVentasPorMes(MesesHistorial));
+                if (this.IsDisposed || panelGrafico.IsDisposed) return;
+
+                if (datos.All(d => d.Total == 0))
+                {
+                    MostrarMensajeGrafico("Todavía no hay ventas registradas.\nCuando empieces a vender vas a ver acá la evolución mes a mes.");
+                    return;
+                }
+
+                DibujarEvolucion(datos);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error cargando evolución: " + ExceptionHelper.ObtenerMensaje(ex));
+                MostrarMensajeGrafico("No se pudo cargar la evolución del negocio.");
+            }
+        }
+
+        /// <summary>
+        /// Ventas y ganancia estimada agrupadas por mes, incluyendo los meses sin
+        /// ventas (si se omitieran, el gráfico saltearía huecos y mentiría sobre
+        /// la evolución real).
+        /// </summary>
+        private List<VentaMes> ObtenerVentasPorMes(int meses)
+        {
+            var primerMes = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(-(meses - 1));
+
+            var resultado = new List<VentaMes>();
+            for (int i = 0; i < meses; i++)
+                resultado.Add(new VentaMes { Mes = primerMes.AddMonths(i) });
+
+            using (var context = new AlmacenDbContext())
+            {
+                var ventas = context.Ventas
+                    .Where(v => v.Fecha >= primerMes)
+                    .Select(v => new { v.Fecha, v.Total })
+                    .ToList();
+
+                foreach (var v in ventas)
+                {
+                    var bucket = resultado.FirstOrDefault(x => x.Mes.Year == v.Fecha.Year && x.Mes.Month == v.Fecha.Month);
+                    if (bucket != null) bucket.Total += v.Total;
+                }
+
+                // Ganancia ESTIMADA: usa el costo actual del producto, no el costo al
+                // momento de la venta — el esquema no guarda un snapshot del costo en
+                // DetalleVenta. Mismo criterio que ya usa el Resumen del Negocio, así
+                // que ambas pantallas dan el mismo número.
+                var detalles = context.DetallesVenta
+                    .Include(d => d.Producto)
+                    .Include(d => d.Venta)
+                    .Where(d => d.Venta.Fecha >= primerMes)
+                    .Select(d => new { d.Venta.Fecha, d.PrecioUnitario, d.Cantidad, d.Producto.Costo })
+                    .ToList();
+
+                foreach (var d in detalles)
+                {
+                    var bucket = resultado.FirstOrDefault(x => x.Mes.Year == d.Fecha.Year && x.Mes.Month == d.Fecha.Month);
+                    if (bucket != null) bucket.Ganancia += (d.PrecioUnitario - d.Costo) * d.Cantidad;
+                }
+            }
+
+            return resultado;
+        }
+
+        private void DibujarEvolucion(List<VentaMes> datos)
+        {
+            panelGrafico.Controls.Clear();
+
+            var chart = new Chart { Dock = DockStyle.Fill, BackColor = Color.White };
+
+            var area = new ChartArea("Evolucion");
+            area.BackColor = Color.White;
+            area.AxisX.MajorGrid.Enabled = false;
+            area.AxisX.LineColor = Color.FromArgb(203, 213, 225);
+            area.AxisX.LabelStyle.Font = new Font("Segoe UI", 8.5F);
+            area.AxisX.Interval = 1;
+            area.AxisY.MajorGrid.LineColor = Color.FromArgb(235, 238, 242);
+            area.AxisY.LineColor = Color.FromArgb(203, 213, 225);
+            area.AxisY.LabelStyle.Font = new Font("Segoe UI", 8.5F);
+            area.AxisY.LabelStyle.Format = "C0";
+            chart.ChartAreas.Add(area);
+
+            var serieVentas = new Series("Ventas")
+            {
+                ChartType = SeriesChartType.Column,
+                Color = ColorPrimario,
+                BorderWidth = 0
+            };
+            var serieGanancia = new Series("Ganancia estimada")
+            {
+                ChartType = SeriesChartType.Line,
+                Color = Color.FromArgb(46, 125, 50),
+                BorderWidth = 3,
+                MarkerStyle = MarkerStyle.Circle,
+                MarkerSize = 7
+            };
+
+            var cultura = new CultureInfo("es-AR");
+            foreach (var d in datos)
+            {
+                string etiqueta = d.Mes.ToString("MMM yy", cultura);
+                serieVentas.Points.AddXY(etiqueta, (double)d.Total);
+                serieGanancia.Points.AddXY(etiqueta, (double)d.Ganancia);
+            }
+
+            chart.Series.Add(serieVentas);
+            chart.Series.Add(serieGanancia);
+            chart.Legends.Add(new Legend("Leyenda")
+            {
+                Docking = Docking.Top,
+                Alignment = StringAlignment.Near,
+                Font = new Font("Segoe UI", 9F),
+                BorderColor = Color.Transparent
+            });
+
+            chart.Titles.Add(new Title(
+                $"Ventas y ganancia — últimos {MesesHistorial} meses",
+                Docking.Top,
+                new Font("Segoe UI", 11F, FontStyle.Bold),
+                Color.FromArgb(30, 41, 59))
+            { Alignment = ContentAlignment.TopLeft });
+
+            panelGrafico.Controls.Add(chart);
+        }
+
+        private void MostrarMensajeGrafico(string mensaje)
+        {
+            if (panelGrafico.IsDisposed) return;
+            panelGrafico.Controls.Clear();
+            panelGrafico.Controls.Add(new Label
+            {
+                Text = mensaje,
+                Dock = DockStyle.Fill,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Font = new Font("Segoe UI", 11F),
+                ForeColor = ColorTextoSuave
+            });
         }
 
         // --- CONSTRUCCIÓN DEL MENÚ ---
@@ -216,48 +381,43 @@ namespace AlmacenDesktop.Forms
 
         // Solo tiene sentido mientras el comercio no configuró usuarios todavía;
         // una vez que hay equipo cargado, ocupa lugar sin aportar nada.
-        private void MostrarGuiaSiCorresponde()
+        // Devuelve true si efectivamente mostró la guía.
+        private bool MostrarGuiaSiCorresponde()
         {
-            if (_usuarioActual.Rol != RolUsuario.Admin) return;
+            if (_usuarioActual.Rol != RolUsuario.Admin) return false;
 
             try
             {
                 using (var context = new AlmacenDbContext())
                 {
-                    if (context.Usuarios.Count() > 1) return;
+                    if (context.Usuarios.Count() > 1) return false;
                 }
             }
             catch
             {
-                return; // Si no se puede leer la base, simplemente no mostramos la guía.
+                return false; // Si no se puede leer la base, simplemente no mostramos la guía.
             }
 
-            var grpGuia = new GroupBox
-            {
-                Text = "📘 Guía de Inicio: Configurar Usuarios del Negocio",
-                Location = new Point(275, 75),
-                Size = new Size(520, 160),
-                Font = new Font("Segoe UI", 10, FontStyle.Bold),
-                ForeColor = ColorPrimario,
-                BackColor = Color.White
-            };
+            lblTituloHome.Text = "Primeros pasos";
 
             var lblInstrucciones = new Label
             {
                 Text = "¡Bienvenido a VENDEMAX!\n\n" +
-                       "Para configurar su comercio, le sugerimos seguir estos pasos:\n" +
-                       "1. Crear Administradores: vaya a 'Usuarios' y registre a los socios con rol 'Admin'.\n" +
-                       "2. Crear Empleados / Cajeros: registre a su personal con el rol 'Vendedor'.\n" +
-                       "   (El sistema limitará su acceso protegiendo la caja, importaciones y reportes).\n" +
-                       "3. Seguridad: asigne contraseñas seguras a cada cuenta registrada.",
-                Location = new Point(15, 25),
-                Size = new Size(490, 120),
-                Font = new Font("Segoe UI", 9, FontStyle.Regular),
-                ForeColor = Color.Black
+                       "Para configurar su comercio, le sugerimos seguir estos pasos:\n\n" +
+                       "1.  Crear Administradores: vaya a «Usuarios» y registre a los socios con rol Admin.\n\n" +
+                       "2.  Crear Empleados / Cajeros: registre a su personal con el rol Vendedor.\n" +
+                       "     El sistema limitará su acceso protegiendo la caja, importaciones y reportes.\n\n" +
+                       "3.  Seguridad: asigne contraseñas seguras a cada cuenta registrada.\n\n" +
+                       "Cuando empiece a vender, acá va a ver la evolución mes a mes de su negocio.",
+                Dock = DockStyle.Fill,
+                Padding = new Padding(30, 25, 30, 25),
+                Font = new Font("Segoe UI", 10F),
+                ForeColor = Color.FromArgb(30, 41, 59)
             };
 
-            grpGuia.Controls.Add(lblInstrucciones);
-            this.Controls.Add(grpGuia);
+            panelGrafico.Controls.Clear();
+            panelGrafico.Controls.Add(lblInstrucciones);
+            return true;
         }
 
         private async Task ChequearActualizacionesAsync()

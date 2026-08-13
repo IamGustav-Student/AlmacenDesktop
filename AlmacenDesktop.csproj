@@ -7,7 +7,7 @@
 		<UseWindowsForms>true</UseWindowsForms>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<ApplicationIcon>Resources\app.ico</ApplicationIcon>
-		<Version>1.1.0</Version>
+		<Version>1.1.1</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -29,6 +29,14 @@
 
 		<!-- NUEVAS DEPENDENCIAS (Gráficos y Seguridad) -->
 		<PackageReference Include="System.Windows.Forms.DataVisualization" Version="1.0.0-prerelease.20110.1" />
+		<!-- DataVisualization (port de los Chart de .NET Framework) referencia
+		     System.Data.SqlClient para el data-binding de sus series. Sin esta
+		     referencia explícita el assembly no se copia a la salida y CUALQUIER
+		     Chart tira "Could not load file or assembly 'System.Data.SqlClient'"
+		     al pintarse — excepción no controlada, fuera de todo try/catch.
+		     No se usa SQL Server en ningún lado: está solo para satisfacer esa
+		     dependencia. -->
+		<PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
 		<PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
 		<PackageReference Include="System.Management" Version="8.0.0" />
 		<PackageReference Include="Obfuscar" Version="2.2.38" PrivateAssets="all" GeneratePathProperty="true" />

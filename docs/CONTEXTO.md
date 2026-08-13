@@ -83,6 +83,8 @@ El token de GitHub usado para releases está en `.github-token.env` (gitignoread
 | v1.0.5 | Botones del diálogo de actualización cortados — primer caso de bug de `AutoScaleMode` |
 | v1.0.6 | Configuración se rompía si el Spooler de Windows estaba caído + búsqueda de productos sensible a mayúsculas |
 | v1.0.7 | Barrida completa: mensajes de error genéricos → `ExceptionHelper` en toda la app; `AutoScaleMode` en los 9 formularios que faltaban; solapamiento real de título/botón en Clientes |
+| v1.1.0 | Productos sueltos por peso / unidad fraccionable (`UnidadMedida`, cantidades decimales) |
+| v1.1.1 | Menú que expone las 7 pantallas ocultas + pantalla de inicio con evolución de 12 meses + fix de gráficos rotos y de ORDER BY decimal |
 
 ## Roadmap en curso — evolución como software de almacén (desde 2026-08-12)
 
@@ -96,15 +98,16 @@ Plan completo (con justificación técnica y análisis de riesgos) en el archivo
 
 | Fase | Versión | Qué hace | Estado |
 |---|---|---|---|
-| 1 | v1.0.8 | Menú data-driven que expone los 7 módulos ocultos | ✅ hecho |
-| 2 | v1.0.9 | `Helpers/Theme.cs` — paleta y tipografía centralizadas | ⏳ pendiente |
-| 3 | v1.0.10 | Pantalla de inicio con estadísticas históricas | 🔨 en curso |
-| 4 | v1.0.11 | `Forms/BaseForm.cs` + atajos de teclado unificados | ⏳ pendiente |
-| 5 | v1.0.12+ | Roll-out del tema por tráfico (Ventas → Productos → Clientes → resto) | ⏳ pendiente |
+| 1 | v1.1.1 | Menú data-driven que expone los 7 módulos ocultos | ✅ hecho |
+| 3 | v1.1.1 | Pantalla de inicio con evolución mes a mes (12 meses) | ✅ hecho |
+| — | v1.1.1 | Fix: gráficos rotos (SqlClient) + ORDER BY decimal en SQLite | ✅ hecho |
+| 2 | v1.1.2 | `Helpers/Theme.cs` — paleta y tipografía centralizadas | ⏳ pendiente |
+| 4 | v1.1.3 | `Forms/BaseForm.cs` + atajos de teclado unificados | ⏳ pendiente |
+| 5 | v1.1.4+ | Roll-out del tema por tráfico (Ventas → Productos → Clientes → resto) | ⏳ pendiente |
 | 6 | — | Balanza: lectura de código de barras con peso embebido | ⏳ pendiente |
 | 7 | — | Precio mayorista / por cantidad | ⏳ pendiente |
 
-### Fase 1 — qué se hizo exactamente (v1.0.8)
+### Fase 1 — qué se hizo exactamente (v1.1.1)
 
 - `Forms/MenuPrincipal.Designer.cs` pasó a ser **solo estructura**: un `panelMenu` (Dock.Left, 250px, navy) con un único hijo `flowMenu` (`FlowLayoutPanel`, Dock.Fill, AutoScroll, TopDown, `WrapContents=false`). Ya no declara un `Button` por pantalla.
 - `Forms/MenuPrincipal.cs` arma el menú en runtime desde una lista de `ItemMenu { Grupo, Texto, SoloAdmin, Crear, Destacado }`. **Agregar una pantalla nueva = una línea en `ObtenerItems()`**, sin tocar el Designer ni escribir un handler.
@@ -115,6 +118,26 @@ Plan completo (con justificación técnica y análisis de riesgos) en el archivo
 **Gotcha del FlowLayoutPanel con AutoScroll:** el ancho de cada ítem se calcula como `flowMenu.ClientSize.Width - 22 - SystemInformation.VerticalScrollBarWidth`. Ese último descuento va **siempre**, aunque la barra vertical todavía no se vea: si no se reserva, al aparecer la barra en pantallas bajas reduce el área útil y dispara además una barra horizontal. Verificado con harness: sin reservar → `ScrollH visible: True`; reservando → ambas en False.
 
 **Cómo se verificó (útil para repetirlo):** no se puede correr la app entera sin pasar por el gate de licencia, así que se armó un proyecto WinForms descartable en el scratchpad que referencia `AlmacenDesktop.csproj`, instancia `MenuPrincipal` con un `Usuario` falso (Admin y Vendedor), lo muestra, y vuelca (a) un PNG con `DrawToBitmap` y (b) un reporte de texto con la posición/alto de cada ítem y el estado de los scrollbars. Confirmó los 15 ítems para Admin, 11 para Vendedor, y que todo entra sin scroll. Ojo: `AlmacenDesktop.Program` es `internal`, así que desde afuera no se puede setear `ConnectionStringGlobal` — el `AlmacenDbContext` cae a su fallback de `almacen.db` junto al exe.
+
+### Fase 3 — pantalla de inicio con evolución mes a mes (v1.1.1)
+
+El panel derecho del menú (antes vacío en gris) ahora muestra un gráfico de **ventas y ganancia estimada de los últimos 12 meses**. Decisión del usuario: va en el panel del menú (no dentro del Resumen del Negocio) y la métrica elegida fue específicamente la evolución mes a mes.
+
+- `MenuPrincipal.Designer.cs` suma `panelContenido` (Dock.Fill) con `lblTituloHome` + `lblBienvenida` (Dock.Top) y `panelGrafico` (Dock.Fill, tarjeta blanca).
+- **Orden de docking (importante):** el control `Fill` se agrega **primero** a `Controls` y los bordes después. Es el criterio que ya usaba `ProductosForm.Designer.cs:284-285` (`panelMain` Fill primero, `panelEditor` Left después) — se siguió ese ejemplo en vez de adivinar.
+- `ObtenerVentasPorMes()` arma los 12 buckets **incluyendo los meses sin ventas**; si se omitieran, el gráfico saltearía huecos y mentiría sobre la evolución.
+- La ganancia es **estimada**: usa el costo *actual* del producto, no el costo al momento de la venta (el esquema no guarda snapshot de costo en `DetalleVenta`). Mismo criterio que ya usaba el Resumen del Negocio, así que ambas pantallas dan el mismo número.
+- La guía de inicio y el gráfico son **excluyentes**: si hay ≤1 usuario (instalación nueva, sin historial que graficar) se muestra la guía dentro de la misma tarjeta; si no, se carga el gráfico. Evita además que la carga async le pise el panel.
+
+### Dos bugs reales encontrados al exponer las pantallas ocultas (corregidos en v1.0.8)
+
+Ambos estaban **latentes justamente porque `DashboardForm` era inalcanzable** — nunca se habían ejecutado.
+
+**1. Cualquier `Chart` reventaba la app.** `System.Windows.Forms.DataVisualization` (el port de los Chart de .NET Framework) referencia `System.Data.SqlClient` para el data-binding de sus series, pero ese assembly **no se copiaba a la salida del build**. Resultado: al pintarse cualquier gráfico saltaba `Could not load file or assembly 'System.Data.SqlClient'` como **excepción no controlada** (fuera de todo try/catch, porque ocurre durante el pintado, no en la construcción). Fix: `<PackageReference Include="System.Data.SqlClient" Version="4.8.6" />` en `AlmacenDesktop.csproj`. **No se usa SQL Server en ningún lado** — está solo para satisfacer esa dependencia. Si algún día se saca esa referencia, todos los gráficos vuelven a romperse.
+
+**2. SQLite no puede ordenar por `decimal` — regresión de v1.1.0.** Cuando `Stock` y `Cantidad` pasaron de `int` a `decimal` (soporte de productos por peso), dos consultas de `DashboardForm` quedaron rotas: `.OrderBy(p => p.Stock)` y `.OrderByDescending(x => x.Unidades)` (suma de `Cantidad`). Error: *"SQLite does not support expressions of type 'decimal' in ORDER BY clauses"*. Como el form atrapa la excepción y la muestra en un `MessageBox` modal, desde afuera solo se veía un cuelgue. Fix: `.AsEnumerable()` antes del `OrderBy` para ordenar en memoria (son pocas filas).
+
+> **Regla para el futuro:** en este proyecto, cualquier `OrderBy`/`OrderByDescending` sobre `Stock`, `StockMinimo`, `Cantidad`, `Precio`, `Costo` o `Subtotal` **debe ir después de un `.AsEnumerable()`**. `ReporteGananciasForm` ya lo hacía bien (trae a memoria antes de agrupar) y por eso nunca falló.
 
 ### Decisiones tomadas (no re-litigar)
 

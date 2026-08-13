@@ -128,15 +128,20 @@ namespace AlmacenDesktop.Forms
                     lblGananciaMonto.Text = gananciaMes.ToString("C2");
 
                     // 4. KPI: Alertas de Stock
+                    // El ORDER BY se hace en memoria (AsEnumerable) a propósito:
+                    // desde que Stock pasó a decimal, SQLite no puede ordenar por esa
+                    // columna ("SQLite does not support expressions of type 'decimal'
+                    // in ORDER BY clauses"). Son pocas filas, ordenar acá no cuesta nada.
                     var productosCriticos = db.Productos
                         .Where(p => p.Stock <= p.StockMinimo && p.Activo)
-                        .OrderBy(p => p.Stock)
                         .Select(p => new {
                             Id = p.Id,
                             Producto = p.Nombre,
                             Stock = p.Stock,
                             Minimo = p.StockMinimo
                         })
+                        .AsEnumerable()
+                        .OrderBy(p => p.Stock)
                         .ToList();
 
                     lblAlertaCantidad.Text = productosCriticos.Count.ToString();
@@ -152,9 +157,13 @@ namespace AlmacenDesktop.Forms
                     dgvBajoStock.DataSource = productosCriticos;
 
                     // 5. GRID: Top 5 Productos (Ranking)
+                    // Mismo motivo que arriba: Cantidad es decimal y SQLite no puede
+                    // ordenar por decimal, así que se agrupa y ordena en memoria.
                     var ranking = db.DetallesVenta
                         .Where(d => d.Venta.Fecha >= inicioMes)
-                        .GroupBy(d => d.Producto.Nombre)
+                        .Select(d => new { Nombre = d.Producto.Nombre, d.Cantidad, d.Subtotal })
+                        .AsEnumerable()
+                        .GroupBy(d => d.Nombre)
                         .Select(g => new {
                             Producto = g.Key,
                             Unidades = g.Sum(x => x.Cantidad),
