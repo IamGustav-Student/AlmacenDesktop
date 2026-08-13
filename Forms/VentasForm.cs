@@ -437,7 +437,11 @@ namespace AlmacenDesktop.Forms
         {
             _carrito.Clear();
             txtPagaCon.Text = "";
-            cboMetodoPago.SelectedIndex = 0;
+            // Recarga clientes/productos desde la BD (no solo el combo de método de
+            // pago): el Stock que se usa para validar en AgregarAlCarrito quedaba
+            // congelado desde que se abrió la pantalla, permitiendo sobre-vender un
+            // producto si se completaban varias ventas sin cerrar VentasForm.
+            CargarDatosIniciales();
             ActualizarUI();
             txtEscanear.Focus();
         }

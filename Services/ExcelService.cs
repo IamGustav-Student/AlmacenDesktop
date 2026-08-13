@@ -78,7 +78,7 @@ namespace AlmacenDesktop.Services
 
                             decimal precio = LeerDecimal(fila, mapa["precio"]);
                             decimal costo = LeerDecimal(fila, mapa["costo"]);
-                            int stock = LeerInt(fila, mapa["stock"]);
+                            decimal stock = LeerDecimal(fila, mapa["stock"]);
 
                             if (precio < 0) throw new ArgumentException("El precio de venta no puede ser negativo.");
                             if (costo < 0) throw new ArgumentException("El costo no puede ser negativo.");
@@ -261,6 +261,5 @@ namespace AlmacenDesktop.Services
 
         private string LeerCelda(IXLRow fila, int colIdx) => colIdx == -1 ? "" : fila.Cell(colIdx).GetValue<string>().Trim();
         private decimal LeerDecimal(IXLRow fila, int colIdx) => (colIdx != -1 && decimal.TryParse(fila.Cell(colIdx).Value.ToString(), out decimal d)) ? d : 0;
-        private int LeerInt(IXLRow fila, int colIdx) => (colIdx != -1 && int.TryParse(fila.Cell(colIdx).Value.ToString(), out int i)) ? i : 0;
     }
 }
