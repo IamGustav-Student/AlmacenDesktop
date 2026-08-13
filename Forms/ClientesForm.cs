@@ -164,6 +164,17 @@ namespace AlmacenDesktop.Forms
 
         private void Limpiar()
         {
+            // CargarDatos() reasigna el DataSource del grid, y WinForms autoselecciona
+            // la primera fila al rebindear — eso disparaba SelectionChanged de nuevo y
+            // repoblaba los campos con ese cliente, así que "limpiar" nunca dejaba la
+            // pantalla realmente en blanco (ej. al apretar Escape para cargar uno nuevo).
+            // Desconectamos el evento mientras se recarga/limpia la selección, y los
+            // campos se limpian al final para que ese sea siempre el estado visible.
+            dgvClientes.SelectionChanged -= dgvClientes_SelectionChanged;
+            CargarDatos();
+            dgvClientes.ClearSelection();
+            dgvClientes.SelectionChanged += dgvClientes_SelectionChanged;
+
             txtNombre.Clear();
             txtApellido.Clear();
             txtDni.Clear();
@@ -172,8 +183,6 @@ namespace AlmacenDesktop.Forms
             txtDireccion.Clear();
             _clienteIdSeleccionado = 0;
             btnGuardar.Text = "GUARDAR CLIENTE (F5)";
-            dgvClientes.ClearSelection();
-            CargarDatos();
             // Devolvemos el foco al primer campo para seguir cargando rápido
             txtNombre.Focus();
         }
