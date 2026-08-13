@@ -28,6 +28,7 @@
             this.btnGuardar = new System.Windows.Forms.Button();
             this.btnBackup = new System.Windows.Forms.Button();
             this.btnConfigurarAfip = new System.Windows.Forms.Button();
+            this.btnRestaurarBackup = new System.Windows.Forms.Button();
 
             // CAMBIO: Ahora es un ComboBox
             this.cboImpresoras = new System.Windows.Forms.ComboBox();
@@ -151,10 +152,22 @@
             this.btnConfigurarAfip.UseVisualStyleBackColor = false;
             this.btnConfigurarAfip.Click += new System.EventHandler(this.btnConfigurarAfip_Click);
 
+            // btnRestaurarBackup
+            this.btnRestaurarBackup.BackColor = System.Drawing.Color.Firebrick;
+            this.btnRestaurarBackup.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnRestaurarBackup.ForeColor = System.Drawing.Color.White;
+            this.btnRestaurarBackup.Location = new System.Drawing.Point(30, 310);
+            this.btnRestaurarBackup.Name = "btnRestaurarBackup";
+            this.btnRestaurarBackup.Size = new System.Drawing.Size(530, 40);
+            this.btnRestaurarBackup.Text = "🗄️  RESTAURAR UN BACKUP";
+            this.btnRestaurarBackup.UseVisualStyleBackColor = false;
+            this.btnRestaurarBackup.Click += new System.EventHandler(this.btnRestaurarBackup_Click);
+
             // Form
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(600, 330);
+            this.ClientSize = new System.Drawing.Size(600, 385);
+            this.Controls.Add(this.btnRestaurarBackup);
             this.Controls.Add(this.btnConfigurarAfip);
             this.Controls.Add(this.btnBackup);
             this.Controls.Add(this.btnGuardar);
@@ -198,6 +211,7 @@
         private System.Windows.Forms.Button btnGuardar;
         private System.Windows.Forms.Button btnBackup;
         private System.Windows.Forms.Button btnConfigurarAfip;
+        private System.Windows.Forms.Button btnRestaurarBackup;
         private System.Windows.Forms.ComboBox cboImpresoras; // Variable nueva
     }
 }

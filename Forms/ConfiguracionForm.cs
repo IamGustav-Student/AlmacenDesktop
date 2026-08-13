@@ -144,6 +144,51 @@ namespace AlmacenDesktop.Forms
             }
         }
 
+        private void btnRestaurarBackup_Click(object sender, EventArgs e)
+        {
+            string carpetaBackups = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backups");
+
+            using (var ofd = new OpenFileDialog())
+            {
+                ofd.Title = "Elegí el archivo de backup a restaurar";
+                ofd.Filter = "Backup de Vendemax (*.db)|*.db";
+                ofd.InitialDirectory = System.IO.Directory.Exists(carpetaBackups)
+                    ? carpetaBackups
+                    : AppDomain.CurrentDomain.BaseDirectory;
+
+                if (ofd.ShowDialog() != DialogResult.OK) return;
+
+                var confirmacion = MessageBox.Show(
+                    "⚠️ ESTO VA A REEMPLAZAR TODOS LOS DATOS ACTUALES\n\n" +
+                    "Ventas, productos, clientes, caja — todo lo que hay cargado ahora mismo se va a " +
+                    "reemplazar por lo que había guardado en el backup elegido.\n\n" +
+                    "Antes de tocar nada, se guarda una copia de seguridad de los datos actuales, " +
+                    "por si te equivocaste de archivo.\n\n" +
+                    "La aplicación se va a cerrar y volver a abrir sola cuando termine.\n\n" +
+                    "¿Confirmás que querés restaurar este backup?",
+                    "Restaurar Backup — Acción Importante",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning,
+                    MessageBoxDefaultButton.Button2);
+
+                if (confirmacion != DialogResult.Yes) return;
+
+                try
+                {
+                    _backupService.RestaurarBackup(ofd.FileName);
+                    // Si llegó hasta acá sin excepción, RestaurarBackup ya llamó a
+                    // Application.Exit() — la app se está cerrando para restaurarse sola.
+                }
+                catch (Exception ex)
+                {
+                    AudioHelper.PlayError();
+                    MessageBox.Show(
+                        $"No se pudo restaurar el backup:\n{ExceptionHelper.ObtenerMensaje(ex)}",
+                        "Error al Restaurar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
         private void btnConfigurarAfip_Click(object sender, EventArgs e)
         {
             var res = MessageBox.Show(
