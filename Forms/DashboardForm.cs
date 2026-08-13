@@ -35,10 +35,14 @@ namespace AlmacenDesktop.Forms
 
         private void InicializarGraficos()
         {
-            // Redimensionar Form para alojar gráficos abajo sin desfasar el diseño
+            // El diseño de los gráficos asume ~1000x780. Antes se fijaba Size +
+            // MinimumSize + MaximumSize al mismo valor, lo que hacía que la ventana
+            // no entrara en notebooks de 1366x768 (queda menos alto útil tras la
+            // barra de tareas y el marco). Se deja un mínimo razonable y se permite
+            // agrandar; si la pantalla es baja, el usuario puede maximizar.
             this.Size = new Size(1000, 780);
-            this.MinimumSize = new Size(1000, 780);
-            this.MaximumSize = new Size(1000, 780);
+            this.MinimumSize = new Size(900, 600);
+            this.AutoScroll = true;
 
             // 1. CHART VENTAS (Línea de Tendencia)
             chartVentas = new Chart();
