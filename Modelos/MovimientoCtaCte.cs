@@ -2,12 +2,12 @@
 
 namespace AlmacenDesktop.Modelos
 {
-    // Esta clase sirve para mostrar datos en las grillas de cuenta corriente y fiados.
+    // Esta clase sirve para mostrar datos en las grillas de cuenta corriente.
     // Al sacarla de los Forms, evitamos duplicar código.
     public class MovimientoCtaCte
     {
         public DateTime Fecha { get; set; }
-        public string Tipo { get; set; } // Ejemplo: "COMPRA FIADA", "PAGO A CUENTA"
+        public string Tipo { get; set; } // Ejemplo: "COMPRA CTA. CTE.", "PAGO A CUENTA"
         public string Descripcion { get; set; } // Ejemplo: "Venta #123"
         public decimal Debe { get; set; }
         public decimal Haber { get; set; }

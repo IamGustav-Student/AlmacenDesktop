@@ -62,11 +62,11 @@ namespace AlmacenDesktop.Forms
             {
                 // Mapeamos a la clase unificada MovimientoCtaCte
                 var ventasFiadas = context.Ventas
-                    .Where(v => v.ClienteId == clienteId && v.MetodoPago == "Fiado")
+                    .Where(v => v.ClienteId == clienteId && v.MetodoPago == "Cuenta Corriente")
                     .Select(v => new MovimientoCtaCte
                     {
                         Fecha = v.Fecha,
-                        Tipo = "COMPRA FIADA",
+                        Tipo = "COMPRA CTA. CTE.",
                         Descripcion = $"Venta #{v.Id}", // CAMBIO: Detalle -> Descripcion
                         Debe = v.Total,
                         Haber = 0

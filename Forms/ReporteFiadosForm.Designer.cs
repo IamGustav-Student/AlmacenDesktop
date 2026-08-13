@@ -105,7 +105,7 @@
             this.lblTituloGrilla.Name = "lblTituloGrilla";
             this.lblTituloGrilla.Padding = new System.Windows.Forms.Padding(10);
             this.lblTituloGrilla.Size = new System.Drawing.Size(500, 40);
-            this.lblTituloGrilla.Text = "Historial de Movimientos (Fiados y Pagos)";
+            this.lblTituloGrilla.Text = "Historial de Movimientos (Cuenta Corriente y Pagos)";
 
             // Form
             this.ClientSize = new System.Drawing.Size(800, 500);

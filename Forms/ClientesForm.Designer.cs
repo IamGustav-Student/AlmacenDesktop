@@ -121,7 +121,7 @@ namespace AlmacenDesktop.Forms
             this.btnVerCtaCte.Name = "btnVerCtaCte";
             this.btnVerCtaCte.Size = new Size(290, 35);
             this.btnVerCtaCte.TabIndex = 16;
-            this.btnVerCtaCte.Text = "📊 VER CUENTA CORRIENTE (FIADOS)";
+            this.btnVerCtaCte.Text = "📊 VER CUENTA CORRIENTE";
             this.btnVerCtaCte.UseVisualStyleBackColor = false;
             this.btnVerCtaCte.Click += new EventHandler(this.btnVerCtaCte_Click);
             // 

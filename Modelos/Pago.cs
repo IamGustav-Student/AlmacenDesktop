@@ -19,8 +19,10 @@ namespace AlmacenDesktop.Modelos
         [Column(TypeName = "decimal(18, 2)")]
         public decimal Monto { get; set; }
 
+        // Default a "" (no null): la columna es NOT NULL en SQLite y ni
+        // CuentaCorrienteForm ni ReporteFiadosForm la completan al registrar un pago.
         [StringLength(200)]
-        public string Observaciones { get; set; }
+        public string Observaciones { get; set; } = string.Empty;
 
         public int UsuarioId { get; set; } // Qué cajero recibió la plata
         public Usuario Usuario { get; set; }

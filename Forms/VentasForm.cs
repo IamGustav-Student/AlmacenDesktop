@@ -121,7 +121,7 @@ namespace AlmacenDesktop.Forms
             cboMetodoPago.Items.Add("Efectivo");
             cboMetodoPago.Items.Add("Transferencia");
             cboMetodoPago.Items.Add("Billetera Virtual");
-            cboMetodoPago.Items.Add("Fiado");
+            cboMetodoPago.Items.Add("Cuenta Corriente");
             cboMetodoPago.SelectedIndex = 0;
         }
 
@@ -132,7 +132,7 @@ namespace AlmacenDesktop.Forms
                 case Keys.F1: txtEscanear.Focus(); txtEscanear.SelectAll(); e.Handled = true; break;
                 case Keys.F2: cboMetodoPago.SelectedItem = "Efectivo"; e.Handled = true; break;
                 case Keys.F3: cboMetodoPago.SelectedItem = "Billetera Virtual"; e.Handled = true; break;
-                case Keys.F4: cboMetodoPago.SelectedItem = "Fiado"; e.Handled = true; break;
+                case Keys.F4: cboMetodoPago.SelectedItem = "Cuenta Corriente"; e.Handled = true; break;
                 case Keys.F5: btnFinalizar.PerformClick(); e.Handled = true; break;
                 case Keys.F10:
                     if (MessageBox.Show("¿Limpiar venta actual?", "Limpiar", MessageBoxButtons.YesNo) == DialogResult.Yes) Limpiar();
@@ -256,7 +256,7 @@ namespace AlmacenDesktop.Forms
 
         private void cboMetodoPago_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (cboMetodoPago.SelectedItem?.ToString() == "Fiado")
+            if (cboMetodoPago.SelectedItem?.ToString() == "Cuenta Corriente")
             {
                 cboClientes.Enabled = true;
                 cboClientes.Focus();
@@ -289,13 +289,13 @@ namespace AlmacenDesktop.Forms
                 return;
             }
 
-            if (cboMetodoPago.SelectedItem?.ToString() == "Fiado")
+            if (cboMetodoPago.SelectedItem?.ToString() == "Cuenta Corriente")
             {
                 var cli = cboClientes.SelectedItem as Cliente;
                 if (cli == null || cli.DniCuit == Constantes.CLIENTE_DEF_DNI)
                 {
                     AudioHelper.PlayError();
-                    MessageBox.Show("Debe seleccionar un cliente para Fiado.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Debe seleccionar un cliente para Cuenta Corriente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
             }

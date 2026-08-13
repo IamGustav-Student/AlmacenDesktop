@@ -230,8 +230,8 @@ namespace AlmacenDesktop.Forms
                 new ItemMenu { Grupo = "OPERACIÓN DIARIA", Texto = "📒  Historial de Cajas", Crear = () => new HistorialCajasForm() },
 
                 // Clientes
-                new ItemMenu { Grupo = "CLIENTES", Texto = "👥  Clientes / Fiados", Crear = () => new ClientesForm() },
-                new ItemMenu { Grupo = "CLIENTES", Texto = "📋  Reporte de Fiados", Crear = () => new ReporteFiadosForm() },
+                new ItemMenu { Grupo = "CLIENTES", Texto = "👥  Clientes / Cta. Cte.", Crear = () => new ClientesForm() },
+                new ItemMenu { Grupo = "CLIENTES", Texto = "📋  Reporte de Cuenta Corriente", Crear = () => new ReporteFiadosForm() },
 
                 // Inventario
                 new ItemMenu { Grupo = "INVENTARIO", Texto = "📦  Productos", Crear = () => new ProductosForm() },

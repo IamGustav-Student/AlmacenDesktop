@@ -136,7 +136,7 @@
             this.lblCliente.AutoSize = true;
             this.lblCliente.Location = new System.Drawing.Point(710, 20);
             this.lblCliente.Name = "lblCliente";
-            this.lblCliente.Text = "Cliente (F4 para Fiado):";
+            this.lblCliente.Text = "Cliente (F4 para Cta. Cte.):";
 
             // Cbo Cliente (búsqueda en vivo por nombre, letra por letra)
             this.cboClientes.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));

@@ -62,7 +62,7 @@ namespace AlmacenDesktop.Forms
                 // 1. VENTAS (Agregamos VentaId oculto)
                 var ventasFiado = context.Ventas
                     .AsNoTracking()
-                    .Where(v => v.ClienteId == _clienteSeleccionado.Id && v.MetodoPago == "Fiado")
+                    .Where(v => v.ClienteId == _clienteSeleccionado.Id && v.MetodoPago == "Cuenta Corriente")
                     .Select(v => new MovimientoCtaCte
                     {
                         Fecha = v.Fecha,
@@ -216,7 +216,7 @@ namespace AlmacenDesktop.Forms
                             UsuarioId = Program.UsuarioActualGlobal.Id,
                             Tipo = "INGRESO",
                             Monto = numMontoPago.Value,
-                            Descripcion = $"Cobro Fiado - {_clienteSeleccionado.Apellido}"
+                            Descripcion = $"Cobro Cuenta Corriente - {_clienteSeleccionado.Apellido}"
                         };
                         context.MovimientosCaja.Add(movimientoCaja);
                     }
