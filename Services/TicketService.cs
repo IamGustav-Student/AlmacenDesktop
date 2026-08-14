@@ -26,7 +26,20 @@ namespace AlmacenDesktop.Services
         private List<DetalleVenta> _detallesPendientes;
         private Caja _cajaPendiente;
         private MovimientoCaja _movimientoPendiente;
+        private List<MovimientoCaja> _movimientosPendientes;
         private string _tipoDocumentoGrafico;
+
+        // Ancho útil de una térmica de 58-80mm en fuente estándar
+        private const int ANCHO_TICKET = 32;
+
+        // "Ventas efectivo:      $ 50.000,00" alineado a la derecha en 32 columnas
+        private static string LineaImporte(string etiqueta, decimal monto)
+        {
+            string importe = monto.ToString("N2");
+            int espacio = ANCHO_TICKET - etiqueta.Length - importe.Length - 2;
+            if (espacio < 1) espacio = 1;
+            return etiqueta + new string(' ', espacio) + "$ " + importe;
+        }
 
         public TicketService()
         {
@@ -88,16 +101,18 @@ namespace AlmacenDesktop.Services
             }
         }
 
-        public void ImprimirCierreCaja(Caja caja)
+        // movimientos es opcional para no romper llamadas existentes; si viene, el ticket
+        // lista cada gasto/retiro con su motivo en vez de solo el total.
+        public void ImprimirCierreCaja(Caja caja, List<MovimientoCaja> movimientos = null)
         {
             if (EsImpresoraTermica(_nombreImpresora))
             {
-                var bytes = ConstruirTicketCierreBytes(caja);
+                var bytes = ConstruirTicketCierreBytes(caja, movimientos);
                 EnviarAImpresoraRaw(bytes, _nombreImpresora);
             }
             else
             {
-                ImprimirGrafico(null, null, caja, null, "CIERRE");
+                ImprimirGrafico(null, null, caja, null, "CIERRE", movimientos);
             }
         }
 
@@ -129,12 +144,13 @@ namespace AlmacenDesktop.Services
         //        MOTOR 1: IMPRESIÓN GRÁFICA (GDI+)
         // ==========================================
 
-        private void ImprimirGrafico(Venta v, List<DetalleVenta> d, Caja c, MovimientoCaja m, string tipo)
+        private void ImprimirGrafico(Venta v, List<DetalleVenta> d, Caja c, MovimientoCaja m, string tipo, List<MovimientoCaja> movs = null)
         {
             _ventaPendiente = v;
             _detallesPendientes = d;
             _cajaPendiente = c;
             _movimientoPendiente = m;
+            _movimientosPendientes = movs;
             _tipoDocumentoGrafico = tipo;
 
             PrintDocument pd = new PrintDocument();
@@ -208,7 +224,78 @@ namespace AlmacenDesktop.Services
                     g.DrawString($"Vto: {_ventaPendiente.CAEVencimiento:dd/MM/yyyy}", fontRegular, Brushes.Black, leftMargin, y);
                 }
             }
-            // ... (Resto de lógica gráfica similar)
+            else if (_tipoDocumentoGrafico == "CIERRE" && _cajaPendiente != null)
+            {
+                // Antes esta rama no existía: en impresoras comunes (no térmicas) el
+                // cierre salía en blanco, solo con el encabezado "VENDEMAX".
+                var caja = _cajaPendiente;
+                var movs = _movimientosPendientes ?? new List<MovimientoCaja>();
+                var egresos = movs.Where(m => m.Tipo == "EGRESO").ToList();
+                decimal totalIngresos = movs.Where(m => m.Tipo == "INGRESO").Sum(m => m.Monto);
+                decimal totalEgresos = egresos.Sum(m => m.Monto);
+
+                g.DrawString("CIERRE DE CAJA", fontBold, Brushes.Black, new RectangleF(leftMargin, y, anchoTicket, 20), centro);
+                y += 22;
+                g.DrawString($"Apertura: {caja.FechaApertura:dd/MM/yy HH:mm}", fontRegular, Brushes.Black, leftMargin, y);
+                y += 15;
+                g.DrawString($"Cierre:   {caja.FechaCierre:dd/MM/yy HH:mm}", fontRegular, Brushes.Black, leftMargin, y);
+                y += 18;
+                g.DrawLine(Pens.Black, leftMargin, y, leftMargin + anchoTicket, y);
+                y += 8;
+
+                Action<string, decimal, Font> fila = (etiqueta, monto, fuente) =>
+                {
+                    g.DrawString(etiqueta, fuente, Brushes.Black, leftMargin, y);
+                    g.DrawString($"$ {monto:N2}", fuente, Brushes.Black, new RectangleF(leftMargin, y, anchoTicket, 20), derecha);
+                    y += 15;
+                };
+
+                fila("Saldo inicial:", caja.SaldoInicial, fontRegular);
+                fila("Ventas efectivo:", caja.TotalVentasEfectivo, fontRegular);
+                fila("Otros ingresos:", totalIngresos, fontRegular);
+                fila("Salidas / gastos:", -totalEgresos, fontRegular);
+
+                y += 3;
+                g.DrawLine(Pens.Black, leftMargin, y, leftMargin + anchoTicket, y);
+                y += 8;
+
+                fila("ESPERADO:", caja.SaldoFinalSistema, fontBold);
+                fila("CONTADO:", caja.SaldoFinalReal, fontBold);
+                fila("DIFERENCIA:", caja.Diferencia, fontBold);
+
+                if (egresos.Count > 0)
+                {
+                    y += 10;
+                    g.DrawString("DETALLE DE SALIDAS", fontBold, Brushes.Black, leftMargin, y);
+                    y += 16;
+                    foreach (var mov in egresos)
+                    {
+                        string motivo = mov.Descripcion ?? "";
+                        if (motivo.Length > 22) motivo = motivo.Substring(0, 22);
+                        fila($"{mov.Fecha:HH:mm} {motivo}", mov.Monto, fontRegular);
+                    }
+                }
+
+                if (caja.TotalVentasOtros > 0)
+                {
+                    y += 10;
+                    g.DrawString("Cobrado por otros medios", fontRegular, Brushes.Black, leftMargin, y);
+                    y += 15;
+                    fila("(tarj./transf./cta.cte.):", caja.TotalVentasOtros, fontRegular);
+                }
+            }
+            else if (_tipoDocumentoGrafico == "MOVIMIENTO" && _movimientoPendiente != null)
+            {
+                var mov = _movimientoPendiente;
+                string titulo = mov.Tipo == "EGRESO" ? "SALIDA DE CAJA" : "INGRESO A CAJA";
+                g.DrawString(titulo, fontBold, Brushes.Black, new RectangleF(leftMargin, y, anchoTicket, 20), centro);
+                y += 22;
+                g.DrawString($"Fecha: {mov.Fecha:dd/MM/yy HH:mm}", fontRegular, Brushes.Black, leftMargin, y);
+                y += 15;
+                g.DrawString($"Motivo: {mov.Descripcion}", fontRegular, Brushes.Black, leftMargin, y);
+                y += 20;
+                g.DrawString($"$ {mov.Monto:N2}", fontTitulo, Brushes.Black, new RectangleF(leftMargin, y, anchoTicket, 30), derecha);
+            }
         }
 
         // ==========================================
@@ -264,14 +351,61 @@ namespace AlmacenDesktop.Services
             return b;
         }
 
-        private byte[] ConstruirTicketCierreBytes(Caja caja)
+        private byte[] ConstruirTicketCierreBytes(Caja caja, List<MovimientoCaja> movimientos = null)
         {
-            return ByteSplicer.Combine(
+            movimientos = movimientos ?? new List<MovimientoCaja>();
+            var egresos = movimientos.Where(m => m.Tipo == "EGRESO").ToList();
+            decimal totalIngresos = movimientos.Where(m => m.Tipo == "INGRESO").Sum(m => m.Monto);
+            decimal totalEgresos = egresos.Sum(m => m.Monto);
+            string linea = new string('-', ANCHO_TICKET);
+
+            var b = ByteSplicer.Combine(
                 Comandos.Center,
                 _e.PrintLine("CIERRE DE CAJA"),
-                _e.PrintLine("----------------"),
+                _e.PrintLine(linea),
                 Comandos.Left,
-                _e.PrintLine($"Real: $ {caja.SaldoFinalReal:N2}"),
+                _e.PrintLine($"Apertura: {caja.FechaApertura:dd/MM/yy HH:mm}"),
+                _e.PrintLine($"Cierre:   {caja.FechaCierre:dd/MM/yy HH:mm}"),
+                _e.PrintLine(linea),
+                _e.PrintLine(LineaImporte("Saldo inicial:", caja.SaldoInicial)),
+                _e.PrintLine(LineaImporte("Ventas efectivo:", caja.TotalVentasEfectivo)),
+                _e.PrintLine(LineaImporte("Otros ingresos:", totalIngresos)),
+                _e.PrintLine(LineaImporte("Salidas/gastos: -", totalEgresos)),
+                _e.PrintLine(linea),
+                _e.PrintLine(LineaImporte("ESPERADO:", caja.SaldoFinalSistema)),
+                _e.PrintLine(LineaImporte("CONTADO:", caja.SaldoFinalReal)),
+                _e.PrintLine(LineaImporte("DIFERENCIA:", caja.Diferencia))
+            );
+
+            // El detalle es el motivo del pedido: que el dueño vea en qué se fue la plata.
+            if (egresos.Count > 0)
+            {
+                b = ByteSplicer.Combine(b,
+                    _e.PrintLine(""),
+                    _e.PrintLine("DETALLE DE SALIDAS"),
+                    _e.PrintLine(linea));
+
+                foreach (var mov in egresos)
+                {
+                    string motivo = mov.Descripcion ?? "";
+                    if (motivo.Length > 20) motivo = motivo.Substring(0, 20);
+                    b = ByteSplicer.Combine(b,
+                        _e.PrintLine(LineaImporte($"{mov.Fecha:HH:mm} {motivo}", mov.Monto)));
+                }
+            }
+
+            // Se aclara aparte porque NO es plata que tenga que estar en el cajón.
+            if (caja.TotalVentasOtros > 0)
+            {
+                b = ByteSplicer.Combine(b,
+                    _e.PrintLine(""),
+                    _e.PrintLine("Cobrado por otros medios"),
+                    _e.PrintLine("(tarjeta/transf./cta.cte.)"),
+                    _e.PrintLine(LineaImporte("Total:", caja.TotalVentasOtros)));
+            }
+
+            return ByteSplicer.Combine(b,
+                Comandos.Center,
                 _e.FeedLines(3),
                 _e.FullCut()
             );

@@ -68,7 +68,9 @@
             // 
             this.numMonto.DecimalPlaces = 2;
             this.numMonto.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.numMonto.Location = new System.Drawing.Point(100, 90);
+            // Corrido a la derecha: en modo abierto la etiqueta dice "Contado ($):" y a
+            // 100px el cuadro le tapaba el final del texto.
+            this.numMonto.Location = new System.Drawing.Point(140, 90);
             this.numMonto.Maximum = new decimal(new int[] { 10000000, 0, 0, 0 });
             this.numMonto.Name = "numMonto";
             this.numMonto.Size = new System.Drawing.Size(180, 29);
@@ -173,6 +175,10 @@
             this.Name = "ControlCajaForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Control de Caja";
+            // Sin esta línea VerificarEstadoCaja() nunca corre: la pantalla queda con los
+            // textos de diseño ("CAJA CERRADA") aunque haya una caja abierta en la base, y
+            // el botón siempre intenta ABRIR — dejando al usuario sin forma de cerrarla.
+            this.Load += new System.EventHandler(this.ControlCajaForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.numMonto)).EndInit();
             this.grpResumen.ResumeLayout(false);
             this.grpResumen.PerformLayout();

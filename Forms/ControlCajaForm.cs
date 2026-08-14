@@ -50,10 +50,12 @@ namespace AlmacenDesktop.Forms
                     if (_cajaActual != null)
                     {
                         // --- MODO: CAJA ABIERTA (Listo para Cerrar) ---
-                        lblEstado.Text = "ESTADO: ABIERTA";
+                        lblEstado.Text = "ESTADO: CAJA ABIERTA";
                         lblEstado.ForeColor = Color.Green;
 
-                        lblMonto.Text = "Saldo Real en Caja (Contar dinero):";
+                        // El detalle largo va en lblInfo (ancho completo); lblMonto tiene que
+                        // quedar corto porque numMonto arranca a 80px de él y lo pisaría.
+                        lblMonto.Text = "Contado ($):";
                         numMonto.Value = 0; // Limpiar para que el usuario ingrese lo que cuenta
                         numMonto.Enabled = true;
 
@@ -61,19 +63,21 @@ namespace AlmacenDesktop.Forms
                         btnAccion.BackColor = Color.Firebrick;
                         btnAccion.ForeColor = Color.White;
 
-                        // Habilitar botón de movimientos si la caja está abierta
-                        if (btnRegistrarMovimiento != null) btnRegistrarMovimiento.Enabled = true;
+                        // El Designer los crea ocultos: se muestran solo con la caja abierta.
+                        grpResumen.Visible = true;
+                        btnRegistrarMovimiento.Visible = true;
+                        btnRegistrarMovimiento.Enabled = true;
 
-                        // Cargar resumen de ventas en la grilla
-                        CargarVentas(context);
+                        // Cargar resumen del turno (ventas + gastos) en la grilla
+                        CargarResumen(context);
                     }
                     else
                     {
                         // --- MODO: CAJA CERRADA (Listo para Abrir) ---
-                        lblEstado.Text = "ESTADO: CERRADA";
+                        lblEstado.Text = "ESTADO: CAJA CERRADA";
                         lblEstado.ForeColor = Color.Red;
 
-                        lblMonto.Text = "Monto Inicial (Cambio):";
+                        lblMonto.Text = "Monto ($):";
                         numMonto.Value = 0;
                         numMonto.Enabled = true;
 
@@ -81,11 +85,12 @@ namespace AlmacenDesktop.Forms
                         btnAccion.BackColor = Color.ForestGreen;
                         btnAccion.ForeColor = Color.White;
 
-                        // Deshabilitar movimientos si no hay caja
-                        if (btnRegistrarMovimiento != null) btnRegistrarMovimiento.Enabled = false;
+                        grpResumen.Visible = false;
+                        btnRegistrarMovimiento.Visible = false;
+                        btnRegistrarMovimiento.Enabled = false;
 
                         dgvVentasCaja.DataSource = null;
-                        lblInfo.Text = "Esperando apertura...";
+                        lblInfo.Text = "Ingrese el saldo inicial para comenzar:";
                     }
                 }
             }
@@ -95,21 +100,65 @@ namespace AlmacenDesktop.Forms
             }
         }
 
-        private void CargarVentas(AlmacenDbContext context)
+        // Muestra el movimiento real de plata del turno: las ventas y también los
+        // gastos/retiros, que antes se sumaban al cerrar pero no se veían en ningún lado.
+        private void CargarResumen(AlmacenDbContext context)
         {
             var ventas = context.Ventas
                 .Where(v => v.CajaId == _cajaActual.Id)
-                .Select(v => new {
-                    Hora = v.Fecha.ToString("HH:mm"),
-                    Total = v.Total,
-                    Pago = v.MetodoPago
-                })
+                .Select(v => new { v.Fecha, v.Total, v.MetodoPago })
                 .ToList();
 
-            dgvVentasCaja.DataSource = ventas;
+            var movimientos = context.MovimientosCaja
+                .Where(m => m.CajaId == _cajaActual.Id)
+                .Select(m => new { m.Fecha, m.Monto, m.Tipo, m.Descripcion })
+                .ToList();
 
-            decimal totalVendido = ventas.Sum(v => v.Total);
-            lblInfo.Text = $"Ventas Turno: {ventas.Count} | Total Sistema: {totalVendido:C2}";
+            // Una sola lista cronológica: la salida se ve con su motivo ("Pago pan"),
+            // en negativo, mezclada entre las ventas tal como ocurrió en el turno.
+            var filas = ventas
+                .Select(v => new
+                {
+                    Orden = v.Fecha,
+                    Hora = v.Fecha.ToString("HH:mm"),
+                    Detalle = $"Venta ({v.MetodoPago})",
+                    Monto = v.Total
+                })
+                .Concat(movimientos.Select(m => new
+                {
+                    Orden = m.Fecha,
+                    Hora = m.Fecha.ToString("HH:mm"),
+                    Detalle = m.Descripcion,
+                    Monto = m.Tipo == "EGRESO" ? -m.Monto : m.Monto
+                }))
+                .OrderBy(x => x.Orden)
+                .Select(x => new { x.Hora, x.Detalle, x.Monto })
+                .ToList();
+
+            dgvVentasCaja.DataSource = filas;
+            if (dgvVentasCaja.Columns["Monto"] != null)
+            {
+                dgvVentasCaja.Columns["Monto"].DefaultCellStyle.Format = "C2";
+                dgvVentasCaja.Columns["Monto"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            }
+
+            decimal efectivo = ventas.Where(v => v.MetodoPago == "Efectivo").Sum(v => v.Total);
+            decimal otrosMedios = ventas.Where(v => v.MetodoPago != "Efectivo").Sum(v => v.Total);
+            decimal ingresos = movimientos.Where(m => m.Tipo == "INGRESO").Sum(m => m.Monto);
+            decimal egresos = movimientos.Where(m => m.Tipo == "EGRESO").Sum(m => m.Monto);
+            decimal esperado = _cajaActual.SaldoInicial + efectivo + ingresos - egresos;
+
+            // Solo lo que realmente entra o sale del cajón. Tarjeta, transferencia y
+            // cuenta corriente se informan aparte porque no son plata en el cajón.
+            lblResumenDetalle.Text =
+                $"{"Saldo inicial:",-19}{_cajaActual.SaldoInicial,12:C2}\n" +
+                $"{"+ Ventas efectivo:",-19}{efectivo,12:C2}\n" +
+                $"{"+ Otros ingresos:",-19}{ingresos,12:C2}\n" +
+                $"{"- Salidas / gastos:",-19}{egresos,12:C2}\n" +
+                $"{"ESPERADO EN CAJA:",-19}{esperado,12:C2}";
+
+            lblInfo.Text = $"Abierta {_cajaActual.FechaApertura:dd/MM HH:mm} · " +
+                           $"{ventas.Count} ventas · No efectivo: {otrosMedios:C2}";
         }
 
         private void btnAccion_Click(object sender, EventArgs e)
@@ -177,9 +226,17 @@ namespace AlmacenDesktop.Forms
                         return;
                     }
 
-                    // Calcular Totales del Sistema
-                    decimal totalVentas = context.Ventas
-                        .Where(v => v.CajaId == cajaDb.Id)
+                    // El saldo esperado es la plata que tiene que haber EN EL CAJÓN, y se
+                    // compara contra lo que el usuario contó a mano. Por eso solo cuentan
+                    // las ventas en efectivo: transferencia, billetera virtual y cuenta
+                    // corriente no ponen un peso en el cajón (la cuenta corriente ni
+                    // siquiera se cobró todavía). Sumarlas marcaba un faltante inexistente.
+                    decimal ventasEfectivo = context.Ventas
+                        .Where(v => v.CajaId == cajaDb.Id && v.MetodoPago == "Efectivo")
+                        .Sum(v => (decimal?)v.Total) ?? 0;
+
+                    decimal ventasOtros = context.Ventas
+                        .Where(v => v.CajaId == cajaDb.Id && v.MetodoPago != "Efectivo")
                         .Sum(v => (decimal?)v.Total) ?? 0;
 
                     decimal ingresos = context.MovimientosCaja
@@ -190,10 +247,24 @@ namespace AlmacenDesktop.Forms
                         .Where(m => m.CajaId == cajaDb.Id && m.Tipo == "EGRESO")
                         .Sum(m => (decimal?)m.Monto) ?? 0;
 
-                    cajaDb.SaldoFinalSistema = cajaDb.SaldoInicial + totalVentas + ingresos - egresos;
+                    // Se recalculan desde las ventas reales para que el registro cerrado
+                    // quede consistente aunque los acumuladores hayan quedado desfasados.
+                    cajaDb.TotalVentasEfectivo = ventasEfectivo;
+                    cajaDb.TotalVentasOtros = ventasOtros;
+
+                    cajaDb.SaldoFinalSistema = cajaDb.SaldoInicial + ventasEfectivo + ingresos - egresos;
                     cajaDb.SaldoFinalReal = numMonto.Value;
                     cajaDb.Diferencia = cajaDb.SaldoFinalReal - cajaDb.SaldoFinalSistema;
                     cajaDb.FechaCierre = DateTime.Now;
+
+                    // La caja también se marca cerrada por bandera: hay pantallas que
+                    // filtran por EstaAbierta y no por FechaCierre (ej. Historial de Cajas).
+                    cajaDb.EstaAbierta = false;
+
+                    var movimientosDelTurno = context.MovimientosCaja
+                        .Where(m => m.CajaId == cajaDb.Id)
+                        .OrderBy(m => m.Fecha)
+                        .ToList();
 
                     context.SaveChanges();
 
@@ -210,7 +281,7 @@ namespace AlmacenDesktop.Forms
                     // 2. IMPRESIÓN TICKET Z
                     try
                     {
-                        _ticketService.ImprimirCierreCaja(cajaDb);
+                        _ticketService.ImprimirCierreCaja(cajaDb, movimientosDelTurno);
                     }
                     catch { /* Ignorar error de impresión */ }
 

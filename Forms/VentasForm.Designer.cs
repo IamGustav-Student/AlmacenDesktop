@@ -45,6 +45,7 @@
             this.lblAtajo2 = new System.Windows.Forms.Label();
             this.lblAtajo3 = new System.Windows.Forms.Label();
             this.lblAtajo4 = new System.Windows.Forms.Label();
+            this.btnRegistrarGasto = new System.Windows.Forms.Button();
 
             ((System.ComponentModel.ISupportInitialize)(this.numCantidad)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCarrito)).BeginInit();
@@ -126,9 +127,30 @@
             this.dgvCarrito.Location = new System.Drawing.Point(20, 90);
             this.dgvCarrito.Name = "dgvCarrito";
             this.dgvCarrito.RowTemplate.Height = 25;
-            this.dgvCarrito.Size = new System.Drawing.Size(670, 300); // Ajustado para dar espacio a la derecha
+            // Se achicó 45px para dejar la franja donde va btnRegistrarGasto
+            this.dgvCarrito.Size = new System.Drawing.Size(670, 255);
             this.dgvCarrito.TabIndex = 15;
             this.dgvCarrito.TabStop = false; // No focus con tab
+
+            //
+            // btnRegistrarGasto
+            //
+            // Abajo a la izquierda, lo más lejos posible del COBRAR verde (que está abajo a
+            // la derecha) para que no se confunda al cobrar apurado.
+            this.btnRegistrarGasto.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnRegistrarGasto.BackColor = System.Drawing.Color.Firebrick;
+            this.btnRegistrarGasto.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnRegistrarGasto.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnRegistrarGasto.ForeColor = System.Drawing.Color.White;
+            this.btnRegistrarGasto.Location = new System.Drawing.Point(20, 353);
+            this.btnRegistrarGasto.Name = "btnRegistrarGasto";
+            this.btnRegistrarGasto.Size = new System.Drawing.Size(280, 38);
+            this.btnRegistrarGasto.TabIndex = 21;
+            this.btnRegistrarGasto.TabStop = false;
+            this.btnRegistrarGasto.Text = "➖ PAGO A PROVEEDOR / GASTO (F8)";
+            this.btnRegistrarGasto.UseVisualStyleBackColor = false;
+            this.btnRegistrarGasto.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnRegistrarGasto.Click += new System.EventHandler(this.btnRegistrarGasto_Click);
 
             // --- PANEL DERECHO DE COBRO ---
 
@@ -275,8 +297,8 @@
 
             this.lblAtajo4.AutoSize = true;
             this.lblAtajo4.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblAtajo4.Location = new System.Drawing.Point(380, 22);
-            this.lblAtajo4.Text = "ENTER: Finalizar Venta";
+            this.lblAtajo4.Location = new System.Drawing.Point(420, 22);
+            this.lblAtajo4.Text = "F8: Pago/Gasto  ·  ENTER: Finalizar";
 
             // 
             // VentasForm
@@ -285,6 +307,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(984, 461);
             this.Controls.Add(this.grpAtajos);
+            this.Controls.Add(this.btnRegistrarGasto);
             this.Controls.Add(this.lblRecargoInfo);
             this.Controls.Add(this.grpPago);
             this.Controls.Add(this.lblMetodo);
@@ -342,5 +365,6 @@
         private System.Windows.Forms.Label lblAtajo2;
         private System.Windows.Forms.Label lblAtajo3;
         private System.Windows.Forms.Label lblAtajo4;
+        private System.Windows.Forms.Button btnRegistrarGasto;
     }
 }

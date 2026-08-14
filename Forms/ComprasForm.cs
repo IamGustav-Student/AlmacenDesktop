@@ -277,7 +277,12 @@ namespace AlmacenDesktop.Forms
                         }
                     }
 
-                    var cajaAbierta = context.Cajas.FirstOrDefault(c => c.UsuarioId == Program.UsuarioActualGlobal.Id && c.EstaAbierta);
+                    // FechaCierre es el criterio autoritativo (la bandera EstaAbierta quedó
+                    // sin actualizar en cajas cerradas antes de v1.1.6): sin esto el egreso
+                    // de la compra podía colgarse de un turno ya cerrado.
+                    var cajaAbierta = context.Cajas
+                        .OrderByDescending(c => c.FechaApertura)
+                        .FirstOrDefault(c => c.UsuarioId == Program.UsuarioActualGlobal.Id && c.EstaAbierta && c.FechaCierre == null);
                     if (cajaAbierta != null)
                     {
                         var egreso = new MovimientoCaja

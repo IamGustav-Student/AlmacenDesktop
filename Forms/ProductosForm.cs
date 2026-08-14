@@ -88,8 +88,7 @@ namespace AlmacenDesktop.Forms
             ConfigurarGrilla();
             CargarUnidadesMedida();
             CargarProveedores();
-            CargarProductos();
-            LimpiarFormulario();
+            LimpiarFormulario(); // ya carga la grilla y deja la pantalla lista para cargar
         }
 
         private void ConfigurarGrilla()
@@ -304,8 +303,9 @@ namespace AlmacenDesktop.Forms
                     _ = _catalogoService.SubirAsync(new[] { (producto.CodigoBarras, producto.Nombre) });
                 }
 
+                // Deja la pantalla en blanco y con el foco en el código, para encadenar
+                // la carga del siguiente producto sin tener que apretar Escape.
                 LimpiarFormulario();
-                CargarProductos();
             }
             catch (Exception ex)
             {
@@ -362,8 +362,7 @@ namespace AlmacenDesktop.Forms
                 {
                     _productoService.Eliminar(producto.Id);
                     AudioHelper.PlayOk();
-                    CargarProductos();
-                    LimpiarFormulario();
+                    LimpiarFormulario(); // recarga la grilla y deja la pantalla en blanco
                 }
                 catch (Exception ex)
                 {
@@ -380,6 +379,17 @@ namespace AlmacenDesktop.Forms
 
         private void LimpiarFormulario()
         {
+            // CargarProductos() rebindea el DataSource del grid, y WinForms autoselecciona
+            // la primera fila al rebindear — eso disparaba SelectionChanged y repoblaba los
+            // campos con ese producto, así que después de guardar la pantalla quedaba
+            // "Editando: <primer producto>" en vez de lista para cargar uno nuevo.
+            // Se recarga con el evento desconectado y los campos se limpian al final,
+            // para que ese sea siempre el estado visible (mismo criterio que ClientesForm).
+            dgvProductos.SelectionChanged -= dgvProductos_SelectionChanged;
+            CargarProductos(txtBusqueda.Text.Trim());
+            dgvProductos.ClearSelection();
+            dgvProductos.SelectionChanged += dgvProductos_SelectionChanged;
+
             txtCodigo.Clear();
             txtNombre.Clear();
             txtDescripcion.Clear();
@@ -391,11 +401,6 @@ namespace AlmacenDesktop.Forms
             numImpuesto.Value = 0;
 
             if (cboProveedor.Items.Count > 0) cboProveedor.SelectedIndex = 0;
-
-            // Evitar que la selección permanezca activa al limpiar
-            dgvProductos.SelectionChanged -= dgvProductos_SelectionChanged;
-            dgvProductos.ClearSelection();
-            dgvProductos.SelectionChanged += dgvProductos_SelectionChanged;
 
             _productoSeleccionado = null;
             _modoEdicion = false;

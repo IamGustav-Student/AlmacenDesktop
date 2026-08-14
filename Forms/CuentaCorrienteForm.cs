@@ -206,7 +206,11 @@ namespace AlmacenDesktop.Forms
                     };
                     context.Pagos.Add(nuevoPago);
 
-                    var cajaAbierta = context.Cajas.FirstOrDefault(c => c.UsuarioId == Program.UsuarioActualGlobal.Id && c.EstaAbierta);
+                    // Mismo criterio que el resto de la app: FechaCierre manda, para que el
+                    // cobro no entre en un turno ya cerrado.
+                    var cajaAbierta = context.Cajas
+                        .OrderByDescending(c => c.FechaApertura)
+                        .FirstOrDefault(c => c.UsuarioId == Program.UsuarioActualGlobal.Id && c.EstaAbierta && c.FechaCierre == null);
                     if (cajaAbierta != null)
                     {
                         var movimientoCaja = new MovimientoCaja

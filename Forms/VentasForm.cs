@@ -134,6 +134,7 @@ namespace AlmacenDesktop.Forms
                 case Keys.F3: cboMetodoPago.SelectedItem = "Billetera Virtual"; e.Handled = true; break;
                 case Keys.F4: cboMetodoPago.SelectedItem = "Cuenta Corriente"; e.Handled = true; break;
                 case Keys.F5: btnFinalizar.PerformClick(); e.Handled = true; break;
+                case Keys.F8: btnRegistrarGasto.PerformClick(); e.Handled = true; break;
                 case Keys.F10:
                     if (MessageBox.Show("¿Limpiar venta actual?", "Limpiar", MessageBoxButtons.YesNo) == DialogResult.Yes) Limpiar();
                     e.Handled = true; break;
@@ -430,6 +431,50 @@ namespace AlmacenDesktop.Forms
             catch (Exception ex)
             {
                 MessageBox.Show("Error impresión: " + ExceptionHelper.ObtenerMensaje(ex));
+            }
+        }
+
+        // Permite registrar una salida de plata (pago al proveedor de pan, flete, etc.)
+        // sin salir del mostrador. Queda como EGRESO de la caja del turno y se descuenta
+        // solo al cerrar, con su motivo a la vista en el resumen y en el ticket Z.
+        private void btnRegistrarGasto_Click(object sender, EventArgs e)
+        {
+            if (_cajaIdActual == null)
+            {
+                AudioHelper.PlayError();
+                MessageBox.Show("Necesita una caja abierta para registrar un pago o gasto.",
+                    "Caja Cerrada", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                Caja caja;
+                using (var context = new AlmacenDbContext())
+                {
+                    caja = context.Cajas.Find(_cajaIdActual.Value);
+                }
+
+                if (caja == null)
+                {
+                    AudioHelper.PlayError();
+                    MessageBox.Show("No se encontró la caja del turno actual.",
+                        "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                using (var frm = new MovimientoCajaForm(caja, _vendedor))
+                {
+                    frm.ShowDialog(this);
+                }
+
+                txtEscanear.Focus();
+            }
+            catch (Exception ex)
+            {
+                AudioHelper.PlayError();
+                MessageBox.Show("Error al registrar el movimiento: " + ExceptionHelper.ObtenerMensaje(ex),
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
