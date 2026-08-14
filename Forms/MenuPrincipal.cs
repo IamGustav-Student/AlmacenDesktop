@@ -34,7 +34,10 @@ namespace AlmacenDesktop.Forms
             public string Grupo { get; init; } = "";
             public string Texto { get; init; } = "";
             public bool SoloAdmin { get; init; }
-            public Func<Form> Crear { get; init; } = null!;
+            // Crear abre la pantalla en una ventana modal (el caso normal).
+            // Accion es para las que viven embebidas en esta misma ventana.
+            public Func<Form> Crear { get; init; }
+            public Action Accion { get; init; }
             public bool Destacado { get; init; }
         }
 
@@ -224,7 +227,10 @@ namespace AlmacenDesktop.Forms
             return new List<ItemMenu>
             {
                 // Operación diaria
-                new ItemMenu { Grupo = "OPERACIÓN DIARIA", Texto = "🛒  Nueva Venta", Destacado = true, Crear = () => new VentasForm(_usuarioActual) },
+                // La venta va embebida en esta misma ventana (no en una aparte), así el
+                // cajero no salta entre ventanas durante el turno.
+                new ItemMenu { Grupo = "OPERACIÓN DIARIA", Texto = "🛒  Nueva Venta", Destacado = true, Accion = MostrarVenta },
+                new ItemMenu { Grupo = "OPERACIÓN DIARIA", Texto = "🏠  Inicio / Resumen", Accion = MostrarInicio },
                 new ItemMenu { Grupo = "OPERACIÓN DIARIA", Texto = "💵  Caja Diaria", Crear = () => new ControlCajaForm(_usuarioActual) },
                 new ItemMenu { Grupo = "OPERACIÓN DIARIA", Texto = "🧾  Historial de Ventas", Crear = () => new HistorialVentasForm() },
                 new ItemMenu { Grupo = "OPERACIÓN DIARIA", Texto = "📒  Historial de Cajas", Crear = () => new HistorialCajasForm() },
@@ -366,7 +372,8 @@ namespace AlmacenDesktop.Forms
 
             try
             {
-                AbrirFormulario(item.Crear());
+                if (item.Accion != null) item.Accion();
+                else AbrirFormulario(item.Crear());
             }
             catch (Exception ex)
             {
@@ -375,6 +382,107 @@ namespace AlmacenDesktop.Forms
                     $"No se pudo abrir «{item.Texto.Trim()}».\n\n{ExceptionHelper.ObtenerMensaje(ex)}",
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        // --- PANTALLA DE VENTA EMBEBIDA ---
+
+        private VentasForm _ventaEmbebida;
+        private int? _cajaDeLaVentaEmbebida;
+        private bool _arranqueHecho;
+
+        // Al arrancar el software se entra derecho a vender. Si todavía no hay turno
+        // abierto se abre primero la caja, que es el orden natural de la mañana en un
+        // comercio; recién con la caja abierta tiene sentido mostrar la venta.
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+
+            // AbrirFormulario hace Hide()/Show(), lo que puede volver a disparar Shown.
+            if (_arranqueHecho) return;
+            _arranqueHecho = true;
+
+            try
+            {
+                MostrarVenta(explicarFaltaDeCaja: false);
+            }
+            catch (Exception ex)
+            {
+                // Que falle el arranque directo en ventas no puede dejar la app inusable:
+                // en el peor caso queda el resumen y el menú, como antes.
+                AudioHelper.PlayError();
+                MessageBox.Show(
+                    "No se pudo abrir la pantalla de venta al iniciar.\n\n" + ExceptionHelper.ObtenerMensaje(ex),
+                    "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MostrarInicio();
+            }
+        }
+
+        private void MostrarVenta() => MostrarVenta(explicarFaltaDeCaja: true);
+
+        private void MostrarVenta(bool explicarFaltaDeCaja)
+        {
+            var ventaService = new VentaService();
+            int? cajaId = ventaService.ObtenerCajaAbiertaId(_usuarioActual.Id);
+
+            // Se valida acá y no se delega a VentasForm: embebida, si se autocerrara por
+            // falta de caja dejaría el panel en blanco sin explicación.
+            if (cajaId == null)
+            {
+                if (explicarFaltaDeCaja)
+                {
+                    MessageBox.Show(
+                        "Para vender primero hay que abrir la caja del turno.\n\n" +
+                        "Se va a abrir «Caja Diaria» para cargar el saldo inicial.",
+                        "Caja Cerrada", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+
+                AbrirFormulario(new ControlCajaForm(_usuarioActual));
+
+                cajaId = ventaService.ObtenerCajaAbiertaId(_usuarioActual.Id);
+                if (cajaId == null)
+                {
+                    // Salió sin abrir el turno: queda en el resumen.
+                    MostrarInicio();
+                    return;
+                }
+            }
+
+            // Si cambió el turno (se cerró la caja y se abrió otra) hay que rearmar la
+            // pantalla: VentasForm cachea el id de caja al cargar, y seguir con la
+            // instancia vieja registraría las ventas en un turno ya cerrado.
+            if (_ventaEmbebida != null && (_ventaEmbebida.IsDisposed || _cajaDeLaVentaEmbebida != cajaId))
+            {
+                if (!_ventaEmbebida.IsDisposed) _ventaEmbebida.Dispose();
+                _ventaEmbebida = null;
+            }
+
+            if (_ventaEmbebida == null)
+            {
+                var venta = new VentasForm(_usuarioActual);
+
+                // TopLevel=false convierte el formulario en un control más: se puede
+                // meter dentro de un panel sin reescribir su layout ni su lógica.
+                venta.TopLevel = false;
+                venta.FormBorderStyle = FormBorderStyle.None;
+                venta.Dock = DockStyle.Fill;
+
+                panelVenta.Controls.Clear();
+                panelVenta.Controls.Add(venta);
+                venta.Show();
+
+                _ventaEmbebida = venta;
+                _cajaDeLaVentaEmbebida = cajaId;
+            }
+
+            panelContenido.Visible = false;
+            panelVenta.Visible = true;
+            _ventaEmbebida.Focus();
+        }
+
+        private void MostrarInicio()
+        {
+            panelVenta.Visible = false;
+            panelContenido.Visible = true;
         }
 
         // --- GUÍA DE INICIO ---

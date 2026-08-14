@@ -465,7 +465,9 @@ namespace AlmacenDesktop.Forms
 
                 using (var frm = new MovimientoCajaForm(caja, _vendedor))
                 {
-                    frm.ShowDialog(this);
+                    // Sin owner explícito: esta pantalla puede estar embebida en la
+                    // ventana principal, y ahí "this" no es una ventana de nivel superior.
+                    frm.ShowDialog();
                 }
 
                 txtEscanear.Focus();

@@ -23,12 +23,24 @@ namespace AlmacenDesktop.Forms
         private BarcodeService _barcodeService;
 
         // --- CONFIGURACIÓN DE LA HOJA (Ajustable) ---
-        // Tamaño típico de etiqueta adhesiva o celda en hoja A4 troquelada
-        private int _anchoEtiqueta = 220;
-        private int _altoEtiqueta = 140;
         private int _margenX = 30; // Margen izquierdo de la hoja
         private int _margenY = 30; // Margen superior de la hoja
         private int _espacioEntre = 10; // Separación entre etiquetas
+
+        // El cartel de góndola es más ancho para que entren 3 por hoja A4 y el precio
+        // pueda ir bien grande; la adhesiva mantiene el tamaño de siempre.
+        private int _anchoEtiqueta => EstiloActual == EstiloEtiqueta.Gondola ? 240 : 220;
+        private int _altoEtiqueta => EstiloActual == EstiloEtiqueta.Gondola ? 150 : 140;
+
+        private EstiloEtiqueta EstiloActual =>
+            cboEstilo.SelectedItem is OpcionEstilo op ? op.Valor : EstiloEtiqueta.Adhesiva;
+
+        private sealed class OpcionEstilo
+        {
+            public EstiloEtiqueta Valor { get; init; }
+            public string Texto { get; init; } = "";
+            public override string ToString() => Texto;
+        }
 
         public EtiquetasForm()
         {
@@ -46,7 +58,23 @@ namespace AlmacenDesktop.Forms
 
         private void EtiquetasForm_Load(object sender, EventArgs e)
         {
+            cboEstilo.Items.Add(new OpcionEstilo { Valor = EstiloEtiqueta.Adhesiva, Texto = "Etiqueta adhesiva" });
+            cboEstilo.Items.Add(new OpcionEstilo { Valor = EstiloEtiqueta.Gondola, Texto = "Cartel de góndola" });
+            cboEstilo.SelectedIndex = 0;
+            cboEstilo.SelectedIndexChanged += (s, ev) => AplicarEstilo();
+
+            AplicarEstilo();
             CargarProductos();
+        }
+
+        // El cartel de góndola siempre lleva el precio (es su razón de ser) y muestra el
+        // código en números, así que los checks de la adhesiva no aplican.
+        private void AplicarEstilo()
+        {
+            bool esGondola = EstiloActual == EstiloEtiqueta.Gondola;
+            chkPrecio.Enabled = !esGondola;
+            chkPrecio.Visible = !esGondola;
+            ActualizarPrevisualizacion();
         }
 
         private void CargarProductos()
@@ -117,7 +145,11 @@ namespace AlmacenDesktop.Forms
                     // Renderizado antialias para que se vea lindo en pantalla
                     g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 
-                    EtiquetaRenderer.Dibujar(g, new RectangleF(0, 0, _anchoEtiqueta, _altoEtiqueta), prod, barcode, chkPrecio.Checked, chkNombre.Checked);
+                    var area = new RectangleF(0, 0, _anchoEtiqueta, _altoEtiqueta);
+                    if (EstiloActual == EstiloEtiqueta.Gondola)
+                        EtiquetaRenderer.DibujarGondola(g, area, prod, chkNombre.Checked);
+                    else
+                        EtiquetaRenderer.Dibujar(g, area, prod, barcode, chkPrecio.Checked, chkNombre.Checked);
                 }
 
                 pb.Image = previewBmp;
@@ -189,7 +221,10 @@ namespace AlmacenDesktop.Forms
                 RectangleF rectEtiqueta = new RectangleF(xActual, yActual, _anchoEtiqueta, _altoEtiqueta);
 
                 // --- MAGIA: DIBUJAR VECTORES DIRECTO A LA IMPRESORA ---
-                EtiquetaRenderer.Dibujar(e.Graphics, rectEtiqueta, prod, barcode, chkPrecio.Checked, chkNombre.Checked);
+                if (EstiloActual == EstiloEtiqueta.Gondola)
+                    EtiquetaRenderer.DibujarGondola(e.Graphics, rectEtiqueta, prod, chkNombre.Checked);
+                else
+                    EtiquetaRenderer.Dibujar(e.Graphics, rectEtiqueta, prod, barcode, chkPrecio.Checked, chkNombre.Checked);
 
                 // Avanzamos posición X para la siguiente etiqueta
                 xActual += _anchoEtiqueta + _espacioEntre;

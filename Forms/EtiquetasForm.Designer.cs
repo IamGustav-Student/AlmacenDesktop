@@ -22,6 +22,8 @@
             this.btnAgregar = new System.Windows.Forms.Button();
             this.chkPrecio = new System.Windows.Forms.CheckBox();
             this.chkNombre = new System.Windows.Forms.CheckBox();
+            this.lblEstilo = new System.Windows.Forms.Label();
+            this.cboEstilo = new System.Windows.Forms.ComboBox();
 
             this.pnlPreview = new System.Windows.Forms.FlowLayoutPanel();
 
@@ -35,6 +37,8 @@
             // 
             // grpFiltros
             // 
+            this.grpFiltros.Controls.Add(this.cboEstilo);
+            this.grpFiltros.Controls.Add(this.lblEstilo);
             this.grpFiltros.Controls.Add(this.chkNombre);
             this.grpFiltros.Controls.Add(this.chkPrecio);
             this.grpFiltros.Controls.Add(this.btnAgregar);
@@ -95,6 +99,19 @@
             this.chkPrecio.Name = "chkPrecio";
             this.chkPrecio.Text = "Incluir Precio";
             this.chkPrecio.UseVisualStyleBackColor = true;
+
+            // lblEstilo / cboEstilo — elige entre la etiqueta adhesiva de siempre y el
+            // cartel de góndola (precio grande para leer de lejos en el estante).
+            this.lblEstilo.AutoSize = true;
+            this.lblEstilo.Location = new System.Drawing.Point(700, 30);
+            this.lblEstilo.Name = "lblEstilo";
+            this.lblEstilo.Text = "Tipo de impresión:";
+
+            this.cboEstilo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboEstilo.Location = new System.Drawing.Point(700, 50);
+            this.cboEstilo.Name = "cboEstilo";
+            this.cboEstilo.Size = new System.Drawing.Size(180, 23);
+            this.cboEstilo.TabIndex = 5;
 
             // btnAgregar
             this.btnAgregar.BackColor = System.Drawing.Color.SteelBlue;
@@ -179,6 +196,8 @@
         private System.Windows.Forms.Button btnAgregar;
         private System.Windows.Forms.CheckBox chkPrecio;
         private System.Windows.Forms.CheckBox chkNombre;
+        private System.Windows.Forms.Label lblEstilo;
+        private System.Windows.Forms.ComboBox cboEstilo;
         private System.Windows.Forms.FlowLayoutPanel pnlPreview;
         private System.Windows.Forms.Button btnImprimir;
         private System.Windows.Forms.Button btnLimpiar;

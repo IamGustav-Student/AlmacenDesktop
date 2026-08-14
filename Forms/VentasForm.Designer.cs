@@ -155,6 +155,10 @@
             // --- PANEL DERECHO DE COBRO ---
 
             // Lbl Cliente
+            // Anclada a la derecha igual que su combo: sin esto, al ensanchar la ventana
+            // (o embebida en la ventana principal) el combo se corría a la derecha y la
+            // etiqueta quedaba suelta en el medio de la pantalla.
+            this.lblCliente.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lblCliente.AutoSize = true;
             this.lblCliente.Location = new System.Drawing.Point(710, 20);
             this.lblCliente.Name = "lblCliente";
@@ -172,6 +176,7 @@
             this.cboClientes.TabIndex = 1; // Tab index después del scanner
 
             // Lbl Metodo
+            this.lblMetodo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lblMetodo.AutoSize = true;
             this.lblMetodo.Location = new System.Drawing.Point(710, 80);
             this.lblMetodo.Name = "lblMetodo";

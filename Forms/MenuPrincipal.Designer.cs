@@ -22,6 +22,7 @@ namespace AlmacenDesktop.Forms
             this.panelGrafico = new System.Windows.Forms.Panel();
             this.lblBienvenida = new System.Windows.Forms.Label();
             this.lblTituloHome = new System.Windows.Forms.Label();
+            this.panelVenta = new System.Windows.Forms.Panel();
 
             this.panelMenu.SuspendLayout();
             this.panelContenido.SuspendLayout();
@@ -97,6 +98,18 @@ namespace AlmacenDesktop.Forms
             this.panelGrafico.TabIndex = 2;
 
             //
+            // panelVenta — aloja la pantalla de venta embebida (no en ventana aparte).
+            // Es hermano Fill de panelContenido y se alternan por Visible: solo uno
+            // está visible a la vez, así no hay dos Fill compitiendo por el layout.
+            // Sin Padding a propósito: la venta ocupa todo el ancho disponible.
+            //
+            this.panelVenta.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(247)))), ((int)(((byte)(250)))));
+            this.panelVenta.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelVenta.Name = "panelVenta";
+            this.panelVenta.TabIndex = 3;
+            this.panelVenta.Visible = false;
+
+            //
             // MenuPrincipal
             //
             // AutoScaleDimensions + AutoScaleMode.Font es la combinación canónica de
@@ -106,6 +119,9 @@ namespace AlmacenDesktop.Forms
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(247)))), ((int)(((byte)(250)))));
             this.ClientSize = new System.Drawing.Size(800, 500);
+            // Los Fill primero y el borde (panelMenu) al final — mismo criterio que el
+            // resto del repo (ver ProductosForm.Designer.cs).
+            this.Controls.Add(this.panelVenta);
             this.Controls.Add(this.panelContenido);
             this.Controls.Add(this.panelMenu);
             this.Name = "MenuPrincipal";
@@ -122,6 +138,7 @@ namespace AlmacenDesktop.Forms
         private System.Windows.Forms.Panel panelMenu;
         private System.Windows.Forms.FlowLayoutPanel flowMenu;
         private System.Windows.Forms.Panel panelContenido;
+        private System.Windows.Forms.Panel panelVenta;
         private System.Windows.Forms.Panel panelGrafico;
         private System.Windows.Forms.Label lblBienvenida;
         private System.Windows.Forms.Label lblTituloHome;
