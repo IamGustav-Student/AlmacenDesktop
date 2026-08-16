@@ -70,10 +70,10 @@ namespace AlmacenDesktop.Forms
         {
             try
             {
-                // Abrir la landing page en el navegador
+                // Abrir la página pública de compra en el navegador
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = Constantes.API_LICENCIAS_URL, // En producción cambiar a la url real de la landing en Constantes
+                    FileName = Constantes.URL_CHECKOUT,
                     UseShellExecute = true
                 });
             }

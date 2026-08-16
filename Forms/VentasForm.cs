@@ -283,6 +283,11 @@ namespace AlmacenDesktop.Forms
         {
             if (_carrito.Count == 0) return;
 
+            // Con la suscripción vencida y la gracia agotada, no se registran
+            // ventas nuevas. El resto del sistema (caja, historial, exportar)
+            // sigue disponible a propósito — ver Helpers/EstadoLicencia.cs.
+            if (!LicenciaRuntime.ExigirOperacionHabilitada(this)) return;
+
             if (_cajaIdActual == null)
             {
                 MessageBox.Show("Caja cerrada o sesión perdida.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);

@@ -62,10 +62,10 @@ namespace AlmacenDesktop
                 }
                 else
                 {
-                    var (validoLocal, mensajeLocal) = LicenseHelper.ValidarLicenciaLocal();
-                    if (!validoLocal)
+                    var estadoLocal = LicenseHelper.EvaluarLicenciaLocal();
+                    if (!estadoLocal.PuedeEntrar)
                     {
-                        using (var lockForm = new LockForm(mensajeLocal))
+                        using (var lockForm = new LockForm(estadoLocal.Mensaje))
                         {
                             if (lockForm.ShowDialog() != DialogResult.OK)
                             {
@@ -75,18 +75,14 @@ namespace AlmacenDesktop
                     }
                     else
                     {
-                        // SincronizaciÃ³n silenciosa de fondo
+                        // Revalidación en segundo plano. A diferencia de antes, el
+                        // resultado NO se descarta: si el servidor rechaza la
+                        // licencia (suspensión manual, contracargo), queda marcada
+                        // y el bloqueo aplica sin esperar a que venza la gracia
+                        // offline de 7 días.
                         System.Threading.Tasks.Task.Run(async () =>
                         {
-                            try
-                            {
-                                var licenseService = new LicenseService();
-                                await licenseService.ValidarOnlineAsync(licencia.Email, licencia.Clave);
-                            }
-                            catch
-                            {
-                                // Falla silenciosa de red, sigue usando perÃ­odo offline
-                            }
+                            await LicenciaRuntime.RevalidarAsync();
                         });
                     }
                 }
@@ -96,6 +92,11 @@ namespace AlmacenDesktop
                 {
                     usuarioAuto = context.Usuarios.FirstOrDefault(u => u.NombreUsuario == "admin");
                 }
+
+                // Deja el estado de la suscripción evaluado y arranca la
+                // revalidación periódica: sin esto, una app que queda abierta
+                // días no se entera nunca de que la suscripción venció.
+                LicenciaRuntime.IniciarMonitoreo();
 
                 if (usuarioAuto != null)
                 {

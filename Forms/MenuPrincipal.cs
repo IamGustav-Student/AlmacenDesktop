@@ -52,6 +52,8 @@ namespace AlmacenDesktop.Forms
             lblBienvenida.Text = $"Hola, {_usuarioActual.Nombre} ({_usuarioActual.Rol})";
 
             ConstruirMenu();
+            MostrarAvisoSuscripcion();
+            LicenciaRuntime.EstadoCambiado += _ => { try { MostrarAvisoSuscripcion(); } catch { } };
 
             // En una instalación recién estrenada no hay historial que graficar, así
             // que ese espacio lo aprovecha la guía de inicio. Son excluyentes a
@@ -62,6 +64,83 @@ namespace AlmacenDesktop.Forms
             }
 
             _ = ChequearActualizacionesAsync();
+        }
+
+        // --- AVISO DE SUSCRIPCIÓN (no bloqueante) ---
+
+        private Panel? _panelAviso;
+
+        /// <summary>
+        /// Banda de aviso arriba del contenido cuando la suscripción está por
+        /// vencer, en gracia o restringida. No frena nada: el objetivo es que el
+        /// comerciante se entere ANTES de quedarse sin poder vender en el
+        /// mostrador, que es lo que pasaba cuando el único aviso era el bloqueo.
+        /// </summary>
+        private void MostrarAvisoSuscripcion()
+        {
+            var estado = LicenciaRuntime.Estado;
+
+            if (_panelAviso != null)
+            {
+                panelContenido.Controls.Remove(_panelAviso);
+                _panelAviso.Dispose();
+                _panelAviso = null;
+            }
+
+            bool mostrar = estado.AmeritaAviso || estado.Estado == EstadoLicencia.Restringido;
+            if (!mostrar) return;
+
+            bool urgente = estado.Estado != EstadoLicencia.PorVencer;
+            var fondo = urgente ? Color.FromArgb(254, 226, 226) : Color.FromArgb(254, 243, 199);
+            var borde = urgente ? ColorPeligro : Color.FromArgb(180, 130, 0);
+
+            _panelAviso = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 62,
+                BackColor = fondo,
+                Padding = new Padding(14, 10, 14, 10),
+            };
+
+            var lbl = new Label
+            {
+                Text = estado.Mensaje,
+                Dock = DockStyle.Fill,
+                Font = new Font("Segoe UI", 9.5F, urgente ? FontStyle.Bold : FontStyle.Regular),
+                ForeColor = borde,
+                TextAlign = ContentAlignment.MiddleLeft,
+            };
+
+            var btn = new Button
+            {
+                Text = "Renovar ahora",
+                Dock = DockStyle.Right,
+                Width = 130,
+                BackColor = ColorPrimario,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Cursor = Cursors.Hand,
+            };
+            btn.FlatAppearance.BorderSize = 0;
+            btn.Click += (s, e) =>
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = Constantes.URL_CHECKOUT,
+                        UseShellExecute = true,
+                    });
+                }
+                catch { }
+            };
+
+            _panelAviso.Controls.Add(lbl);
+            _panelAviso.Controls.Add(btn);
+
+            panelContenido.Controls.Add(_panelAviso);
+            _panelAviso.BringToFront();
         }
 
         // --- PANTALLA DE INICIO: EVOLUCIÓN MES A MES ---

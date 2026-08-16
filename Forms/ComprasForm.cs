@@ -239,6 +239,10 @@ namespace AlmacenDesktop.Forms
         {
             if (_carritoCompra.Count == 0) return;
 
+            // Misma barrera que en Ventas: con la suscripción vencida no se
+            // registran movimientos nuevos de mercadería.
+            if (!Services.LicenciaRuntime.ExigirOperacionHabilitada(this)) return;
+
             try
             {
                 using (var context = new AlmacenDbContext())

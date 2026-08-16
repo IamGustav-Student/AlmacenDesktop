@@ -15,6 +15,27 @@ namespace AlmacenDesktop.Services
         public string Clave { get; set; } = string.Empty;
         public string FechaVencimiento { get; set; } = string.Empty;
         public long Timestamp { get; set; }
+
+        // Campos agregados del lado del servidor. Las versiones viejas del cliente
+        // simplemente los ignoran (System.Text.Json descarta lo desconocido), por
+        // eso se pueden sumar sin romper las instalaciones ya distribuidas.
+        public string Estado { get; set; } = string.Empty;
+        public int DiasRestantes { get; set; }
+    }
+
+    public class ResultadoValidacionOnline
+    {
+        public bool Valido { get; set; }
+        public string Mensaje { get; set; } = string.Empty;
+
+        /// <summary>
+        /// El servidor respondió y rechazó la licencia (suspendida, cancelada,
+        /// inexistente u otro equipo). Distinto de no haber podido consultarlo:
+        /// un rechazo definitivo bloquea, una falla de red cae en gracia offline.
+        /// </summary>
+        public bool RechazoDefinitivo { get; set; }
+
+        public string EstadoServidor { get; set; } = string.Empty;
     }
 
     public class LicenseService
@@ -27,6 +48,16 @@ namespace AlmacenDesktop.Services
         /// Realiza la verificación de licencia online contra el Servidor de Licencias HEXASTRATEGY.
         /// </summary>
         public async Task<(bool valido, string mensaje)> ValidarOnlineAsync(string email, string clave)
+        {
+            var r = await ValidarOnlineDetalladoAsync(email, clave);
+            return (r.Valido, r.Mensaje);
+        }
+
+        /// <summary>
+        /// Igual que <see cref="ValidarOnlineAsync"/> pero informando si el rechazo
+        /// vino del servidor o si simplemente no se pudo consultar.
+        /// </summary>
+        public async Task<ResultadoValidacionOnline> ValidarOnlineDetalladoAsync(string email, string clave)
         {
             string url = $"{Constantes.API_LICENCIAS_URL}/licencias/validar";
             string fingerprint = HardwareHelper.ObtenerMachineFingerprint();
@@ -69,43 +100,63 @@ namespace AlmacenDesktop.Services
                                     if (DateTime.TryParse(payloadObj.FechaVencimiento, out DateTime fechaVencimiento))
                                     {
                                         // Guardar localmente de forma cifrada mediante DPAPI
-                                        bool guardado = LicenseHelper.GuardarLicenciaLocal(email, clave, fechaVencimiento);
+                                        string estado = string.IsNullOrWhiteSpace(payloadObj.Estado) ? "ACTIVO" : payloadObj.Estado;
+                                        bool guardado = LicenseHelper.GuardarLicenciaLocal(email, clave, fechaVencimiento, estado);
                                         if (guardado)
                                         {
-                                            return (true, "Licencia validada y registrada correctamente.");
+                                            return Ok("Licencia validada y registrada correctamente.", estado);
                                         }
-                                        return (false, "Error interno al guardar los datos de licencia cifrados.");
+                                        return Falla("Error interno al guardar los datos de licencia cifrados.");
                                     }
                                 }
                             }
                             else
                             {
-                                return (false, "Error de integridad: La firma digital del servidor no coincide.");
+                                return Falla("Error de integridad: La firma digital del servidor no coincide.");
                             }
                         }
                     }
-                    return (false, "Respuesta del servidor con formato inválido.");
+                    return Falla("Respuesta del servidor con formato inválido.");
                 }
                 else
                 {
-                    // Errores controlados (400, 403, 404, 500)
-                    using (JsonDocument doc = JsonDocument.Parse(rawResponse))
+                    // 403 = suspendida/cancelada/otro equipo. 404 = no existe.
+                    // Ambos son veredictos del servidor, no problemas de conexión.
+                    bool definitivo = (int)response.StatusCode == 403 || (int)response.StatusCode == 404;
+
+                    string mensaje = $"Error del servidor: {(int)response.StatusCode} {response.ReasonPhrase}";
+                    try
                     {
-                        var root = doc.RootElement;
-                        if (root.TryGetProperty("mensaje", out var msgProp))
+                        using (JsonDocument doc = JsonDocument.Parse(rawResponse))
                         {
-                            return (false, msgProp.GetString() ?? "Error al validar la licencia.");
+                            if (doc.RootElement.TryGetProperty("mensaje", out var msgProp))
+                                mensaje = msgProp.GetString() ?? mensaje;
                         }
                     }
-                    return (false, $"Error del servidor: {(int)response.StatusCode} {response.ReasonPhrase}");
+                    catch { /* respuesta no-JSON: queda el mensaje genérico */ }
+
+                    return new ResultadoValidacionOnline
+                    {
+                        Valido = false,
+                        Mensaje = mensaje,
+                        RechazoDefinitivo = definitivo,
+                        EstadoServidor = definitivo ? "SUSPENDIDO" : string.Empty,
+                    };
                 }
             }
             catch (Exception ex)
             {
-                // Fallas de red o servidor caído
-                return (false, $"Error de red: {ex.Message}");
+                // Sin internet o servidor caído: NO es un rechazo. Que caiga en la
+                // gracia offline en vez de bloquear a un comercio que sí pagó.
+                return Falla($"Error de red: {ExceptionHelper.ObtenerMensaje(ex)}");
             }
         }
+
+        private static ResultadoValidacionOnline Ok(string mensaje, string estado) =>
+            new ResultadoValidacionOnline { Valido = true, Mensaje = mensaje, EstadoServidor = estado };
+
+        private static ResultadoValidacionOnline Falla(string mensaje) =>
+            new ResultadoValidacionOnline { Valido = false, Mensaje = mensaje, RechazoDefinitivo = false };
 
         private bool VerificarFirmaHMAC(string payload, string signature)
         {

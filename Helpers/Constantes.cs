@@ -16,7 +16,14 @@ namespace AlmacenDesktop.Helpers
 
         // Servidor de Licencias — ahora integrado al ops-dashboard del ecosistema
         // ProgramadorGS (reemplaza el servicio Node standalone de server/).
+        // OJO: esto es la API interna, NO una página para el cliente. Si se abre
+        // en el navegador, el cliente cae en el login del panel de administración.
         public const string API_LICENCIAS_URL = "https://www.programadorgs.com.ar/ops";
+
+        // Página pública de compra/renovación. Es la que hay que abrir cuando el
+        // cliente quiere pagar — antes se usaba API_LICENCIAS_URL por error y
+        // terminaba en el panel de admin, justo en el momento de cobrar.
+        public const string URL_CHECKOUT = "https://www.programadorgs.com.ar/vendemax-desktop";
 
         // Actualizador automático — consulta el último release público de GitHub.
         public const string GITHUB_RELEASES_API = "https://api.github.com/repos/IamGustav-Student/AlmacenDesktop/releases/latest";

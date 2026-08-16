@@ -76,7 +76,7 @@ namespace AlmacenDesktop.Forms
             {
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = Constantes.API_LICENCIAS_URL, // URL de la landing de suscripción en Constantes
+                    FileName = Constantes.URL_CHECKOUT,
                     UseShellExecute = true
                 });
             }
