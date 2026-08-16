@@ -89,6 +89,8 @@ El token de GitHub usado para releases está en `.github-token.env` (gitignoread
 | v1.1.3 | `Pago.Observaciones` sin default rompía el cobro de cuenta corriente (columna NOT NULL) + rename "Fiado" → "Cuenta Corriente" en toda la UI |
 | v1.1.4 | Escape/Limpiar en Clientes y Proveedores no dejaba la pantalla en blanco (rebind del grid autoseleccionaba la primera fila) |
 | v1.1.5 | Restaurar un backup desde Configuración, sin tocar archivos a mano — reusa el patrón de reemplazo-y-relanzado del auto-actualizador |
+| v1.2.0 | Arranca en la pantalla de venta (embebida en el menú) + carteles de góndola |
+| v1.3.0 | Bloqueo gradual por falta de pago: aviso previo, gracia de 7 días, modo restringido. Fix: el botón de pago abría el panel de admin en vez del checkout |
 
 ## Roadmap en curso — evolución como software de almacén (desde 2026-08-12)
 
@@ -189,6 +191,32 @@ Hasta acá la app solo podía *crear* backups; cargar uno de vuelta era 100% man
 ## Licencia demo multi-dispositivo (ops-dashboard)
 
 Para mostrar el sistema a prospectos sin pisar la licencia de un cliente real: `DesktopLicense` en `ops-dashboard` tiene un campo `esDemo` (default `false`). Si `esDemo = true`, `licencias/validar/route.ts` **no** rechaza por `machineFingerprint` distinto — se puede activar en varias PCs a la vez. Las licencias normales de clientes pagos siguen atadas a un solo equipo, sin cambios. Se marca/desmarca desde el panel admin (`/licencias-desktop/:id`, botón "Marcar como demo"). Pusheado a `master` de `ops-dashboard` — **falta correr la migración de Prisma** (`prisma migrate dev` o `db push`) contra la base real si todavía no se hizo, si no el panel y `licencias/validar` van a tirar error por la columna faltante.
+
+## Bloqueo por falta de pago (v1.3.0)
+
+No es binario. Cinco estados, definidos en `Helpers/EstadoLicencia.cs` y resueltos por `LicenseHelper.EvaluarLicenciaLocal()`:
+
+| Estado | Cuándo | Qué puede hacer |
+|---|---|---|
+| `AlDia` | Normal | Todo |
+| `PorVencer` | Faltan ≤7 días | Todo + banda de aviso en la pantalla de inicio |
+| `Gracia` | Venció hace ≤7 días | **Todo**, con aviso |
+| `Restringido` | Venció hace >7 días | Cerrar caja, historial, exportar. **No vender ni comprar** |
+| `Bloqueado` | Suspensión manual, otro equipo, gracia offline agotada, reloj alterado | Nada |
+
+**Por qué no se corta de golpe:** lo que fuerza el pago es no poder *vender*. Bloquear también el cierre de caja y la exportación de datos deja al comercio sin poder hacer su contabilidad del día y convierte un problema de cobro en uno de reputación. La suspensión manual (contracargo, fraude) sí bloquea de inmediato: no se ganó el período de gracia.
+
+**Dónde se aplica la restricción:** `LicenciaRuntime.ExigirOperacionHabilitada()`, llamada desde `VentasForm.btnFinalizar_Click` y `ComprasForm.FinalizarCompra()`. Todo lo demás queda libre a propósito.
+
+**Revalidación periódica:** `Services/LicenciaRuntime.cs` revalida cada 6 h mientras la app está abierta. Antes solo se validaba al arrancar, así que en un mostrador que no cierra la aplicación nunca, un vencimiento no tenía ningún efecto.
+
+**Rechazo del servidor vs. falta de internet:** son cosas distintas y se tratan distinto. Un 403/404 es un veredicto (`RechazoDefinitivo`) y se persiste en `licencia.dat` para que el bloqueo sobreviva a un reinicio. Una falla de red **no** bloquea: el comercio pagó y puede estar sin conexión — para eso está la gracia offline de 7 días. Confundir ambos casos dejaría sin vender a un cliente al día.
+
+**Del lado del servidor** (`ops-dashboard`):
+- `/licencias/validar` devuelve además `estado` y `diasRestantes` en el payload firmado. Son campos **agregados**: las instalaciones viejas los ignoran (`System.Text.Json` descarta lo desconocido). Se pueden sumar campos, nunca cambiar o quitar los existentes.
+- Cron diario `/api/cron/licencias-vencimiento`: suspende lo vencido y avisa por email a los 7 / 1 / 0 días. `DesktopLicense.ultimoAvisoDias` evita el mail repetido — **el cron se dispara dos veces** (GitHub Actions + cron de Vercel como respaldo), así que sin esa marca el cliente recibiría el aviso duplicado todos los días. Se limpia al renovar.
+
+**Constantes de URL — no confundirlas:** `API_LICENCIAS_URL` es la API interna (`/ops`); abrirla en un navegador lleva al login del panel de administración. La página de compra es `URL_CHECKOUT` (`/vendemax-desktop`). Hasta v1.2.0 los botones de pago usaban la primera, así que el cliente que quería pagar terminaba en una pantalla que no podía usar.
 
 ## Ecosistema — repos relacionados
 
