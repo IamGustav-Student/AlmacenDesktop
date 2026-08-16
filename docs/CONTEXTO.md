@@ -52,7 +52,7 @@ Estos tres sistemas viven en repos hermanos dentro del mismo workspace (`ops-das
 - **Manejo de excepciones**: nunca mostrar `ex.Message` directo en un `MessageBox`. `DbUpdateException` y varias otras excepciones de .NET traen el mensaje útil en `InnerException` (a veces anidado), no en el mensaje de primer nivel. Usar siempre `Helpers/ExceptionHelper.ObtenerMensaje(ex)`, que camina hasta el `InnerException` más profundo.
 - **AutoScaleMode**: todos los formularios deben fijar `this.AutoScaleMode = AutoScaleMode.None` explícitamente en `InitializeComponent()`. Sin esto, el escalado de texto/DPI de Windows corre las posiciones absolutas en pixels y corta o desalinea controles — bug real encontrado y corregido en 10 formularios distintos (v1.0.5–v1.0.7). Layout fijo, no responsive: las pantallas están pensadas para una resolución de diseño fija, no para adaptarse fluidamente a cualquier tamaño de ventana.
 - **Versión + release van juntos**: cualquier cambio de comportamiento que afecte instalaciones nuevas amerita bump de `<Version>` en `AlmacenDesktop.csproj` + release nueva en GitHub en el mismo momento — no se deja el código adelantado al último release publicado, porque el auto-updater y `Product.downloadUrl` del hub dependen de que "la última release" sea realmente lo último.
-- **Nombre del asset de release**: siempre `VendemaxDesktop-v{version}-win-x64.exe` (no el nombre por default de `dotnet publish`, que sería `AlmacenDesktop.exe`).
+- **Nombre del asset de release**: siempre `VENDEMAX.exe`, idéntico en todas las versiones (el nombre por default de `dotnet publish` sería `AlmacenDesktop.exe`). Sin versión en el nombre a propósito: es lo que ve el cliente en su carpeta de descargas. Nada depende del nombre — el auto-updater (`UpdateService.cs`) y la ruta `/descargar` del gateway eligen el asset por la extensión `.exe`.
 - **Notas de release**: cortas, en criollo, sin jerga técnica (nada de nombres de archivos internos, "errorlevel", etc.) — se muestran directo al usuario final en el diálogo de actualización.
 - **Búsquedas en SQLite vía EF Core**: `string.Contains()` traduce a `instr()`, que es sensible a mayúsculas (a diferencia de `LIKE`). Para búsquedas case-insensitive hay que normalizar con `.ToLower()` en ambos lados de la comparación.
 - **`Product.downloadUrl` NO se toca más** (desde 2026-08-16). Quedó fijo en `https://www.programadorgs.com.ar/descargar/vendemax-desktop`, una ruta del gateway que resuelve la última release contra la API de GitHub y redirige. Si volvés a poner ahí una URL de github.com, el link se vuelve a clavar en una versión: antes de este cambio estuvo ofreciendo la v1.0.7 cuando ya iba la v1.2.0.
@@ -64,8 +64,8 @@ dotnet build -c Release                     # build normal, revisa 0 errores
 dotnet publish -c Release -r win-x64 --self-contained true \
   -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true \
   -o publish/vX.X.X                          # genera el .exe (~180-190MB)
-# renombrar a VendemaxDesktop-vX.X.X-win-x64.exe antes de subir
-gh release create vX.X.X "publish/vX.X.X/VendemaxDesktop-vX.X.X-win-x64.exe" \
+# renombrar a VENDEMAX.exe antes de subir
+gh release create vX.X.X "publish/vX.X.X/VENDEMAX.exe" \
   --title "Vendemax Desktop vX.X.X" --notes "..."
 ```
 
