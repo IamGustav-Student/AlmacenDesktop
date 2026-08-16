@@ -55,7 +55,7 @@ Estos tres sistemas viven en repos hermanos dentro del mismo workspace (`ops-das
 - **Nombre del asset de release**: siempre `VendemaxDesktop-v{version}-win-x64.exe` (no el nombre por default de `dotnet publish`, que sería `AlmacenDesktop.exe`).
 - **Notas de release**: cortas, en criollo, sin jerga técnica (nada de nombres de archivos internos, "errorlevel", etc.) — se muestran directo al usuario final en el diálogo de actualización.
 - **Búsquedas en SQLite vía EF Core**: `string.Contains()` traduce a `instr()`, que es sensible a mayúsculas (a diferencia de `LIKE`). Para búsquedas case-insensitive hay que normalizar con `.ToLower()` en ambos lados de la comparación.
-- Después de tocar `Product.downloadUrl` en `subscription-hub` hay que actualizarlo en **dos** bases: la local (Docker Postgres, dev) y la de producción (Railway) — no hay redirect automático a "latest release".
+- **`Product.downloadUrl` NO se toca más** (desde 2026-08-16). Quedó fijo en `https://www.programadorgs.com.ar/descargar/vendemax-desktop`, una ruta del gateway que resuelve la última release contra la API de GitHub y redirige. Si volvés a poner ahí una URL de github.com, el link se vuelve a clavar en una versión: antes de este cambio estuvo ofreciendo la v1.0.7 cuando ya iba la v1.2.0.
 
 ## Cómo compilar y publicar una release
 
@@ -69,7 +69,7 @@ gh release create vX.X.X "publish/vX.X.X/VendemaxDesktop-vX.X.X-win-x64.exe" \
   --title "Vendemax Desktop vX.X.X" --notes "..."
 ```
 
-El token de GitHub usado para releases está en `.github-token.env` (gitignoreado, no versionado). Después de publicar, actualizar `Product.downloadUrl` en `subscription-hub` (dev + prod).
+El token de GitHub usado para releases está en `.github-token.env` (gitignoreado, no versionado). Después de publicar **no hay que actualizar ninguna base**: alcanza con confirmar que `https://www.programadorgs.com.ar/descargar/vendemax-desktop` ya redirige a la versión nueva (cachea 5 minutos).
 
 ## Historial de versiones (resumen)
 
